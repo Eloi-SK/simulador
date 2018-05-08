@@ -5,6 +5,7 @@ int getNumberLines(FILE *file);
 int getLine(FILE *file, char *buffer, size_t length);
 static int endOfLine(FILE *ifp, int c);
 unsigned int bun(unsigned int ir, unsigned int pc, FILE *file);
+unsigned int ldw(unsigned int ir, unsigned int pc, unsigned int *mem, unsigned int *reg, FILE *file);
 
 int main(int argc, char *argv[])
 {
@@ -153,8 +154,7 @@ int main(int argc, char *argv[])
                 break;
             // ldw   
             case 0x19:
-                printf("Not implemented.\n");
-                exit_ = 1;
+                pc = ldw(ir, pc, memory, reg, file_out);
                 break;
             // stw   
             case 0x1A:
@@ -225,6 +225,25 @@ int main(int argc, char *argv[])
     fclose(file_out);
 
     return 0;
+}
+
+unsigned int ldw(unsigned int ir, unsigned int pc, unsigned int *mem, unsigned int *reg, FILE *file)
+{
+    unsigned int x, y, imd;
+    char instruction[20];
+
+    y = (ir & 0x1F);
+    x = (ir & 0x3E0) >> 5;
+    imd = (ir & 0x3FFFC00) >> 10;
+
+    sprintf(instruction, "ldw r%d,r%d,0x%04X", x, y, imd);
+
+    reg[x] = mem[reg[y] + imd];
+    
+    printf("[0x%08X]\t%-20s\tR%d=MEM[(R%d+0x%04X)<<2]=0x%08X\n", pc * 4, instruction, x, y, imd, reg[index_set]);
+    fprintf(file, "[0x%08X]\t%-20s\tR%d=MEM[(R%d+0x%04X)<<2]=0x%08X\n", pc * 4, instruction, x, y, imd, reg[index_set]);
+    pc++;
+    return pc;
 }
 
 unsigned int bun(unsigned int ir, unsigned int pc, FILE *file)
