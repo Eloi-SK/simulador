@@ -7,6 +7,7 @@ static int endOfLine(FILE *ifp, int c);
 unsigned int bun(unsigned int ir, unsigned int pc, FILE *file);
 unsigned int ldw(unsigned int ir, unsigned int pc, unsigned int *mem, unsigned int *reg, FILE *file);
 unsigned int cmpi(unsigned int ir, unsigned int pc, unsigned int *mem, unsigned int *reg, unsigned int *fr, FILE *file);
+unsigned int addi(unsigned int ir, unsigned int pc, unsigned int *reg, unsigned int fr, FILE *file);
 
 int main(int argc, char *argv[])
 {
@@ -110,8 +111,7 @@ int main(int argc, char *argv[])
                 break;
             // addi
             case 0x10:
-                printf("Not implemented.\n");
-                exit_ = 1;
+                pc = addi(ir, pc, reg, fr, file_out);
                 break;
             // subi
             case 0x11:
@@ -227,6 +227,26 @@ int main(int argc, char *argv[])
     return 0;
 }
 
+unsigned int addi(unsigned int ir, unsigned int pc, unsigned int *reg, unsigned int fr, FILE *file)
+{
+    unsigned int index_set, imd, index_get;
+    char instruction[20];
+
+    index_get = (ir & 0x1F);
+    index_set = (ir & 0x3E0) >> 5;
+    imd = (ir & 0x3FFFC00) >> 10;
+
+    sprintf(instruction, "addi r%d,r%d,%d", index_set, index_get, imd);
+
+    reg[index_set] = reg[index_get] + imd;
+
+    printf("[0x%08X]\t%-20s\tFR=0x%08X,R%d=R%d+0x%04X=0x%08X\n", pc * 4, instruction, fr, index_set, index_get, imd, reg[index_set]);
+    fprintf(file, "[0x%08X]\t%-20s\tFR=0x%08X,R%d=R%d+0x%04X=0x%08X\n", pc * 4, instruction, fr, index_set, index_get, imd, reg[index_set]);
+
+    pc++;
+    return pc;
+}
+
 unsigned int cmpi(unsigned int ir, unsigned int pc, unsigned int *mem, unsigned int *reg, unsigned int *fr, FILE *file)
 {
     unsigned int x, imd, cmp;
@@ -242,6 +262,7 @@ unsigned int cmpi(unsigned int ir, unsigned int pc, unsigned int *mem, unsigned 
         cmp = (cmp | 0x00000003);
     
     *fr = cmp;
+    
     pc++;
     return pc;
 }
