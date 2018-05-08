@@ -4,6 +4,7 @@
 int getNumberLines(FILE *file);
 int getLine(FILE *file, char *buffer, size_t length);
 static int endOfLine(FILE *ifp, int c);
+unsigned int bun(unsigned int ir, unsigned int pc, FILE *file);
 
 int main(int argc, char *argv[])
 {
@@ -172,8 +173,7 @@ int main(int argc, char *argv[])
                 break;
             // bun
             case 0x20:
-                printf("Not implemented.\n");
-                exit_ = 1;
+                pc = bun(ir, pc, file_out);
                 break;
             // beq   
             case 0x21:
@@ -225,6 +225,17 @@ int main(int argc, char *argv[])
     fclose(file_out);
 
     return 0;
+}
+
+unsigned int bun(unsigned int ir, unsigned int pc, FILE *file)
+{
+    unsigned int old = pc;
+    pc = (ir & 0x3FFFFFF);
+    char instruction[20];
+    sprintf(instruction, "bun 0x%08X", pc);
+    printf("[0x%08X]\t%-20s\tPC=0x%08X\n", old, instruction, pc * 4);
+    fprintf(file, "[0x%08X]\t%-20s\tPC=0x%08X\n", old, instruction, pc * 4);
+    return pc;
 }
 
 int getNumberLines(FILE *file)
