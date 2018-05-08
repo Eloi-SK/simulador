@@ -8,6 +8,7 @@ unsigned int bun(unsigned int ir, unsigned int pc, FILE *file);
 unsigned int ldw(unsigned int ir, unsigned int pc, unsigned int *mem, unsigned int *reg, FILE *file);
 unsigned int cmpi(unsigned int ir, unsigned int pc, unsigned int *mem, unsigned int *reg, unsigned int *fr, FILE *file);
 unsigned int addi(unsigned int ir, unsigned int pc, unsigned int *reg, unsigned int fr, FILE *file);
+unsigned int cmp(unsigned int ir, unsigned int pc, unsigned int *mem, unsigned int *reg, unsigned int *fr, FILE *file);
 
 int main(int argc, char *argv[])
 {
@@ -76,8 +77,7 @@ int main(int argc, char *argv[])
                 break;
             // cmp
             case 0x04:
-                printf("Not implemented.\n");
-                exit_ = 1;
+                pc = cmp(ir, pc, memory, reg, &fr, file_out);
                 break;
             // shl
             case 0x05:
@@ -229,20 +229,46 @@ int main(int argc, char *argv[])
 
 unsigned int addi(unsigned int ir, unsigned int pc, unsigned int *reg, unsigned int fr, FILE *file)
 {
-    unsigned int index_set, imd, index_get;
+    unsigned int x, imd, y;
     char instruction[20];
 
-    index_get = (ir & 0x1F);
-    index_set = (ir & 0x3E0) >> 5;
+    y = (ir & 0x1F);
+    x = (ir & 0x3E0) >> 5;
     imd = (ir & 0x3FFFC00) >> 10;
 
-    sprintf(instruction, "addi r%d,r%d,%d", index_set, index_get, imd);
+    sprintf(instruction, "addi r%d,r%d,%d", x, y, imd);
 
-    reg[index_set] = reg[index_get] + imd;
+    reg[x] = reg[y] + imd;
 
-    printf("[0x%08X]\t%-20s\tFR=0x%08X,R%d=R%d+0x%04X=0x%08X\n", pc * 4, instruction, fr, index_set, index_get, imd, reg[index_set]);
-    fprintf(file, "[0x%08X]\t%-20s\tFR=0x%08X,R%d=R%d+0x%04X=0x%08X\n", pc * 4, instruction, fr, index_set, index_get, imd, reg[index_set]);
+    printf("[0x%08X]\t%-20s\tFR=0x%08X,R%d=R%d+0x%04X=0x%08X\n", pc * 4, instruction, fr, x, y, imd, reg[x]);
+    fprintf(file, "[0x%08X]\t%-20s\tFR=0x%08X,R%d=R%d+0x%04X=0x%08X\n", pc * 4, instruction, fr, x, y, imd, reg[x]);
 
+    pc++;
+    return pc;
+}
+
+unsigned int cmp(unsigned int ir, unsigned int pc, unsigned int *mem, unsigned int *reg, unsigned int *fr, FILE *file)
+{
+    unsigned int x, y, cmp;
+    char instruction[20];
+
+    x = (ir & 0x3E0) >> 5;
+    y = (ir & 0x1F);
+    cmp = (*fr & 0xFFFFFFF8);
+
+    if (reg[x] == reg[y])
+        cmp = (cmp | 0x00000001);
+    else if (reg[x] < reg[y])
+        cmp = (cmp | 0x00000002);
+    else
+        cmp = (cmp | 0x00000003);
+    
+    *fr = cmp;
+
+    sprintf(instruction, "cmp r%d,r%d", x, y);
+    printf("[0x%08X]\t%-20s\tFR=0x%08X\n", pc*4, instruction, *fr);
+    fprintf(file, "[0x%08X]\t%-20s\tFR=0x%08X\n", pc*4, instruction, *fr);
+    
     pc++;
     return pc;
 }
