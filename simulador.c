@@ -6,6 +6,7 @@ int getLine(FILE *file, char *buffer, size_t length);
 static int endOfLine(FILE *ifp, int c);
 unsigned int bun(unsigned int ir, unsigned int pc, FILE *file);
 unsigned int ldw(unsigned int ir, unsigned int pc, unsigned int *mem, unsigned int *reg, FILE *file);
+unsigned int cmpi(unsigned int ir, unsigned int pc, unsigned int *mem, unsigned int *reg, unsigned int *fr, FILE *file);
 
 int main(int argc, char *argv[])
 {
@@ -129,8 +130,7 @@ int main(int argc, char *argv[])
                 break;
             // cmpi
             case 0x14:
-                printf("Not implemented.\n");
-                exit_ = 1;
+                pc = cmpi(ir, pc, memory, reg, &fr, file_out);
                 break;
             // andi
             case 0x15:
@@ -227,6 +227,25 @@ int main(int argc, char *argv[])
     return 0;
 }
 
+unsigned int cmpi(unsigned int ir, unsigned int pc, unsigned int *mem, unsigned int *reg, unsigned int *fr, FILE *file)
+{
+    unsigned int x, imd, cmp;
+    x = (ir & 0x3E0) >> 5;
+    imd = (ir & 0x3FFFC00) >> 10;
+    cmp = (*fr & 0xFFFFFFF8);
+
+    if (reg[x] == imd)
+        cmp = (cmp | 0x00000001);
+    else if (reg[x] < imd)
+        cmp = (cmp | 0x00000002);
+    else
+        cmp = (cmp | 0x00000003);
+    
+    *fr = cmp;
+    pc++;
+    return pc;
+}
+
 unsigned int ldw(unsigned int ir, unsigned int pc, unsigned int *mem, unsigned int *reg, FILE *file)
 {
     unsigned int x, y, imd;
@@ -240,8 +259,8 @@ unsigned int ldw(unsigned int ir, unsigned int pc, unsigned int *mem, unsigned i
 
     reg[x] = mem[reg[y] + imd];
     
-    printf("[0x%08X]\t%-20s\tR%d=MEM[(R%d+0x%04X)<<2]=0x%08X\n", pc * 4, instruction, x, y, imd, reg[index_set]);
-    fprintf(file, "[0x%08X]\t%-20s\tR%d=MEM[(R%d+0x%04X)<<2]=0x%08X\n", pc * 4, instruction, x, y, imd, reg[index_set]);
+    printf("[0x%08X]\t%-20s\tR%d=MEM[(R%d+0x%04X)<<2]=0x%08X\n", pc * 4, instruction, x, y, imd, reg[x]);
+    fprintf(file, "[0x%08X]\t%-20s\tR%d=MEM[(R%d+0x%04X)<<2]=0x%08X\n", pc * 4, instruction, x, y, imd, reg[x]);
     pc++;
     return pc;
 }
@@ -275,7 +294,7 @@ int getLine(FILE *file, char *buffer, size_t length)
     char *end = buffer + length - 1;
     char *dst = buffer;
     int c;
-    while ((c = getc(file)) != EOF && !endofline(file, c) && dst < end)
+    while ((c = getc(file)) != EOF && !endOfLine(file, c) && dst < end)
         *dst++ = c;
     *dst = '\0';
     return ((c == EOF && dst == buffer) ? EOF : dst - buffer);
