@@ -6,6 +6,8 @@ int getLine(FILE *file, char *buffer, size_t length);
 static int endOfLine(FILE *ifp, int c);
 unsigned int bun(unsigned int ir, unsigned int pc, FILE *file);
 unsigned int ldw(unsigned int ir, unsigned int pc, unsigned int *mem, unsigned int *reg, FILE *file);
+unsigned int stw(unsigned int ir, unsigned int pc, unsigned int *mem, unsigned int *reg, FILE *file);
+unsigned int ldb(unsigned int ir, unsigned int pc, unsigned int *mem, unsigned int *reg, FILE *file);
 unsigned int cmpi(unsigned int ir, unsigned int pc, unsigned int *reg, unsigned int *fr, FILE *file);
 unsigned int addi(unsigned int ir, unsigned int pc, unsigned int *reg, unsigned int fr, FILE *file);
 unsigned int cmp(unsigned int ir, unsigned int pc, unsigned int *reg, unsigned int *fr, FILE *file);
@@ -164,13 +166,11 @@ int main(int argc, char *argv[])
                 break;
             // stw   
             case 0x1A:
-                printf("Not implemented.\n");
-                exit_ = 1;
+                pc = stw(ir, pc, memory, reg, file_out);
                 break;
             // ldb   
             case 0x1B:
-                printf("Not implemented.\n");
-                exit_ = 1;
+                pc = ldb(ir, pc, memory, reg, file_out);
                 break;
             // stb   
             case 0x1C:
@@ -308,6 +308,44 @@ unsigned int ldw(unsigned int ir, unsigned int pc, unsigned int *mem, unsigned i
     
     printf("[0x%08X]\t%-20s\tR%d=MEM[(R%d+0x%04X)<<2]=0x%08X\n", pc * 4, instruction, x, y, imd, reg[x]);
     fprintf(file, "[0x%08X]\t%-20s\tR%d=MEM[(R%d+0x%04X)<<2]=0x%08X\n", pc * 4, instruction, x, y, imd, reg[x]);
+    pc++;
+    return pc;
+}
+
+unsigned int stw(unsigned int ir, unsigned int pc, unsigned int *mem, unsigned int *reg, FILE *file)
+{
+    unsigned int x, y, imd;
+    char instruction[20];
+
+    y = (ir & 0x1F);
+    x = (ir & 0x3E0) >> 5;
+    imd = (ir & 0x3FFFC00) >> 10;
+
+    sprintf(instruction, "stw r%d,0x%04X,r%d", x, imd, y);
+
+    mem[reg[x] + imd] = reg[y];
+    
+    printf("[0x%08X]\t%-20s\tMEM[(R%d+0x%04X)<<2]=R%d=0x%08X\n", pc * 4, instruction, x, imd, y, mem[reg[x] + imd]);
+    fprintf(file, "[0x%08X]\t%-20s\tMEM[(R%d+0x%04X)<<2]=R%d=0x%08X\n", pc * 4, instruction, x, imd, y, mem[reg[x] + imd]);
+    pc++;
+    return pc;
+}
+
+unsigned int ldb(unsigned int ir, unsigned int pc, unsigned int *mem, unsigned int *reg, FILE *file)
+{
+    unsigned int x, y, imd;
+    char instruction[20];
+
+    y = (ir & 0x1F);
+    x = (ir & 0x3E0) >> 5;
+    imd = (ir & 0x3FFFC00) >> 10;
+
+    sprintf(instruction, "ldb r%d,r%d,0x%04X", x, y, imd);
+
+    reg[x] = mem[reg[y] + imd];
+    
+    printf("[0x%08X]\t%-20s\tR%d=MEM[(R%d+0x%04X)<<2]=0x%02X\n", pc * 4, instruction, x, y, imd, reg[x]);
+    fprintf(file, "[0x%08X]\t%-20s\tR%d=MEM[(R%d+0x%04X)<<2]=0x%02X\n", pc * 4, instruction, x, y, imd, reg[x]);
     pc++;
     return pc;
 }
