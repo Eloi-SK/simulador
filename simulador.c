@@ -9,6 +9,7 @@ unsigned int ldw(unsigned int ir, unsigned int pc, unsigned int *mem, unsigned i
 unsigned int cmpi(unsigned int ir, unsigned int pc, unsigned int *mem, unsigned int *reg, unsigned int *fr, FILE *file);
 unsigned int addi(unsigned int ir, unsigned int pc, unsigned int *reg, unsigned int fr, FILE *file);
 unsigned int cmp(unsigned int ir, unsigned int pc, unsigned int *mem, unsigned int *reg, unsigned int *fr, FILE *file);
+unsigned int bgt(unsigned int ir, unsigned int pc, unsigned int fr, FILE *file);
 
 int main(int argc, char *argv[])
 {
@@ -187,8 +188,7 @@ int main(int argc, char *argv[])
                 break;
             // bgt   
             case 0x23:
-                printf("Not implemented.\n");
-                exit_ = 1;
+                pc = bgt(ir, pc, fr, file_out);
                 break;
             // bne   
             case 0x24:
@@ -261,7 +261,7 @@ unsigned int cmp(unsigned int ir, unsigned int pc, unsigned int *mem, unsigned i
     else if (reg[x] < reg[y])
         cmp = (cmp | 0x00000002);
     else
-        cmp = (cmp | 0x00000003);
+        cmp = (cmp | 0x00000004);
     
     *fr = cmp;
 
@@ -285,7 +285,7 @@ unsigned int cmpi(unsigned int ir, unsigned int pc, unsigned int *mem, unsigned 
     else if (reg[x] < imd)
         cmp = (cmp | 0x00000002);
     else
-        cmp = (cmp | 0x00000003);
+        cmp = (cmp | 0x00000004);
     
     *fr = cmp;
     
@@ -312,14 +312,33 @@ unsigned int ldw(unsigned int ir, unsigned int pc, unsigned int *mem, unsigned i
     return pc;
 }
 
+unsigned int bgt(unsigned int ir, unsigned int pc, unsigned int fr, FILE *file)
+{
+    unsigned int old = pc, cmp;
+    char instruction[20];
+    
+     cmp = (fr & 0x07);
+     sprintf(instruction, "bgt 0x%08X", (ir & 0x3FFFFFF));
+
+     if(cmp == 4)
+        pc = (ir & 0x3FFFFFF);
+    else
+        pc++;
+
+    printf("[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, pc * 4);
+    fprintf(file, "[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, pc * 4);
+
+    return pc;
+}
+
 unsigned int bun(unsigned int ir, unsigned int pc, FILE *file)
 {
     unsigned int old = pc;
     pc = (ir & 0x3FFFFFF);
     char instruction[20];
     sprintf(instruction, "bun 0x%08X", pc);
-    printf("[0x%08X]\t%-20s\tPC=0x%08X\n", old, instruction, pc * 4);
-    fprintf(file, "[0x%08X]\t%-20s\tPC=0x%08X\n", old, instruction, pc * 4);
+    printf("[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, pc * 4);
+    fprintf(file, "[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, pc * 4);
     return pc;
 }
 
