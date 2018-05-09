@@ -6,12 +6,13 @@ int getLine(FILE *file, char *buffer, size_t length);
 static int endOfLine(FILE *ifp, int c);
 unsigned int bun(unsigned int ir, unsigned int pc, FILE *file);
 unsigned int ldw(unsigned int ir, unsigned int pc, unsigned int *mem, unsigned int *reg, FILE *file);
-unsigned int cmpi(unsigned int ir, unsigned int pc, unsigned int *mem, unsigned int *reg, unsigned int *fr, FILE *file);
+unsigned int cmpi(unsigned int ir, unsigned int pc, unsigned int *reg, unsigned int *fr, FILE *file);
 unsigned int addi(unsigned int ir, unsigned int pc, unsigned int *reg, unsigned int fr, FILE *file);
-unsigned int cmp(unsigned int ir, unsigned int pc, unsigned int *mem, unsigned int *reg, unsigned int *fr, FILE *file);
+unsigned int cmp(unsigned int ir, unsigned int pc, unsigned int *reg, unsigned int *fr, FILE *file);
 unsigned int bgt(unsigned int ir, unsigned int pc, unsigned int fr, FILE *file);
 unsigned int beq(unsigned int ir, unsigned int pc, unsigned int fr, FILE *file);
 unsigned int blt(unsigned int ir, unsigned int pc, unsigned int fr, FILE *file);
+unsigned int bne(unsigned int ir, unsigned int pc, unsigned int fr, FILE *file);
 
 int main(int argc, char *argv[])
 {
@@ -80,7 +81,7 @@ int main(int argc, char *argv[])
                 break;
             // cmp
             case 0x04:
-                pc = cmp(ir, pc, memory, reg, &fr, file_out);
+                pc = cmp(ir, pc, reg, &fr, file_out);
                 break;
             // shl
             case 0x05:
@@ -133,7 +134,7 @@ int main(int argc, char *argv[])
                 break;
             // cmpi
             case 0x14:
-                pc = cmpi(ir, pc, memory, reg, &fr, file_out);
+                pc = cmpi(ir, pc, reg, &fr, file_out);
                 break;
             // andi
             case 0x15:
@@ -192,8 +193,7 @@ int main(int argc, char *argv[])
                 break;
             // bne   
             case 0x24:
-                printf("Not implemented.\n");
-                exit_ = 1;
+                pc = bne(ir, pc, fr, file_out);
                 break;
             // ble   
             case 0x25:
@@ -247,7 +247,7 @@ unsigned int addi(unsigned int ir, unsigned int pc, unsigned int *reg, unsigned 
     return pc;
 }
 
-unsigned int cmp(unsigned int ir, unsigned int pc, unsigned int *mem, unsigned int *reg, unsigned int *fr, FILE *file)
+unsigned int cmp(unsigned int ir, unsigned int pc, unsigned int *reg, unsigned int *fr, FILE *file)
 {
     unsigned int x, y, cmp;
     char instruction[20];
@@ -273,7 +273,7 @@ unsigned int cmp(unsigned int ir, unsigned int pc, unsigned int *mem, unsigned i
     return pc;
 }
 
-unsigned int cmpi(unsigned int ir, unsigned int pc, unsigned int *mem, unsigned int *reg, unsigned int *fr, FILE *file)
+unsigned int cmpi(unsigned int ir, unsigned int pc, unsigned int *reg, unsigned int *fr, FILE *file)
 {
     unsigned int x, imd, cmp;
     x = (ir & 0x3E0) >> 5;
@@ -359,6 +359,25 @@ unsigned int blt(unsigned int ir, unsigned int pc, unsigned int fr, FILE *file)
      sprintf(instruction, "blt 0x%08X", (ir & 0x3FFFFFF));
 
      if(cmp == 2)
+        pc = (ir & 0x3FFFFFF);
+    else
+        pc++;
+
+    printf("[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, pc * 4);
+    fprintf(file, "[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, pc * 4);
+
+    return pc;
+}
+
+unsigned int bne(unsigned int ir, unsigned int pc, unsigned int fr, FILE *file)
+{
+    unsigned int old = pc, cmp;
+    char instruction[20];
+    
+     cmp = (fr & 0x07);
+     sprintf(instruction, "bne 0x%08X", (ir & 0x3FFFFFF));
+
+     if(cmp != 1)
         pc = (ir & 0x3FFFFFF);
     else
         pc++;
