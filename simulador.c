@@ -13,6 +13,8 @@ unsigned int bgt(unsigned int ir, unsigned int pc, unsigned int fr, FILE *file);
 unsigned int beq(unsigned int ir, unsigned int pc, unsigned int fr, FILE *file);
 unsigned int blt(unsigned int ir, unsigned int pc, unsigned int fr, FILE *file);
 unsigned int bne(unsigned int ir, unsigned int pc, unsigned int fr, FILE *file);
+unsigned int ble(unsigned int ir, unsigned int pc, unsigned int fr, FILE *file);
+unsigned int bge(unsigned int ir, unsigned int pc, unsigned int fr, FILE *file);
 
 int main(int argc, char *argv[])
 {
@@ -197,13 +199,11 @@ int main(int argc, char *argv[])
                 break;
             // ble   
             case 0x25:
-                printf("Not implemented.\n");
-                exit_ = 1;
+                pc = ble(ir, pc, fr, file_out);
                 break;
             // bge   
             case 0x26:
-                printf("Not implemented.\n");
-                exit_ = 1;
+               pc = bge(ir, pc, fr, file_out);
                 break;
             // int   
             case 0x3F:
@@ -378,6 +378,44 @@ unsigned int bne(unsigned int ir, unsigned int pc, unsigned int fr, FILE *file)
      sprintf(instruction, "bne 0x%08X", (ir & 0x3FFFFFF));
 
      if(cmp != 1)
+        pc = (ir & 0x3FFFFFF);
+    else
+        pc++;
+
+    printf("[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, pc * 4);
+    fprintf(file, "[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, pc * 4);
+
+    return pc;
+}
+
+unsigned int ble(unsigned int ir, unsigned int pc, unsigned int fr, FILE *file)
+{
+    unsigned int old = pc, cmp;
+    char instruction[20];
+    
+     cmp = (fr & 0x07);
+     sprintf(instruction, "ble 0x%08X", (ir & 0x3FFFFFF));
+
+     if(cmp == 1 || cmp == 2)
+        pc = (ir & 0x3FFFFFF);
+    else
+        pc++;
+
+    printf("[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, pc * 4);
+    fprintf(file, "[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, pc * 4);
+
+    return pc;
+}
+
+unsigned int bge(unsigned int ir, unsigned int pc, unsigned int fr, FILE *file)
+{
+    unsigned int old = pc, cmp;
+    char instruction[20];
+    
+     cmp = (fr & 0x07);
+     sprintf(instruction, "bge 0x%08X", (ir & 0x3FFFFFF));
+
+     if(cmp == 1 || cmp == 4)
         pc = (ir & 0x3FFFFFF);
     else
         pc++;
