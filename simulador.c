@@ -18,6 +18,7 @@ unsigned int bne(unsigned int ir, unsigned int pc, unsigned int fr, FILE *file);
 unsigned int ble(unsigned int ir, unsigned int pc, unsigned int fr, FILE *file);
 unsigned int bge(unsigned int ir, unsigned int pc, unsigned int fr, FILE *file);
 unsigned int mul(unsigned int ir, unsigned int pc, unsigned int *reg, unsigned int *fr, unsigned int *er, FILE *file);
+unsigned int add(unsigned int ir, unsigned int pc, unsigned int *reg, unsigned int *fr, FILE *file);
 
 int main(int argc, char *argv[])
 {
@@ -67,8 +68,7 @@ int main(int argc, char *argv[])
         {
             // nop/add
             case 0x00:
-                printf("Not implemented.\n");
-                exit_ = 1;
+                pc = add(ir, pc, reg, &fr, file_in);
                 break;
             // sub
             case 0x01:
@@ -226,6 +226,53 @@ int main(int argc, char *argv[])
     fclose(file_out);
 
     return 0;
+}
+
+unsigned int add(unsigned int ir, unsigned int pc, unsigned int *reg, unsigned int *fr, FILE *file)
+{
+    unsigned int x, y, z, tmp, tmp_x, tmp_y, tmp_z;
+    char instruction[20];
+
+    y = (ir & 0x1F);
+    x = (ir & 0x3E0) >> 5;
+    z = (ir & 0x7C00) >> 10;
+
+    tmp = (ir & 0x38000) >> 15;
+    tmp_x = (tmp & 0x01);
+    tmp_y = (tmp & 0x02);
+    tmp_z = (tmp & 0x04);
+
+    if (tmp_x == 1) 
+        x = (x >> 1) | (tmp_x << 5);
+    if (tmp_y == 1)
+        y = (y >> 1) | (tmp_y << 5);
+    if (tmp_z == 1)
+        z = (z >> 1) | (tmp_z << 5);
+
+    
+    unsigned long long int int_64 = reg[x] + reg[y];
+
+    char tmp_ = (int_64 & 0xFFFFFFFF00000000) >> 32;
+    reg[z] = (int_64 & 0xFFFFFFFF);
+
+    unsigned int ov = (*fr & 0x10) >> 4;
+
+    if(tmp_ == 1 && ov == 0)
+        *fr = (*fr | 0x10);
+    else if (tmp_ == 1 && ov == 1)
+        *fr = (*fr | 0x1F);
+    else if (tmp_ == 0 && ov == 0)
+        *fr = (*fr | 0);
+    else if (tmp_ == 0 && ov == 1)
+        *fr = (*fr & 0x0F);
+
+    sprintf(instruction, "add r%d,r%d,r%d", z, x, y);
+
+    printf("[0x%08X]\t%-20s\tFR=0x%08X,R%d=R%d+R%d=0x%08X\n", pc * 4, instruction, *fr, z, x, y, reg[z]);
+    fprintf(file, "[0x%08X]\t%-20s\tFR=0x%08X,R%d=R%d+R%d=0x%08X\n", pc * 4, instruction, *fr, z, x, y, reg[z]);
+
+    pc++;
+    return pc;
 }
 
 unsigned int mul(unsigned int ir, unsigned int pc, unsigned int *reg, unsigned int *fr, unsigned int *er, FILE *file)
