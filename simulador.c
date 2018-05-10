@@ -9,7 +9,7 @@ unsigned int ldw(unsigned int ir, unsigned int pc, unsigned int *mem, unsigned i
 unsigned int stw(unsigned int ir, unsigned int pc, unsigned int *mem, unsigned int *reg, FILE *file);
 unsigned int ldb(unsigned int ir, unsigned int pc, unsigned int *mem, unsigned int *reg, FILE *file);
 unsigned int cmpi(unsigned int ir, unsigned int pc, unsigned int *reg, unsigned int *fr, FILE *file);
-unsigned int addi(unsigned int ir, unsigned int pc, unsigned int *reg, unsigned int fr, FILE *file);
+unsigned int addi(unsigned int ir, unsigned int pc, unsigned int *reg, unsigned int *fr, FILE *file);
 unsigned int cmp(unsigned int ir, unsigned int pc, unsigned int *reg, unsigned int *fr, FILE *file);
 unsigned int bgt(unsigned int ir, unsigned int pc, unsigned int fr, FILE *file);
 unsigned int beq(unsigned int ir, unsigned int pc, unsigned int fr, FILE *file);
@@ -52,6 +52,7 @@ int main(int argc, char *argv[])
 
     unsigned int pc = 0, tmp, opcode, ir, er, fr;
     fr = 0;
+    er = 0;
     unsigned int reg[32];
     for (i = 0; i < 32; i++) reg[i] = 0;
     int exit_ = 0;
@@ -119,7 +120,7 @@ int main(int argc, char *argv[])
                 break;
             // addi
             case 0x10:
-                pc = addi(ir, pc, reg, fr, file_out);
+                pc = addi(ir, pc, reg, &fr, file_out);
                 break;
             // subi
             case 0x11:
@@ -219,7 +220,7 @@ int main(int argc, char *argv[])
 
     printf("[END OF SIMULATION]\n");
     fprintf(file_out, "[END OF SIMULATION]");
-    
+
     system("pause");
     fclose(file_in);
     fclose(file_out);
@@ -227,18 +228,32 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-unsigned int addi(unsigned int ir, unsigned int pc, unsigned int *reg, unsigned int fr, FILE *file)
+unsigned int addi(unsigned int ir, unsigned int pc, unsigned int *reg, unsigned int *fr, FILE *file)
 {
-    unsigned int x, imd, y;
+    unsigned int x, y, imd;
     char instruction[20];
 
     y = (ir & 0x1F);
     x = (ir & 0x3E0) >> 5;
     imd = (ir & 0x3FFFC00) >> 10;
 
-    sprintf(instruction, "addi r%d,r%d,%d", x, y, imd);
+    unsigned long long int int_64 = reg[y] + imd;
 
-    reg[x] = reg[y] + imd;
+    char tmp_ = (int_64 & 0xFFFFFFFF00000000) >> 32;
+    reg[x] = (int_64 & 0xFFFFFFFF);
+
+    unsigned int ov = (*fr & 0x10) >> 4;
+
+    if(tmp_ == 1 && ov == 0)
+        *fr = (*fr | 0x10);
+    else if (tmp_ == 1 && ov == 1)
+        *fr = (*fr | 0x1F);
+    else if (tmp_ == 0 && ov == 0)
+        *fr = (*fr | 0);
+    else if (tmp_ == 0 && ov == 1)
+        *fr = (*fr & 0x0F);
+
+    sprintf(instruction, "addi r%d,r%d,%d", x, y, imd);
 
     printf("[0x%08X]\t%-20s\tFR=0x%08X,R%d=R%d+0x%04X=0x%08X\n", pc * 4, instruction, fr, x, y, imd, reg[x]);
     fprintf(file, "[0x%08X]\t%-20s\tFR=0x%08X,R%d=R%d+0x%04X=0x%08X\n", pc * 4, instruction, fr, x, y, imd, reg[x]);
