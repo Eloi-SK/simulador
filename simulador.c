@@ -219,7 +219,7 @@ int main(int argc, char *argv[])
 
     printf("[END OF SIMULATION]\n");
     fprintf(file_out, "[END OF SIMULATION]");
-
+    
     system("pause");
     fclose(file_in);
     fclose(file_out);
@@ -249,11 +249,22 @@ unsigned int addi(unsigned int ir, unsigned int pc, unsigned int *reg, unsigned 
 
 unsigned int cmp(unsigned int ir, unsigned int pc, unsigned int *reg, unsigned int *fr, FILE *file)
 {
-    unsigned int x, y, cmp;
+    unsigned int x, y, cmp, tmp, tmp_x, tmp_y;
     char instruction[20];
 
     x = (ir & 0x3E0) >> 5;
     y = (ir & 0x1F);
+    
+    tmp = (ir & 0x38000) >> 15;
+    tmp_x = (tmp & 0x01);
+    tmp_y = (tmp & 0x02);
+    
+    if (tmp_x == 1) 
+        x = (x >> 1) | (tmp_x << 5);
+    else if ( tmp_y == 1)
+        y = (y >> 1) | (tmp_y << 5);
+    
+    
     cmp = (*fr & 0xFFFFFFF8);
 
     if (reg[x] == reg[y])
