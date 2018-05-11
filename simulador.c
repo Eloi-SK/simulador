@@ -19,6 +19,7 @@ unsigned int ble(unsigned int ir, unsigned int pc, unsigned int fr, FILE *file);
 unsigned int bge(unsigned int ir, unsigned int pc, unsigned int fr, FILE *file);
 unsigned int mul(unsigned int ir, unsigned int pc, unsigned int *reg, unsigned int *fr, unsigned int *er, FILE *file);
 unsigned int add(unsigned int ir, unsigned int pc, unsigned int *reg, unsigned int *fr, FILE *file);
+unsigned int _int(unsigned int ir, unsigned int pc, FILE *file);
 
 int main(int argc, char *argv[])
 {
@@ -208,7 +209,7 @@ int main(int argc, char *argv[])
                 break;
             // int   
             case 0x3F:
-                printf("Not implemented.\n");
+                pc = _int(ir, pc, file_out);
                 exit_ = 1;
                 break;
             default:
@@ -226,6 +227,21 @@ int main(int argc, char *argv[])
     fclose(file_out);
 
     return 0;
+}
+
+unsigned int _int(unsigned int ir, unsigned int pc, FILE *file)
+{
+    unsigned int imd, old = pc;
+    char instruction[20];    
+
+    imd = (ir & 0x3FFFFFF);
+    pc = 0;
+    
+    sprintf(instruction, "int %d", imd);
+    printf("[0x%08X]\t%-20s\tCR=0x00000000,PC=0x%08X\n", old * 4, instruction, pc * 4);
+    fprintf(file, "[0x%08X]\t%-20s\tCR=0x00000000,PC=0x%08X\n", old * 4, instruction, pc * 4);
+
+    return pc;
 }
 
 unsigned int add(unsigned int ir, unsigned int pc, unsigned int *reg, unsigned int *fr, FILE *file)
