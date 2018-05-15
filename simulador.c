@@ -363,8 +363,8 @@ unsigned int addi(unsigned int ir, unsigned int pc, unsigned int *reg, unsigned 
 
     sprintf(instruction, "addi r%d,r%d,%d", x, y, imd);
 
-    printf("[0x%08X]\t%-20s\tFR=0x%08X,R%d=R%d+0x%04X=0x%08X\n", pc * 4, instruction, fr, x, y, imd, reg[x]);
-    fprintf(file, "[0x%08X]\t%-20s\tFR=0x%08X,R%d=R%d+0x%04X=0x%08X\n", pc * 4, instruction, fr, x, y, imd, reg[x]);
+    printf("[0x%08X]\t%-20s\tFR=0x%08X,R%d=R%d+0x%04X=0x%08X\n", pc * 4, instruction, *fr, x, y, imd, reg[x]);
+    fprintf(file, "[0x%08X]\t%-20s\tFR=0x%08X,R%d=R%d+0x%04X=0x%08X\n", pc * 4, instruction, *fr, x, y, imd, reg[x]);
 
     pc++;
     return pc;
