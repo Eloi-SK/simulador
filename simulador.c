@@ -19,6 +19,7 @@ unsigned int ble(unsigned int ir, unsigned int pc, unsigned int fr, FILE *file);
 unsigned int bge(unsigned int ir, unsigned int pc, unsigned int fr, FILE *file);
 unsigned int mul(unsigned int ir, unsigned int pc, unsigned int *reg, unsigned int *fr, unsigned int *er, FILE *file);
 unsigned int add(unsigned int ir, unsigned int pc, unsigned int *reg, unsigned int *fr, FILE *file);
+unsigned int divi(unsigned int ir, unsigned int pc, unsigned int *reg, unsigned int *fr, unsigned int *er, FILE *file);
 unsigned int _int(unsigned int ir, unsigned int pc, FILE *file);
 
 int main(int argc, char *argv[])
@@ -135,8 +136,7 @@ int main(int argc, char *argv[])
                 break;
             // divi
             case 0x13:
-                printf("Not implemented.\n");
-                exit_ = 1;
+                pc = divi(ir, pc, reg, &fr, &er, file_in);
                 break;
             // cmpi
             case 0x14:
@@ -227,6 +227,29 @@ int main(int argc, char *argv[])
     fclose(file_out);
 
     return 0;
+}
+
+unsigned int divi(unsigned int ir, unsigned int pc, unsigned int *reg, unsigned int *fr, unsigned int *er, FILE *file)
+{
+    unsigned int x, y, imd;
+    char instruction[20];
+
+    y = (ir & 0x1F);
+    x = (ir & 0x3E0) >> 5;
+    imd = (ir & 0x3FFFC00) >> 10;
+
+    unsigned int zd = (*fr & 0x10) >> 3;
+
+    if (imd == 0 && zd == 0)
+    {
+        *fr = (*fr | 0x0A);
+        sprintf(instruction, "divi r%d,r%d,%d", x, y, imd);
+        printf("[0x%08X]\t%-20s\tFR=0x%08X,ER=0x%08X,R%d=R%d/0x%04X=0x%08X\n", pc * 4, instruction, *fr, *er, x, y, imd, reg[x]);
+        fprintf(file, "[0x%08X]\t%-20s\tFR=0x%08X,ER=0x%08X,R%d=R%d/0x%04X=0x%08X\n", pc * 4, instruction, *fr, *er, x, y, imd, reg[x]);
+        pc++;
+        return pc;
+    }
+
 }
 
 unsigned int _int(unsigned int ir, unsigned int pc, FILE *file)
