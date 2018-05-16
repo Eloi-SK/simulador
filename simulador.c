@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
 {
     if (argc < 3)
     {
-        printf("Argumento invÃ¡lido.");
+        printf("Argumento inválido.");
         return -1;
     }
 
@@ -368,7 +368,10 @@ unsigned int addi(unsigned int ir, unsigned int pc, unsigned int *reg, unsigned 
     x = (ir & 0x3E0) >> 5;
     imd = (ir & 0x3FFFC00) >> 10;
 
-    unsigned long long int int_64 = reg[y] + imd;
+    unsigned long long int reg_y_64 =  (unsigned long long int) reg[y];
+    unsigned long long int imd_64 = (unsigned long long int) imd;
+
+    unsigned long long int int_64 = reg_y_64 + imd_64;
 
     char tmp_ = (int_64 & 0xFFFFFFFF00000000) >> 32;
     reg[x] = (int_64 & 0xFFFFFFFF);
