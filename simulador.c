@@ -1,32 +1,50 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <ctype.h>
 
 int getNumberLines(FILE *file);
 int getLine(FILE *file, char *buffer, size_t length);
 static int endOfLine(FILE *ifp, int c);
-unsigned int bun(unsigned int ir, unsigned int pc, FILE *file);
-unsigned int ldw(unsigned int ir, unsigned int pc, unsigned int *mem, unsigned int *reg, FILE *file);
-unsigned int stw(unsigned int ir, unsigned int pc, unsigned int *mem, unsigned int *reg, FILE *file);
-unsigned int ldb(unsigned int ir, unsigned int pc, unsigned int *mem, unsigned int *reg, FILE *file);
-unsigned int cmpi(unsigned int ir, unsigned int pc, unsigned int *reg, unsigned int *fr, FILE *file);
-unsigned int addi(unsigned int ir, unsigned int pc, unsigned int *reg, unsigned int *fr, FILE *file);
-unsigned int cmp(unsigned int ir, unsigned int pc, unsigned int *reg, unsigned int *fr, FILE *file);
-unsigned int bgt(unsigned int ir, unsigned int pc, unsigned int fr, FILE *file);
-unsigned int beq(unsigned int ir, unsigned int pc, unsigned int fr, FILE *file);
-unsigned int blt(unsigned int ir, unsigned int pc, unsigned int fr, FILE *file);
-unsigned int bne(unsigned int ir, unsigned int pc, unsigned int fr, FILE *file);
-unsigned int ble(unsigned int ir, unsigned int pc, unsigned int fr, FILE *file);
-unsigned int bge(unsigned int ir, unsigned int pc, unsigned int fr, FILE *file);
-unsigned int mul(unsigned int ir, unsigned int pc, unsigned int *reg, unsigned int *fr, unsigned int *er, FILE *file);
-unsigned int add(unsigned int ir, unsigned int pc, unsigned int *reg, unsigned int *fr, FILE *file);
-unsigned int divi(unsigned int ir, unsigned int pc, unsigned int *reg, unsigned int *fr, unsigned int *er, FILE *file);
-unsigned int _int(unsigned int ir, unsigned int pc, FILE *file);
+char * indexToName(int index, int upperCase);
+
+void add(unsigned int *reg, FILE *file);
+void sub(unsigned int *reg, FILE *file);
+void mul(unsigned int *reg, FILE *file);
+void _div(unsigned int *reg, FILE *file);
+void cmp(unsigned int *reg, FILE *file);
+void shl(unsigned int *reg, FILE *file);
+void shr(unsigned int *reg, FILE *file);
+void and(unsigned int *reg, FILE *file);
+void not(unsigned int *reg, FILE *file);
+void or(unsigned int *reg, FILE *file);
+void xor(unsigned int *reg, FILE *file);
+void addi(unsigned int *reg, FILE *file);
+void subi(unsigned int *reg, FILE *file);
+void muli(unsigned int *reg, FILE *file);
+void divi(unsigned int *reg, FILE *file);
+void cmpi(unsigned int *reg, FILE *file);
+void andi(unsigned int *reg, FILE *file);
+void noti(unsigned int *reg, FILE *file);
+void ori(unsigned int *reg, FILE *file);
+void xori(unsigned int *reg, FILE *file);
+void ldw(unsigned int *mem, unsigned int *reg, FILE *file);
+void stw(unsigned int *mem, unsigned int *reg, FILE *file);
+void ldb(unsigned int *mem, unsigned int *reg, FILE *file);
+void stb(unsigned int *mem, unsigned int *reg, FILE *file);
+void bun(unsigned int *reg, FILE *file);
+void bgt(unsigned int *reg, FILE *file);
+void beq(unsigned int *reg, FILE *file);
+void blt(unsigned int *reg, FILE *file);
+void bne(unsigned int *reg, FILE *file);
+void ble(unsigned int *reg, FILE *file);
+void bge(unsigned int *reg, FILE *file);
+void _int(unsigned int *reg, FILE *file);
 
 int main(int argc, char *argv[])
 {
     if (argc < 3)
     {
-        printf("Argumento inválido.");
+        printf("Argumento invÃ¡lido.");
         return -1;
     }
 
@@ -54,75 +72,71 @@ int main(int argc, char *argv[])
     printf("[START OF SIMULATION]\n");
     fprintf(file_out, "[START OF SIMULATION]\n");
 
-    unsigned int pc = 0, tmp, opcode, ir, er, fr;
-    fr = 0;
-    er = 0;
-    unsigned int reg[32];
-    for (i = 0; i < 32; i++) reg[i] = 0;
+    unsigned int opcode;
+    unsigned int reg[64];
+    for (i = 0; i < 64; i++) reg[i] = 0;
     int exit_ = 0;
 
     while(exit_ == 0)
     {
-        ir = memory[pc];
-        opcode = (ir & 0xFC000000) >> 26;
+        reg[33] = memory[reg[32]];
+        opcode = (reg[33] & 0xFC000000) >> 26;
 
         switch(opcode)
         {
             // nop/add
             case 0x00:
-                pc = add(ir, pc, reg, &fr, file_in);
+                add(reg, file_in);
                 break;
             // sub
             case 0x01:
-                printf("Not implemented.\n");
+                sub(reg, file_out);
                 exit_ = 1;
                 break;
             // mul
             case 0x02:
-                pc = mul(ir, pc, reg, &fr, &er, file_in);
+                mul(reg, file_out);
                 break;
             // div
             case 0x03:
-                printf("Not implemented.\n");
+                _div(reg, file_out);
                 exit_ = 1;
                 break;
             // cmp
             case 0x04:
-                pc = cmp(ir, pc, reg, &fr, file_out);
+                cmp(reg, file_out);
                 break;
             // shl
             case 0x05:
-                printf("Not implemented.\n");
-                exit_ = 1;
+                shl(reg, file_in);
                 break;
             // shr
             case 0x06:
-                printf("Not implemented.\n");
-                exit_ = 1;
+                shr(reg, file_in);
                 break;
             // and
             case 0x07:
-                printf("Not implemented.\n");
-                pc++;
+                and(reg, file_out);
+                exit_ = 1;
                 break;
             // not
             case 0x08:
-                printf("Not implemented.\n");
+                not(reg, file_out);
                 exit_ = 1;
                 break;
             // or
             case 0x09:
-                printf("Not implemented.\n");
+                or(reg, file_out);
                 exit_ = 1;
                 break;
             // xor
             case 0x0A:
-                printf("Not implemented.\n");
+                xor(reg, file_out);
                 exit_ = 1;
                 break;
             // addi
             case 0x10:
-                pc = addi(ir, pc, reg, &fr, file_out);
+                addi(reg, file_out);
                 break;
             // subi
             case 0x11:
@@ -131,85 +145,83 @@ int main(int argc, char *argv[])
                 break;
             // muli
             case 0x12:
-                printf("Not implemented.\n");
-                exit_ = 1;
+                muli(reg, file_out);
                 break;
             // divi
             case 0x13:
-                pc = divi(ir, pc, reg, &fr, &er, file_in);
+                divi(reg, file_in);
                 break;
             // cmpi
             case 0x14:
-                pc = cmpi(ir, pc, reg, &fr, file_out);
+                cmpi(reg, file_out);
                 break;
             // andi
             case 0x15:
-                printf("Not implemented.\n");
+                andi(reg, file_out);
                 exit_ = 1;
                 break;
             // noti
             case 0x16:
-                printf("Not implemented.\n");
+                noti(reg, file_out);
                 exit_ = 1;
                 break;
             // ori
             case 0x17:
-                printf("Not implemented.\n");
+                ori(reg, file_out);
                 exit_ = 1;
                 break;
-            // ori
+            // xori
             case 0x18:
-                printf("Not implemented.\n");
+                xori(reg, file_out);
                 exit_ = 1;
                 break;
             // ldw   
             case 0x19:
-                pc = ldw(ir, pc, memory, reg, file_out);
+                ldw(memory, reg, file_out);
                 break;
             // stw   
             case 0x1A:
-                pc = stw(ir, pc, memory, reg, file_out);
+                stw(memory, reg, file_out);
                 break;
             // ldb   
             case 0x1B:
-                pc = ldb(ir, pc, memory, reg, file_out);
+                ldb(memory, reg, file_out);
                 break;
             // stb   
             case 0x1C:
-                printf("Not implemented.\n");
-                exit_ = 1;
+                stb(memory, reg, file_out);
                 break;
             // bun
             case 0x20:
-                pc = bun(ir, pc, file_out);
+                bun(reg, file_out);
                 break;
             // beq   
             case 0x21:
-                pc = beq(ir, pc, fr, file_out);
+                beq(reg, file_out);
                 break;
             // blt   
             case 0x22:
-                pc = blt(ir, pc, fr, file_out);
+                blt(reg, file_out);
                 break;
             // bgt   
             case 0x23:
-                pc = bgt(ir, pc, fr, file_out);
+                bgt(reg, file_out);
                 break;
             // bne   
             case 0x24:
-                pc = bne(ir, pc, fr, file_out);
+                bne(reg, file_out);
                 break;
             // ble   
             case 0x25:
-                pc = ble(ir, pc, fr, file_out);
+                ble(reg, file_out);
                 break;
             // bge   
             case 0x26:
-               pc = bge(ir, pc, fr, file_out);
+                bge(reg, file_out);
                 break;
             // int   
             case 0x3F:
-                pc = _int(ir, pc, file_out);
+                _int(reg, file_out);
                 exit_ = 1;
                 break;
             default:
@@ -229,144 +241,256 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-unsigned int divi(unsigned int ir, unsigned int pc, unsigned int *reg, unsigned int *fr, unsigned int *er, FILE *file)
-{
-    unsigned int x, y, imd;
-    char instruction[20];
-
-    y = (ir & 0x1F);
-    x = (ir & 0x3E0) >> 5;
-    imd = (ir & 0x3FFFC00) >> 10;
-
-    unsigned int zd = (*fr & 0x10) >> 3;
-
-    if (imd == 0 && zd == 0)
-    {
-        *fr = (*fr | 0x0A);
-        sprintf(instruction, "divi r%d,r%d,%d", x, y, imd);
-        printf("[0x%08X]\t%-20s\tFR=0x%08X,ER=0x%08X,R%d=R%d/0x%04X=0x%08X\n", pc * 4, instruction, *fr, *er, x, y, imd, reg[x]);
-        fprintf(file, "[0x%08X]\t%-20s\tFR=0x%08X,ER=0x%08X,R%d=R%d/0x%04X=0x%08X\n", pc * 4, instruction, *fr, *er, x, y, imd, reg[x]);
-        pc++;
-        return pc;
-    }
-
-}
-
-unsigned int _int(unsigned int ir, unsigned int pc, FILE *file)
-{
-    unsigned int imd, old = pc;
-    char instruction[20];    
-
-    imd = (ir & 0x3FFFFFF);
-    pc = 0;
-    
-    sprintf(instruction, "int %d", imd);
-    printf("[0x%08X]\t%-20s\tCR=0x00000000,PC=0x%08X\n", old * 4, instruction, pc * 4);
-    fprintf(file, "[0x%08X]\t%-20s\tCR=0x00000000,PC=0x%08X\n", old * 4, instruction, pc * 4);
-
-    return pc;
-}
-
-unsigned int add(unsigned int ir, unsigned int pc, unsigned int *reg, unsigned int *fr, FILE *file)
+void add(unsigned int *reg, FILE *file)
 {
     unsigned int x, y, z, tmp, tmp_x, tmp_y, tmp_z;
     char instruction[20];
 
-    y = (ir & 0x1F);
-    x = (ir & 0x3E0) >> 5;
-    z = (ir & 0x7C00) >> 10;
+    y = (reg[33] & 0x1F);
+    x = (reg[33] & 0x3E0) >> 5;
+    z = (reg[33] & 0x7C00) >> 10;
 
-    tmp = (ir & 0x38000) >> 15;
-    tmp_x = (tmp & 0x01);
-    tmp_y = (tmp & 0x02);
-    tmp_z = (tmp & 0x04);
+    tmp = (reg[33] & 0x38000) >> 15;
+    tmp_y = (tmp & 0x01);
+    tmp_x = (tmp & 0x02) >> 1;
+    tmp_z = (tmp & 0x04) >> 2;
 
     if (tmp_x == 1) 
-        x = (x >> 1) | (tmp_x << 5);
+        x |= (tmp_x << 5);
     if (tmp_y == 1)
-        y = (y >> 1) | (tmp_y << 5);
+        y |= (tmp_y << 5);
     if (tmp_z == 1)
-        z = (z >> 1) | (tmp_z << 5);
+        z |= (tmp_z << 5);
 
-    
-    unsigned long long int int_64 = reg[x] + reg[y];
+    unsigned long long int reg_x_64 =  (unsigned long long int) reg[x];
+    unsigned long long int reg_y_64 = (unsigned long long int) reg[y];
+
+    unsigned long long int int_64 = reg_x_64 + reg_y_64;
 
     char tmp_ = (int_64 & 0xFFFFFFFF00000000) >> 32;
     reg[z] = (int_64 & 0xFFFFFFFF);
 
-    unsigned int ov = (*fr & 0x10) >> 4;
-
+    unsigned int ov = (reg[35] & 0x10) >> 4;
+    unsigned int fr = reg[35];
     if(tmp_ == 1 && ov == 0)
-        *fr = (*fr | 0x10);
+        reg[35] |= 0x10;
     else if (tmp_ == 1 && ov == 1)
-        *fr = (*fr | 0x1F);
+        reg[35] |= 0x1F;
     else if (tmp_ == 0 && ov == 0)
-        *fr = (*fr | 0);
+        reg[35] |= 0;
     else if (tmp_ == 0 && ov == 1)
-        *fr = (*fr & 0x0F);
+        reg[35] &= 0x0F;
 
-    sprintf(instruction, "add r%d,r%d,r%d", z, x, y);
+    sprintf(instruction, "add %s,%s,%s", indexToName(z, 0), indexToName(x, 0), indexToName(y, 0));
 
-    printf("[0x%08X]\t%-20s\tFR=0x%08X,R%d=R%d+R%d=0x%08X\n", pc * 4, instruction, *fr, z, x, y, reg[z]);
-    fprintf(file, "[0x%08X]\t%-20s\tFR=0x%08X,R%d=R%d+R%d=0x%08X\n", pc * 4, instruction, *fr, z, x, y, reg[z]);
+    printf("[0x%08X]\t%-20s\tFR=0x%08X,%s=%s+%s=0x%08X\n", reg[32] * 4, instruction, reg[35], indexToName(z, 1), indexToName(x, 1), indexToName(y, 1), reg[z]);
+    fprintf(file, "[0x%08X]\t%-20s\tFR=0x%08X,%s=%s+%s=0x%08X\n", reg[32] * 4, instruction, reg[35], indexToName(z, 1), indexToName(x, 1), indexToName(y, 1), reg[z]);
 
-    pc++;
-    return pc;
+    reg[32]++;
+
 }
 
-unsigned int mul(unsigned int ir, unsigned int pc, unsigned int *reg, unsigned int *fr, unsigned int *er, FILE *file)
+void sub(unsigned int *reg, FILE *file)
+{
+    printf("Not implemented.\n");
+}
+
+void mul(unsigned int *reg, FILE *file)
 {
     unsigned int x, y, z, tmp, tmp_x, tmp_y, tmp_z;
     char instruction[20];
 
-    y = (ir & 0x1F);
-    x = (ir & 0x3E0) >> 5;
-    z = (ir & 0x7C00) >> 10;
+    y = (reg[33] & 0x1F);
+    x = (reg[33] & 0x3E0) >> 5;
+    z = (reg[33] & 0x7C00) >> 10;
 
-    tmp = (ir & 0x38000) >> 15;
-    tmp_x = (tmp & 0x01);
-    tmp_y = (tmp & 0x02);
-    tmp_z = (tmp & 0x04);
+    tmp = (reg[33] & 0x38000) >> 15;
+    tmp_y = (tmp & 0x01);
+    tmp_x = (tmp & 0x02) >> 1;
+    tmp_z = (tmp & 0x04) >> 2;
 
     if (tmp_x == 1) 
-        x = (x >> 1) | (tmp_x << 5);
+        x |= (tmp_x << 5);
     if (tmp_y == 1)
-        y = (y >> 1) | (tmp_y << 5);
+        y |= (tmp_y << 5);
     if (tmp_z == 1)
-        z = (z >> 1) | (tmp_z << 5);
+        z |= (tmp_z << 5);
 
-    unsigned long long int int_64 = reg[x] * reg[y];
+    unsigned long long int reg_x_64 =  (unsigned long long int) reg[x];
+    unsigned long long int reg_y_64 = (unsigned long long int) reg[y];
 
-    *er = (int_64 & 0xFFFFFFFF00000000) >> 32;
+    unsigned long long int int_64 = reg_x_64 * reg_y_64;
+
+    reg[34] = (int_64 & 0xFFFFFFFF00000000) >> 32;
     reg[z] = (int_64 & 0xFFFFFFFF);
 
-    unsigned int ov = (*fr & 0x10) >> 4;
+    unsigned int ov = (reg[35] & 0x10) >> 4;
 
-    if(*er > 0 && ov == 0)
-        *fr = (*fr | 0x10);
-    else if (*er > 0 && ov == 1)
-        *fr = (*fr | 0x1F);
-    else if (*er == 0 && ov == 0)
-        *fr = (*fr | 0);
-    else if (*er == 0 && ov == 1)
-        *fr = (*fr & 0x0F);
+    if(reg[34] > 0 && ov == 0)
+        reg[35] |= 0x10;
+    else if (reg[34] > 0 && ov == 1)
+        reg[35] |= 0x1F;
+    else if (reg[34] == 0 && ov == 0)
+        reg[35] |= 0;
+    else if (reg[34] == 0 && ov == 1)
+        reg[35] &= 0x0F;
 
-    sprintf(instruction, "mul r%d,r%d,r%d", z, x, y);
-    printf("[0x%08X]\t%-20s\tFR=0x%08X,ER=0x%08X,R%d=R%d*R%d=0x%08X\n", pc * 4, instruction, *fr, *er, z, x, y, reg[z]);
-    fprintf(file, "[0x%08X]\t%-20s\tFR=0x%08X,ER=0x%08X,R%d=R%d*R%d=0x%08X\n", pc * 4, instruction, *fr, *er, z, x, y, reg[z]);
+    sprintf(instruction, "mul %s,%s,%s", indexToName(z, 0), indexToName(x, 0), indexToName(y, 0));
+    printf("[0x%08X]\t%-20s\tFR=0x%08X,ER=0x%08X,%s=%s*%s=0x%08X\n", reg[32] * 4, instruction, reg[35], reg[34], indexToName(z, 1), indexToName(x, 1), indexToName(y, 1), reg[z]);
+    fprintf(file, "[0x%08X]\t%-20s\tFR=0x%08X,ER=0x%08X,%s=%s*%s=0x%08X\n", reg[32] * 4, instruction, reg[35], reg[34], indexToName(z, 1), indexToName(x, 1), indexToName(y, 1), reg[z]);
 
-    pc++;
-    return pc;
+    reg[32]++;
 }
 
-unsigned int addi(unsigned int ir, unsigned int pc, unsigned int *reg, unsigned int *fr, FILE *file)
+void _div(unsigned int *reg, FILE *file)
+{
+    printf("Not implemented.\n");
+}
+
+void cmp(unsigned int *reg, FILE *file)
+{
+    unsigned int x, y, cmp, tmp, tmp_x, tmp_y;
+    char instruction[20];
+
+    x = (reg[33] & 0x3E0) >> 5;
+    y = (reg[33] & 0x1F);
+    
+    tmp = (reg[33] & 0x38000) >> 15;
+    tmp_x = (tmp & 0x02) >> 1;
+    tmp_y = (tmp & 0x01);
+    
+    if (tmp_x == 1) 
+        x |= (tmp_x << 5);
+    if ( tmp_y == 1)
+        y |= (tmp_y << 5);
+    
+    
+    cmp = (reg[35] & 0xFFFFFFF8);
+
+    if (reg[x] == reg[y])
+        cmp = (cmp | 0x00000001);
+    else if (reg[x] < reg[y])
+        cmp = (cmp | 0x00000002);
+    else
+        cmp = (cmp | 0x00000004);
+    
+    reg[35] = cmp;
+
+    sprintf(instruction, "cmp %s,%s", indexToName(x, 0), indexToName(y, 0));
+    printf("[0x%08X]\t%-20s\t%s=0x%08X\n", reg[32], instruction, indexToName(35, 1), reg[35]);
+    fprintf(file, "[0x%08X]\t%-20s\t%s=0x%08X\n", reg[32], instruction, indexToName(35, 1), reg[35]);
+
+    reg[32]++;
+}
+
+void shl(unsigned int *reg, FILE *file)
+{
+    unsigned int x, y, z, tmp, tmp_x, tmp_y, tmp_z;
+    char instruction[20];
+
+    y = (reg[33] & 0x1F);
+    x = (reg[33] & 0x3E0) >> 5;
+    z = (reg[33] & 0x7C00) >> 10;
+
+    tmp = (reg[33] & 0x38000) >> 15;
+    tmp_y = (tmp & 0x01);
+    tmp_x = (tmp & 0x02) >> 1;
+    tmp_z = (tmp & 0x04) >> 2;
+
+    if (tmp_x == 1) 
+        x |= (tmp_x << 5);
+    if (tmp_y == 1)
+        y |= (tmp_y << 5);
+    if (tmp_z == 1)
+        z |= (tmp_z << 5);
+
+    unsigned long long int shl_z_64, shl_x_64;
+
+    unsigned long long int er_64 = (unsigned long long int) reg[34];
+    unsigned long long int x_64 = (unsigned long long int) reg[x];
+
+    shl_x_64 = (er_64 << 32) | x_64;
+    shl_z_64 = (shl_x_64 << (y + 1));
+
+    reg[34] = (shl_z_64 & 0xFFFFFFFF00000000) >> 32;
+    reg[z] = (shl_z_64 & 0xFFFFFFFF);
+
+    sprintf(instruction, "shl %s,%s,%d", indexToName(z, 0), indexToName(x, 0), y);
+    printf("[0x%08X]\t%-20s\t%s=0x%08X,%s=%s<<%d=0x%08X\n",reg[32] * 4, instruction, indexToName(34, 1), reg[34], indexToName(z, 1), indexToName(x, 1), y+1, reg[z]);
+    fprintf(file, "[0x%08X]\t%-20s\t%s=0x%08X,%s=%s<<%d=0x%08X\n",reg[32] * 4, instruction, indexToName(34, 1), reg[34], indexToName(z, 1), indexToName(x, 1), y+1, reg[z]);
+
+    reg[32]++;
+
+}
+
+void shr(unsigned int *reg, FILE *file)
+{
+    unsigned int x, y, z, tmp, tmp_x, tmp_y, tmp_z;
+    char instruction[20];
+
+    y = (reg[33] & 0x1F);
+    x = (reg[33] & 0x3E0) >> 5;
+    z = (reg[33] & 0x7C00) >> 10;
+
+    tmp = (reg[33] & 0x38000) >> 15;
+    tmp_y = (tmp & 0x01);
+    tmp_x = (tmp & 0x02) >> 1;
+    tmp_z = (tmp & 0x04) >> 2;
+
+    if (tmp_x == 1) 
+        x |= (tmp_x << 5);
+    if (tmp_y == 1)
+        y |= (tmp_y << 5);
+    if (tmp_z == 1)
+        z |= (tmp_z << 5);
+
+    unsigned long long int shr_z_64, shr_x_64;
+
+    unsigned long long int er_64 = (unsigned long long int) reg[34];
+    unsigned long long int x_64 = (unsigned long long int) reg[x];
+
+    shr_x_64 = (er_64 << 32) | x_64;
+    shr_z_64 = (shr_x_64 >> (y + 1));
+
+    reg[34] = (shr_z_64 & 0xFFFFFFFF00000000) >> 32;
+    reg[z] = (shr_z_64 & 0xFFFFFFFF);
+
+    sprintf(instruction, "shr %s,%s,%d", indexToName(z, 0), indexToName(x, 0), y);
+    printf("[0x%08X]\t%-20s\t%s=0x%08X,%s=%s<<%d=0x%08X\n",reg[32] * 4, instruction, indexToName(34, 1), reg[34], indexToName(z, 1), indexToName(x, 1), y+1, reg[z]);
+    fprintf(file, "[0x%08X]\t%-20s\t%s=0x%08X,%s=%s<<%d=0x%08X\n",reg[32] * 4, instruction, indexToName(34, 1), reg[34], indexToName(z, 1), indexToName(x, 1), y+1, reg[z]);
+
+    reg[32]++;
+
+}
+
+void and(unsigned int *reg, FILE *file)
+{
+    printf("Not implemented.\n");
+}
+
+void not(unsigned int *reg, FILE *file)
+{
+    printf("Not implemented.\n");
+}
+
+void or(unsigned int *reg, FILE *file)
+{
+    printf("Not implemented.\n");
+}
+
+void xor(unsigned int *reg, FILE *file)
+{
+    printf("Not implemented.\n");
+}
+
+void addi(unsigned int *reg, FILE *file)
 {
     unsigned int x, y, imd;
     char instruction[20];
 
-    y = (ir & 0x1F);
-    x = (ir & 0x3E0) >> 5;
-    imd = (ir & 0x3FFFC00) >> 10;
+    y = (reg[33] & 0x1F);
+    x = (reg[33] & 0x3E0) >> 5;
+    imd = (reg[33] & 0x3FFFC00) >> 10;
 
     unsigned long long int reg_y_64 =  (unsigned long long int) reg[y];
     unsigned long long int imd_64 = (unsigned long long int) imd;
@@ -376,69 +500,95 @@ unsigned int addi(unsigned int ir, unsigned int pc, unsigned int *reg, unsigned 
     char tmp_ = (int_64 & 0xFFFFFFFF00000000) >> 32;
     reg[x] = (int_64 & 0xFFFFFFFF);
 
-    unsigned int ov = (*fr & 0x10) >> 4;
+    unsigned int ov = (reg[35] & 0x10) >> 4;
 
     if(tmp_ == 1 && ov == 0)
-        *fr = (*fr | 0x10);
+        reg[35] = (reg[35] | 0x10);
     else if (tmp_ == 1 && ov == 1)
-        *fr = (*fr | 0x1F);
+        reg[35] = (reg[35] | 0x1F);
     else if (tmp_ == 0 && ov == 0)
-        *fr = (*fr | 0);
+        reg[35] = (reg[35] | 0);
     else if (tmp_ == 0 && ov == 1)
-        *fr = (*fr & 0x0F);
+        reg[35] = (reg[35] & 0x0F);
+    
+    sprintf(instruction, "addi %s,%s,%d", indexToName(x, 0), indexToName(y, 0), imd);
 
-    sprintf(instruction, "addi r%d,r%d,%d", x, y, imd);
+    printf("[0x%08X]\t%-20s\t%s=0x%08X,%s=%s+0x%04X=0x%08X\n", reg[32] * 4, instruction, indexToName(35, 1), reg[35], indexToName(x, 1), indexToName(y, 1), imd, reg[x]);
+    fprintf(file, "[0x%08X]\t%-20s\t%s=0x%08X,%s=%s+0x%04X=0x%08X\n", reg[32] * 4, instruction, indexToName(35, 1), reg[35], indexToName(x, 1), indexToName(y, 1), imd, reg[x]);
 
-    printf("[0x%08X]\t%-20s\tFR=0x%08X,R%d=R%d+0x%04X=0x%08X\n", pc * 4, instruction, *fr, x, y, imd, reg[x]);
-    fprintf(file, "[0x%08X]\t%-20s\tFR=0x%08X,R%d=R%d+0x%04X=0x%08X\n", pc * 4, instruction, *fr, x, y, imd, reg[x]);
-
-    pc++;
-    return pc;
+    reg[32]++;
 }
 
-unsigned int cmp(unsigned int ir, unsigned int pc, unsigned int *reg, unsigned int *fr, FILE *file)
+void sub(unsigned int *reg, FILE *file)
 {
-    unsigned int x, y, cmp, tmp, tmp_x, tmp_y;
+    printf("Not implemented.\n");
+}
+
+void muli(unsigned int *reg, FILE *file)
+{
+    unsigned int x, y, imd;
     char instruction[20];
 
-    x = (ir & 0x3E0) >> 5;
-    y = (ir & 0x1F);
-    
-    tmp = (ir & 0x38000) >> 15;
-    tmp_x = (tmp & 0x01);
-    tmp_y = (tmp & 0x02);
-    
-    if (tmp_x == 1) 
-        x = (x >> 1) | (tmp_x << 5);
-    else if ( tmp_y == 1)
-        y = (y >> 1) | (tmp_y << 5);
-    
-    
-    cmp = (*fr & 0xFFFFFFF8);
+    y = (reg[33] & 0x1F);
+    x = (reg[33] & 0x3E0) >> 5;
+    imd = (reg[33] & 0x3FFFC00) >> 10;
 
-    if (reg[x] == reg[y])
-        cmp = (cmp | 0x00000001);
-    else if (reg[x] < reg[y])
-        cmp = (cmp | 0x00000002);
-    else
-        cmp = (cmp | 0x00000004);
-    
-    *fr = cmp;
+    unsigned long long int reg_y_64 =  (unsigned long long int) reg[y];
+    unsigned long long int imd_64 = (unsigned long long int) imd;
 
-    sprintf(instruction, "cmp r%d,r%d", x, y);
-    printf("[0x%08X]\t%-20s\tFR=0x%08X\n", pc*4, instruction, *fr);
-    fprintf(file, "[0x%08X]\t%-20s\tFR=0x%08X\n", pc*4, instruction, *fr);
-    
-    pc++;
-    return pc;
+    unsigned long long int int_64 = reg_y_64 * imd;
+
+    reg[34] = (int_64 & 0xFFFFFFFF00000000) >> 32;
+    reg[x] = (int_64 & 0xFFFFFFFF);
+
+    unsigned int ov = (reg[35] & 0x10) >> 4;
+
+    if(reg[34] > 0 && ov == 0)
+        reg[35] |= 0x10;
+    else if (reg[34] > 0 && ov == 1)
+        reg[35] |= 0x1F;
+    else if (reg[34] == 0 && ov == 0)
+        reg[35] |= 0;
+    else if (reg[34] == 0 && ov == 1)
+        reg[35] &= 0x0F;
+
+    sprintf(instruction, "muli %s,%s,%d", indexToName(x, 0), indexToName(y, 0), imd);
+    printf("[0x%08X]\t%-20s\tFR=0x%08X,ER=0x%08X,%s=%s*0x%04X=0x%08X\n", reg[32] * 4, instruction, reg[35], reg[34], indexToName(x, 1), indexToName(y, 1), imd, reg[x]);
+    fprintf(file, "[0x%08X]\t%-20s\tFR=0x%08X,ER=0x%08X,%s=%s*0x%04X=0x%08X\n", reg[32] * 4, instruction, reg[35], reg[34], indexToName(x, 1), indexToName(y, 1), imd, reg[x]);
+
+    reg[32]++;
 }
 
-unsigned int cmpi(unsigned int ir, unsigned int pc, unsigned int *reg, unsigned int *fr, FILE *file)
+void divi(unsigned int *reg, FILE *file)
+{
+    unsigned int x, y, imd;
+    char instruction[20];
+
+    y = (reg[33] & 0x1F);
+    x = (reg[33] & 0x3E0) >> 5;
+    imd = (reg[33] & 0x3FFFC00) >> 10;
+
+    unsigned int zd = (reg[35] & 0x08) >> 3;
+
+    if (imd == 0 && zd == 0)
+    {
+        reg[35] = (reg[35] | 0x08);
+        sprintf(instruction, "divi %s,%s,%d", indexToName(x, 0), indexToName(y, 0), imd);
+        printf("[0x%08X]\t%-20s\t%s=0x%08X,%s=0x%08X,%s=%s/0x%04X=0x%08X\n", reg[32] * 4, instruction, indexToName(35, 1), reg[35], indexToName(34, 1), reg[34], indexToName(x, 1), indexToName(y, 1), imd, reg[x]);
+        fprintf(file, "[0x%08X]\t%-20s\t%s=0x%08X,%s=0x%08X,%s=%s/0x%04X=0x%08X\n", reg[32] * 4, instruction, indexToName(35, 1), reg[35], indexToName(34, 1), reg[34], indexToName(x, 1), indexToName(y, 1), imd, reg[x]);
+        
+        reg[32]++;
+    }
+}
+
+void cmpi(unsigned int *reg, FILE *file)
 {
     unsigned int x, imd, cmp;
-    x = (ir & 0x3E0) >> 5;
-    imd = (ir & 0x3FFFC00) >> 10;
-    cmp = (*fr & 0xFFFFFFF8);
+    char instruction[20];
+
+    x = (reg[33] & 0x3E0) >> 5;
+    imd = (reg[33] & 0x3FFFC00) >> 10;
+    cmp = (reg[35] & 0xFFFFFFF8);
 
     if (reg[x] == imd)
         cmp = (cmp | 0x00000001);
@@ -447,192 +597,279 @@ unsigned int cmpi(unsigned int ir, unsigned int pc, unsigned int *reg, unsigned 
     else
         cmp = (cmp | 0x00000004);
     
-    *fr = cmp;
+    reg[35] = cmp;
+
+    sprintf(instruction, "cmpi %s,%d", indexToName(x, 0), imd);
+    printf("[0x%08X]\t%-20s\t%s=0x%08X\n", reg[32], instruction, indexToName(35, 1), reg[35]);
+    fprintf(file, "[0x%08X]\t%-20s\t%s=0x%08X\n", reg[32], instruction, indexToName(35, 1), reg[35]);
     
-    pc++;
-    return pc;
+    reg[32]++;
 }
 
-unsigned int ldw(unsigned int ir, unsigned int pc, unsigned int *mem, unsigned int *reg, FILE *file)
+void andi(unsigned int *reg, FILE *file)
+{
+    printf("Not implemented.\n");
+}
+
+void noti(unsigned int *reg, FILE *file)
+{
+    printf("Not implemented.\n");
+}
+
+void ori(unsigned int *reg, FILE *file)
+{
+    printf("Not implemented.\n");
+}
+
+void xori(unsigned int *reg, FILE *file)
+{
+    printf("Not implemented.\n");
+}
+
+void ldw(unsigned int *mem, unsigned int *reg, FILE *file)
 {
     unsigned int x, y, imd;
     char instruction[20];
 
-    y = (ir & 0x1F);
-    x = (ir & 0x3E0) >> 5;
-    imd = (ir & 0x3FFFC00) >> 10;
+    y = (reg[33] & 0x1F);
+    x = (reg[33] & 0x3E0) >> 5;
+    imd = (reg[33] & 0x3FFFC00) >> 10;
 
     sprintf(instruction, "ldw r%d,r%d,0x%04X", x, y, imd);
 
     reg[x] = mem[reg[y] + imd];
     
-    printf("[0x%08X]\t%-20s\tR%d=MEM[(R%d+0x%04X)<<2]=0x%08X\n", pc * 4, instruction, x, y, imd, reg[x]);
-    fprintf(file, "[0x%08X]\t%-20s\tR%d=MEM[(R%d+0x%04X)<<2]=0x%08X\n", pc * 4, instruction, x, y, imd, reg[x]);
-    pc++;
-    return pc;
+    printf("[0x%08X]\t%-20s\tR%d=MEM[(R%d+0x%04X)<<2]=0x%08X\n", reg[32] * 4, instruction, x, y, imd, reg[x]);
+    fprintf(file, "[0x%08X]\t%-20s\tR%d=MEM[(R%d+0x%04X)<<2]=0x%08X\n", reg[32] * 4, instruction, x, y, imd, reg[x]);
+    
+    reg[32]++;
 }
 
-unsigned int stw(unsigned int ir, unsigned int pc, unsigned int *mem, unsigned int *reg, FILE *file)
+void stw(unsigned int *mem, unsigned int *reg, FILE *file)
 {
     unsigned int x, y, imd;
     char instruction[20];
 
-    y = (ir & 0x1F);
-    x = (ir & 0x3E0) >> 5;
-    imd = (ir & 0x3FFFC00) >> 10;
+    y = (reg[33] & 0x1F);
+    x = (reg[33] & 0x3E0) >> 5;
+    imd = (reg[33] & 0x3FFFC00) >> 10;
 
-    sprintf(instruction, "stw r%d,0x%04X,r%d", x, imd, y);
+    sprintf(instruction, "stw %s,0x%04X,%s", indexToName(x, 0), imd, indexToName(y, 0));
 
     mem[reg[x] + imd] = reg[y];
     
-    printf("[0x%08X]\t%-20s\tMEM[(R%d+0x%04X)<<2]=R%d=0x%08X\n", pc * 4, instruction, x, imd, y, mem[reg[x] + imd]);
-    fprintf(file, "[0x%08X]\t%-20s\tMEM[(R%d+0x%04X)<<2]=R%d=0x%08X\n", pc * 4, instruction, x, imd, y, mem[reg[x] + imd]);
-    pc++;
-    return pc;
+    printf("[0x%08X]\t%-20s\tMEM[(%s+0x%04X)<<2]=%s=0x%08X\n", reg[32] * 4, instruction, indexToName(x, 1), imd, indexToName(y, 1), mem[reg[x] + imd]);
+    fprintf(file, "[0x%08X]\t%-20s\tMEM[(%s+0x%04X)<<2]=%s=0x%08X\n", reg[32] * 4, instruction, indexToName(x, 1), imd, indexToName(y, 1), mem[reg[x] + imd]);
+    
+    reg[32]++;
 }
 
-unsigned int ldb(unsigned int ir, unsigned int pc, unsigned int *mem, unsigned int *reg, FILE *file)
+void ldb(unsigned int *mem, unsigned int *reg, FILE *file)
 {
-    unsigned int x, y, imd;
+    unsigned int index, byte, x, y, imd, tmp;
     char instruction[20];
 
-    y = (ir & 0x1F);
-    x = (ir & 0x3E0) >> 5;
-    imd = (ir & 0x3FFFC00) >> 10;
+    y = (reg[33] & 0x1F);
+    x = (reg[33] & 0x3E0) >> 5;
+    imd = (reg[33] & 0x3FFFC00) >> 10;
 
-    sprintf(instruction, "ldb r%d,r%d,0x%04X", x, y, imd);
-
-    reg[x] = mem[reg[y] + imd];
+    index = (reg[y] + imd) / 4;
+    tmp = mem[index];
+    byte = (reg[y] + imd) % 4;
     
-    printf("[0x%08X]\t%-20s\tR%d=MEM[(R%d+0x%04X)<<2]=0x%02X\n", pc * 4, instruction, x, y, imd, reg[x]);
-    fprintf(file, "[0x%08X]\t%-20s\tR%d=MEM[(R%d+0x%04X)<<2]=0x%02X\n", pc * 4, instruction, x, y, imd, reg[x]);
-    pc++;
-    return pc;
+    switch(byte)
+    {
+        case 0:
+            reg[x] = (tmp & 0xFF000000) >> 24;
+            break;
+        case 1:
+            reg[x] = (tmp & 0xFF0000) >> 16;
+            break;
+        case 2:
+            reg[x] = (tmp & 0xFF00) >> 8;
+            break;
+        case 3:
+            reg[x] = (tmp & 0xFF);
+            break;
+    }
+
+    sprintf(instruction, "ldb %s,%s,0x%04X", indexToName(x, 0), indexToName(y, 0), imd);
+
+    printf("[0x%08X]\t%-20s\t%s=MEM[(%s+0x%04X)]=0x%02X\n", reg[32] * 4, instruction, indexToName(x, 1), indexToName(y, 1), imd, reg[x]);
+    fprintf(file, "[0x%08X]\t%-20s\t%s=MEM[(%s+0x%04X)]=0x%02X\n", reg[32] * 4, instruction, indexToName(x, 1), indexToName(y, 1), imd, reg[x]);
+
+    reg[32]++;
 }
 
-unsigned int bgt(unsigned int ir, unsigned int pc, unsigned int fr, FILE *file)
+void stb(unsigned int *mem, unsigned int *reg, FILE *file)
 {
-    unsigned int old = pc, cmp;
+    unsigned int index, byte, x, y, imd, tmp;
     char instruction[20];
+
+    y = (reg[33] & 0x1F);
+    x = (reg[33] & 0x3E0) >> 5;
+    imd = (reg[33] & 0x3FFFC00) >> 10;
+
+    index = (reg[x] + imd) / 4;
+    tmp = mem[index];
+    byte = (reg[x] + imd) % 4;
     
-     cmp = (fr & 0x07);
-     sprintf(instruction, "bgt 0x%08X", (ir & 0x3FFFFFF));
+    switch(byte)
+    {
+        case 0:
+            mem[index] =  (reg[y] << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (((tmp & 0xFF00) >> 8) << 8) | (tmp & 0xFF);
+            break;
+        case 1:
+            mem[index] =  (((tmp & 0xFF000000) >> 24) << 24) | (reg[y] << 16) | (((tmp & 0xFF00) >> 8) << 8) | (tmp & 0xFF);
+            break;
+        case 2:
+            mem[index] =  (((tmp & 0xFF000000) >> 24) << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (reg[y] << 8) | (tmp & 0xFF);
+            break;
+        case 3:
+            mem[index] =  (((tmp & 0xFF000000) >> 24) << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (((tmp & 0xFF00) >> 8) << 8) | reg[y];
+            break;
+    }
 
-     if(cmp == 4)
-        pc = (ir & 0x3FFFFFF);
-    else
-        pc++;
+    sprintf(instruction, "stb %s,0x%04X,%s", indexToName(x, 0), imd, indexToName(y, 0));
 
-    printf("[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, pc * 4);
-    fprintf(file, "[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, pc * 4);
-
-    return pc;
+    printf("[0x%08X]\t%-20s\tMEM[(%s+0x%04X)]=%s=0x%02X\n", reg[32] * 4, instruction, indexToName(x, 1), imd, indexToName(y, 1), reg[y]);
+    fprintf(file, "[0x%08X]\t%-20s\tMEM[(%s+0x%04X)]=%s=0x%02X\n", reg[32] * 4, instruction, indexToName(x, 1), imd, indexToName(y, 1), reg[y]);
+    
+    reg[32]++;
 }
 
-unsigned int beq(unsigned int ir, unsigned int pc, unsigned int fr, FILE *file)
+void bun(unsigned int *reg, FILE *file)
 {
-    unsigned int old = pc, cmp;
+    unsigned int old = reg[32];
+    reg[32] = (reg[33] & 0x3FFFFFF);
+    char instruction[20];
+    sprintf(instruction, "bun 0x%08X", reg[32]);
+    printf("[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, reg[32] * 4);
+    fprintf(file, "[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, reg[32] * 4);
+    
+    return reg[32];
+}
+
+void beq(unsigned int *reg, FILE *file)
+{
+    unsigned int old = reg[32], cmp;
     char instruction[20];
     
-     cmp = (fr & 0x07);
-     sprintf(instruction, "beq 0x%08X", (ir & 0x3FFFFFF));
+     cmp = (reg[35] & 0x07);
+     sprintf(instruction, "beq 0x%08X", (reg[33] & 0x3FFFFFF));
 
      if(cmp == 1)
-        pc = (ir & 0x3FFFFFF);
+        reg[32] = (reg[33] & 0x3FFFFFF);
     else
-        pc++;
+        reg[32]++;
 
-    printf("[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, pc * 4);
-    fprintf(file, "[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, pc * 4);
+    printf("[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, reg[32] * 4);
+    fprintf(file, "[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, reg[32] * 4);
 
-    return pc;
 }
 
-unsigned int blt(unsigned int ir, unsigned int pc, unsigned int fr, FILE *file)
+void blt(unsigned int *reg, FILE *file)
 {
-    unsigned int old = pc, cmp;
+    unsigned int old = reg[32], cmp;
     char instruction[20];
     
-     cmp = (fr & 0x07);
-     sprintf(instruction, "blt 0x%08X", (ir & 0x3FFFFFF));
+     cmp = (reg[35] & 0x07);
+     sprintf(instruction, "blt 0x%08X", (reg[33] & 0x3FFFFFF));
 
      if(cmp == 2)
-        pc = (ir & 0x3FFFFFF);
+        reg[32] = (reg[33] & 0x3FFFFFF);
     else
-        pc++;
+        reg[32]++;
 
-    printf("[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, pc * 4);
-    fprintf(file, "[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, pc * 4);
+    printf("[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, reg[32] * 4);
+    fprintf(file, "[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, reg[32] * 4);
 
-    return pc;
 }
 
-unsigned int bne(unsigned int ir, unsigned int pc, unsigned int fr, FILE *file)
+void bgt(unsigned int *reg, FILE *file)
 {
-    unsigned int old = pc, cmp;
+    unsigned int old = reg[32], cmp;
     char instruction[20];
     
-     cmp = (fr & 0x07);
-     sprintf(instruction, "bne 0x%08X", (ir & 0x3FFFFFF));
+     cmp = (reg[35] & 0x07);
+     sprintf(instruction, "bgt 0x%08X", (reg[33] & 0x3FFFFFF));
+
+     if(cmp == 4)
+        reg[32] = (reg[33] & 0x3FFFFFF);
+    else
+        reg[32]++;
+
+    printf("[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, reg[32] * 4);
+    fprintf(file, "[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, reg[32] * 4);
+
+}
+
+void bne(unsigned int *reg, FILE *file)
+{
+    unsigned int old = reg[32], cmp;
+    char instruction[20];
+    
+     cmp = (reg[35] & 0x07);
+     sprintf(instruction, "bne 0x%08X", (reg[33] & 0x3FFFFFF));
 
      if(cmp != 1)
-        pc = (ir & 0x3FFFFFF);
+        reg[32] = (reg[33] & 0x3FFFFFF);
     else
-        pc++;
+        reg[32]++;
 
-    printf("[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, pc * 4);
-    fprintf(file, "[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, pc * 4);
+    printf("[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, reg[32] * 4);
+    fprintf(file, "[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, reg[32] * 4);
 
-    return pc;
 }
 
-unsigned int ble(unsigned int ir, unsigned int pc, unsigned int fr, FILE *file)
+void ble(unsigned int *reg, FILE *file)
 {
-    unsigned int old = pc, cmp;
+    unsigned int old = reg[32], cmp;
     char instruction[20];
     
-     cmp = (fr & 0x07);
-     sprintf(instruction, "ble 0x%08X", (ir & 0x3FFFFFF));
+     cmp = (reg[35] & 0x07);
+     sprintf(instruction, "ble 0x%08X", (reg[33] & 0x3FFFFFF));
 
      if(cmp == 1 || cmp == 2)
-        pc = (ir & 0x3FFFFFF);
+        reg[32] = (reg[33] & 0x3FFFFFF);
     else
-        pc++;
+        reg[32]++;
 
-    printf("[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, pc * 4);
-    fprintf(file, "[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, pc * 4);
+    printf("[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, reg[32] * 4);
+    fprintf(file, "[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, reg[32] * 4);
 
-    return pc;
 }
 
-unsigned int bge(unsigned int ir, unsigned int pc, unsigned int fr, FILE *file)
+void bge(unsigned int *reg, FILE *file)
 {
-    unsigned int old = pc, cmp;
+    unsigned int old = reg[32], cmp;
     char instruction[20];
     
-     cmp = (fr & 0x07);
-     sprintf(instruction, "bge 0x%08X", (ir & 0x3FFFFFF));
+     cmp = (reg[35] & 0x07);
+     sprintf(instruction, "bge 0x%08X", (reg[33] & 0x3FFFFFF));
 
      if(cmp == 1 || cmp == 4)
-        pc = (ir & 0x3FFFFFF);
+        reg[32] = (reg[33] & 0x3FFFFFF);
     else
-        pc++;
+        reg[32]++;
 
-    printf("[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, pc * 4);
-    fprintf(file, "[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, pc * 4);
+    printf("[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, reg[32] * 4);
+    fprintf(file, "[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, reg[32] * 4);
 
-    return pc;
 }
 
-unsigned int bun(unsigned int ir, unsigned int pc, FILE *file)
+void _int(unsigned int *reg, FILE *file)
 {
-    unsigned int old = pc;
-    pc = (ir & 0x3FFFFFF);
-    char instruction[20];
-    sprintf(instruction, "bun 0x%08X", pc);
-    printf("[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, pc * 4);
-    fprintf(file, "[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, pc * 4);
-    return pc;
+    unsigned int imd, old = reg[32];
+    char instruction[20];    
+
+    imd = (reg[33] & 0x3FFFFFF);
+    reg[32] = 0;
+    
+    sprintf(instruction, "int %d", imd);
+    printf("[0x%08X]\t%-20s\tCR=0x00000000,PC=0x%08X\n", old * 4, instruction, reg[32]);
+    fprintf(file, "[0x%08X]\t%-20s\tCR=0x00000000,PC=0x%08X\n", old * 4, instruction, reg[32]);
+
 }
 
 int getNumberLines(FILE *file)
@@ -669,4 +906,43 @@ static int endOfLine(FILE *ifp, int c)
             ungetc(c, ifp);
     }
     return(eol);
+}
+
+char * indexToName(int index, int upperCase)
+{
+    char *str = (char *) malloc(sizeof(char) * 4);
+
+    if (index < 32)
+    {
+        sprintf(str, "r%d", index);
+    }
+    else
+    {
+        switch (index)
+        {
+            case 32:
+                sprintf(str, "pc");
+                break;
+            case 33:
+                sprintf(str, "ir");
+                break;
+            case 34:
+                sprintf(str, "er");
+                break;
+            case 35:
+                sprintf(str, "fr");
+                break;
+            default:
+                break;
+        }
+    }
+
+    if (upperCase == 1)
+    {
+        for(int i = 0; str[i] != '\0'; i++){
+            str[i] = toupper(str[i]);
+        }
+    }
+    
+    return str;
 }
