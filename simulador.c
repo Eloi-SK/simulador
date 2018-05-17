@@ -17,7 +17,7 @@ void shr(unsigned int *reg, FILE *file);                    // Implemented
 void and(unsigned int *reg, FILE *file);                    // Implemented
 void not(unsigned int *reg, FILE *file);                    // Implemented
 void or(unsigned int *reg, FILE *file);                     // Implemented
-void xor(unsigned int *reg, FILE *file);                    // Not Implemented
+void xor(unsigned int *reg, FILE *file);                    // Implemented
 void addi(unsigned int *reg, FILE *file);                   // Implemented
 void subi(unsigned int *reg, FILE *file);                   // Not Implemented
 void muli(unsigned int *reg, FILE *file);                   // Implemented
@@ -128,7 +128,6 @@ int main(int argc, char *argv[])
             // xor
             case 0x0A:
                 xor(reg, file_out);
-                exit_ = 1;
                 break;
             // addi
             case 0x10:
@@ -600,7 +599,32 @@ void or(unsigned int *reg, FILE *file)
 
 void xor(unsigned int *reg, FILE *file)
 {
-    printf("Not implemented.\n");
+    unsigned int x, y, z, tmp, tmp_x, tmp_y, tmp_z;
+    char instruction[20];
+
+    y = (reg[33] & 0x1F);
+    x = (reg[33] & 0x3E0) >> 5;
+    z = (reg[33] & 0x7C00) >> 10;
+
+    tmp = (reg[33] & 0x38000) >> 15;
+    tmp_y = (tmp & 0x01);
+    tmp_x = (tmp & 0x02) >> 1;
+    tmp_z = (tmp & 0x04) >> 2;
+
+    if (tmp_x == 1) 
+        x |= (tmp_x << 5);
+    if (tmp_y == 1)
+        y |= (tmp_y << 5);
+    if (tmp_z == 1)
+        z |= (tmp_z << 5);
+
+    reg[z] = reg[x] ^ reg[y];
+
+    sprintf(instruction, "xor %s,%s,%s", indexToName(z, 0), indexToName(x, 0), indexToName(y, 0));
+    printf("[0x%08X]\t%s\t%s=%s^%s=0x%08X", reg[32] * 4, instruction, indexToName(z, 1), indexToName(x, 1), indexToName(y, 1), reg[z]);
+    fprintf(file, "[0x%08X]\t%s\t%s=%s^%s=0x%08X", reg[32] * 4, instruction, indexToName(z, 1), indexToName(x, 1), indexToName(y, 1), reg[z]);
+
+    reg[32]++;
 }
 
 void addi(unsigned int *reg, FILE *file)
