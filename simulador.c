@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
         {
             // nop/add
             case 0x00:
-                add(reg, file_in);
+                add(reg, file_out);
                 break;
             // sub
             case 0x01:
@@ -108,11 +108,11 @@ int main(int argc, char *argv[])
                 break;
             // shl
             case 0x05:
-                shl(reg, file_in);
+                shl(reg, file_out);
                 break;
             // shr
             case 0x06:
-                shr(reg, file_in);
+                shr(reg, file_out);
                 break;
             // and
             case 0x07:
@@ -149,7 +149,7 @@ int main(int argc, char *argv[])
                 break;
             // divi
             case 0x13:
-                divi(reg, file_in);
+                divi(reg, file_out);
                 break;
             // cmpi
             case 0x14:
@@ -377,8 +377,8 @@ void cmp(unsigned int *reg, FILE *file)
     reg[35] = cmp;
 
     sprintf(instruction, "cmp %s,%s", indexToName(x, 0), indexToName(y, 0));
-    printf("[0x%08X]\t%-20s\t%s=0x%08X\n", reg[32], instruction, indexToName(35, 1), reg[35]);
-    fprintf(file, "[0x%08X]\t%-20s\t%s=0x%08X\n", reg[32], instruction, indexToName(35, 1), reg[35]);
+    printf("[0x%08X]\t%-20s\t%s=0x%08X\n", reg[32] * 4, instruction, indexToName(35, 1), reg[35]);
+    fprintf(file, "[0x%08X]\t%-20s\t%s=0x%08X\n", reg[32] * 4, instruction, indexToName(35, 1), reg[35]);
 
     reg[32]++;
 }
@@ -456,8 +456,8 @@ void shr(unsigned int *reg, FILE *file)
     reg[z] = (shr_z_64 & 0xFFFFFFFF);
 
     sprintf(instruction, "shr %s,%s,%d", indexToName(z, 0), indexToName(x, 0), y);
-    printf("[0x%08X]\t%-20s\t%s=0x%08X,%s=%s<<%d=0x%08X\n",reg[32] * 4, instruction, indexToName(34, 1), reg[34], indexToName(z, 1), indexToName(x, 1), y+1, reg[z]);
-    fprintf(file, "[0x%08X]\t%-20s\t%s=0x%08X,%s=%s<<%d=0x%08X\n",reg[32] * 4, instruction, indexToName(34, 1), reg[34], indexToName(z, 1), indexToName(x, 1), y+1, reg[z]);
+    printf("[0x%08X]\t%-20s\t%s=0x%08X,%s=%s>>%d=0x%08X\n",reg[32] * 4, instruction, indexToName(34, 1), reg[34], indexToName(z, 1), indexToName(x, 1), y+1, reg[z]);
+    fprintf(file, "[0x%08X]\t%-20s\t%s=0x%08X,%s=%s>>%d=0x%08X\n",reg[32] * 4, instruction, indexToName(34, 1), reg[34], indexToName(z, 1), indexToName(x, 1), y+1, reg[z]);
 
     reg[32]++;
 
@@ -519,7 +519,7 @@ void addi(unsigned int *reg, FILE *file)
     reg[32]++;
 }
 
-void sub(unsigned int *reg, FILE *file)
+void subi(unsigned int *reg, FILE *file)
 {
     printf("Not implemented.\n");
 }
@@ -600,8 +600,8 @@ void cmpi(unsigned int *reg, FILE *file)
     reg[35] = cmp;
 
     sprintf(instruction, "cmpi %s,%d", indexToName(x, 0), imd);
-    printf("[0x%08X]\t%-20s\t%s=0x%08X\n", reg[32], instruction, indexToName(35, 1), reg[35]);
-    fprintf(file, "[0x%08X]\t%-20s\t%s=0x%08X\n", reg[32], instruction, indexToName(35, 1), reg[35]);
+    printf("[0x%08X]\t%-20s\t%s=0x%08X\n", reg[32] * 4, instruction, indexToName(35, 1), reg[35]);
+    fprintf(file, "[0x%08X]\t%-20s\t%s=0x%08X\n", reg[32] * 4, instruction, indexToName(35, 1), reg[35]);
     
     reg[32]++;
 }
@@ -695,8 +695,8 @@ void ldb(unsigned int *mem, unsigned int *reg, FILE *file)
 
     sprintf(instruction, "ldb %s,%s,0x%04X", indexToName(x, 0), indexToName(y, 0), imd);
 
-    printf("[0x%08X]\t%-20s\t%s=MEM[(%s+0x%04X)]=0x%02X\n", reg[32] * 4, instruction, indexToName(x, 1), indexToName(y, 1), imd, reg[x]);
-    fprintf(file, "[0x%08X]\t%-20s\t%s=MEM[(%s+0x%04X)]=0x%02X\n", reg[32] * 4, instruction, indexToName(x, 1), indexToName(y, 1), imd, reg[x]);
+    printf("[0x%08X]\t%-20s\t%s=MEM[%s+0x%04X]=0x%02X\n", reg[32] * 4, instruction, indexToName(x, 1), indexToName(y, 1), imd, reg[x]);
+    fprintf(file, "[0x%08X]\t%-20s\t%s=MEM[%s+0x%04X]=0x%02X\n", reg[32] * 4, instruction, indexToName(x, 1), indexToName(y, 1), imd, reg[x]);
 
     reg[32]++;
 }
@@ -732,8 +732,8 @@ void stb(unsigned int *mem, unsigned int *reg, FILE *file)
 
     sprintf(instruction, "stb %s,0x%04X,%s", indexToName(x, 0), imd, indexToName(y, 0));
 
-    printf("[0x%08X]\t%-20s\tMEM[(%s+0x%04X)]=%s=0x%02X\n", reg[32] * 4, instruction, indexToName(x, 1), imd, indexToName(y, 1), reg[y]);
-    fprintf(file, "[0x%08X]\t%-20s\tMEM[(%s+0x%04X)]=%s=0x%02X\n", reg[32] * 4, instruction, indexToName(x, 1), imd, indexToName(y, 1), reg[y]);
+    printf("[0x%08X]\t%-20s\tMEM[%s+0x%04X]=%s=0x%02X\n", reg[32] * 4, instruction, indexToName(x, 1), imd, indexToName(y, 1), reg[y]);
+    fprintf(file, "[0x%08X]\t%-20s\tMEM[%s+0x%04X]=%s=0x%02X\n", reg[32] * 4, instruction, indexToName(x, 1), imd, indexToName(y, 1), reg[y]);
     
     reg[32]++;
 }
@@ -747,7 +747,6 @@ void bun(unsigned int *reg, FILE *file)
     printf("[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, reg[32] * 4);
     fprintf(file, "[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, reg[32] * 4);
     
-    return reg[32];
 }
 
 void beq(unsigned int *reg, FILE *file)
