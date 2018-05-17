@@ -23,7 +23,7 @@ void subi(unsigned int *reg, FILE *file);                   // Not Implemented
 void muli(unsigned int *reg, FILE *file);                   // Implemented
 void divi(unsigned int *reg, FILE *file);                   // Partial
 void cmpi(unsigned int *reg, FILE *file);                   // Implemented
-void andi(unsigned int *reg, FILE *file);                   // Not Implemented
+void andi(unsigned int *reg, FILE *file);                   // Implemented
 void noti(unsigned int *reg, FILE *file);                   // Not Implemented
 void ori(unsigned int *reg, FILE *file);                    // Not Implemented
 void xori(unsigned int *reg, FILE *file);                   // Not Implemented
@@ -153,7 +153,6 @@ int main(int argc, char *argv[])
             // andi
             case 0x15:
                 andi(reg, file_out);
-                exit_ = 1;
                 break;
             // noti
             case 0x16:
@@ -752,7 +751,22 @@ void cmpi(unsigned int *reg, FILE *file)
 
 void andi(unsigned int *reg, FILE *file)
 {
-    printf("Not implemented.\n");
+    unsigned int x, y, imd;
+    char instruction[20];
+
+    y = (reg[33] & 0x1F);
+    x = (reg[33] & 0x3E0) >> 5;
+    imd = (reg[33] & 0x3FFFC00) >> 10;
+
+    
+
+    reg[x] = reg[y] & imd;
+
+    sprintf(instruction, "andi %s,%s,%d", indexToName(x, 0), indexToName(y, 0), imd);
+    printf("[0x%08X]\t%s\t%s=%s&0x%04X=0x%08X", reg[32] * 4, instruction, indexToName(x, 1), indexToName(y, 1), imd, reg[x]);
+    fprintf(file, "[0x%08X]\t%s\t%s=%s&0x%04X=0x%08X", reg[32] * 4, instruction, indexToName(x, 1), indexToName(y, 1), imd, reg[x]);
+
+    reg[32]++;
 }
 
 void noti(unsigned int *reg, FILE *file)
