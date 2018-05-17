@@ -26,7 +26,7 @@ void cmpi(unsigned int *reg, FILE *file);                   // Implemented
 void andi(unsigned int *reg, FILE *file);                   // Implemented
 void noti(unsigned int *reg, FILE *file);                   // Implemented
 void ori(unsigned int *reg, FILE *file);                    // Implemented
-void xori(unsigned int *reg, FILE *file);                   // Not Implemented
+void xori(unsigned int *reg, FILE *file);                   // Implemented
 void ldw(unsigned int *mem, unsigned int *reg, FILE *file); // Implemented
 void stw(unsigned int *mem, unsigned int *reg, FILE *file); // Implemented
 void ldb(unsigned int *mem, unsigned int *reg, FILE *file); // Implemented
@@ -165,7 +165,6 @@ int main(int argc, char *argv[])
             // xori
             case 0x18:
                 xori(reg, file_out);
-                exit_ = 1;
                 break;
             // ldw   
             case 0x19:
@@ -802,7 +801,20 @@ void ori(unsigned int *reg, FILE *file)
 
 void xori(unsigned int *reg, FILE *file)
 {
-    printf("Not implemented.\n");
+    unsigned int x, y, imd;
+    char instruction[20];
+
+    y = (reg[33] & 0x1F);
+    x = (reg[33] & 0x3E0) >> 5;
+    imd = (reg[33] & 0x3FFFC00) >> 10;
+
+    reg[x] = reg[y] ^ imd;
+
+    sprintf(instruction, "xori %s,%s,%d", indexToName(x, 0), indexToName(y, 0), imd);
+    printf("[0x%08X]\t%s\t%s=%s^0x%04X=0x%08X", reg[32] * 4, instruction, indexToName(x, 1), indexToName(y, 1), imd, reg[x]);
+    fprintf(file, "[0x%08X]\t%s\t%s=%s^0x%04X=0x%08X", reg[32] * 4, instruction, indexToName(x, 1), indexToName(y, 1), imd, reg[x]);
+
+    reg[32]++;
 }
 
 void ldw(unsigned int *mem, unsigned int *reg, FILE *file)
