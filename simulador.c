@@ -10,7 +10,7 @@ char * indexToName(int index, int upperCase);
 void add(unsigned int *reg, FILE *file);                    // Implemented
 void sub(unsigned int *reg, FILE *file);                    // Not Implemented
 void mul(unsigned int *reg, FILE *file);                    // Implemented
-void _div(unsigned int *reg, FILE *file);                   // Not Implemented
+void _div(unsigned int *reg, FILE *file);                   // Implemented
 void cmp(unsigned int *reg, FILE *file);                    // Implemented
 void shl(unsigned int *reg, FILE *file);                    // Implemented
 void shr(unsigned int *reg, FILE *file);                    // Implemented
@@ -344,7 +344,60 @@ void mul(unsigned int *reg, FILE *file)
 
 void _div(unsigned int *reg, FILE *file)
 {
-    printf("Not implemented.\n");
+    unsigned int x, y, z, tmp, tmp_x, tmp_y, tmp_z;
+    char instruction[20];
+
+    y = (reg[33] & 0x1F);
+    x = (reg[33] & 0x3E0) >> 5;
+    z = (reg[33] & 0x7C00) >> 10;
+
+    tmp = (reg[33] & 0x38000) >> 15;
+    tmp_y = (tmp & 0x01);
+    tmp_x = (tmp & 0x02) >> 1;
+    tmp_z = (tmp & 0x04) >> 2;
+
+    if (tmp_x == 1) 
+        x |= (tmp_x << 5);
+    if (tmp_y == 1)
+        y |= (tmp_y << 5);
+    if (tmp_z == 1)
+        z |= (tmp_z << 5);
+
+    unsigned int zd = (reg[35] & 0x08) >> 3;
+    unsigned int ov = (reg[35] & 0x10) >> 4;
+    unsigned long long int rx_64 = (unsigned long long int) reg[x];
+    unsigned long long int ry_64 = (unsigned long long int) reg[y];
+    unsigned long long int rz_64;
+
+    if (reg[y] != 0)
+    {
+        rz_64 = rx_64 / ry_64;
+        reg[34] = reg[x] % reg[y];
+
+        char tmp_ = (rz_64 & 0xFFFFFFFF00000000) >> 32;
+        reg[z] = (rz_64 & 0xFFFFFFFF);
+
+        if(tmp_ == 1 && ov == 0)
+            reg[35] |= 0x10;
+        else if (tmp_ == 1 && ov == 1)
+            reg[35] |= 0x1F;
+        else if (tmp_ == 0 && ov == 0)
+            reg[35] |= 0;
+        else if (tmp_ == 0 && ov == 1)
+            reg[35] &= 0x0F;
+    }
+
+    if (reg[y] == 0 && zd == 0)
+        reg[35] |= 0x08;
+    else if (reg[y] != 0 && zd == 1)
+        reg[35] &= 0x07;
+
+
+    sprintf(instruction, "div %s,%s,%s", indexToName(z, 0), indexToName(x, 0), indexToName(y, 0));
+    printf("[0x%08X]\t%-20s\t%s=0x%08X,%s=0x%08X,%s=%s/0x%04X=0x%08X\n", reg[32] * 4, instruction, indexToName(35, 1), reg[35], indexToName(34, 1), reg[34], indexToName(z, 1), indexToName(x, 1), indexToName(y, 1), reg[z]);
+    fprintf(file, "[0x%08X]\t%-20s\t%s=0x%08X,%s=0x%08X,%s=%s/0x%04X=0x%08X\n", reg[32] * 4, instruction, indexToName(35, 1), reg[35], indexToName(34, 1), reg[34], indexToName(z, 1), indexToName(x, 1), indexToName(y, 1), reg[z]);
+
+    reg[32]++;
 }
 
 void cmp(unsigned int *reg, FILE *file)
