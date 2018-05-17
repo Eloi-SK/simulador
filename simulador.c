@@ -7,38 +7,38 @@ int getLine(FILE *file, char *buffer, size_t length);
 static int endOfLine(FILE *ifp, int c);
 char * indexToName(int index, int upperCase);
 
-void add(unsigned int *reg, FILE *file);
-void sub(unsigned int *reg, FILE *file);
-void mul(unsigned int *reg, FILE *file);
-void _div(unsigned int *reg, FILE *file);
-void cmp(unsigned int *reg, FILE *file);
-void shl(unsigned int *reg, FILE *file);
-void shr(unsigned int *reg, FILE *file);
-void and(unsigned int *reg, FILE *file);
-void not(unsigned int *reg, FILE *file);
-void or(unsigned int *reg, FILE *file);
-void xor(unsigned int *reg, FILE *file);
-void addi(unsigned int *reg, FILE *file);
-void subi(unsigned int *reg, FILE *file);
-void muli(unsigned int *reg, FILE *file);
-void divi(unsigned int *reg, FILE *file);
-void cmpi(unsigned int *reg, FILE *file);
-void andi(unsigned int *reg, FILE *file);
-void noti(unsigned int *reg, FILE *file);
-void ori(unsigned int *reg, FILE *file);
-void xori(unsigned int *reg, FILE *file);
-void ldw(unsigned int *mem, unsigned int *reg, FILE *file);
-void stw(unsigned int *mem, unsigned int *reg, FILE *file);
-void ldb(unsigned int *mem, unsigned int *reg, FILE *file);
-void stb(unsigned int *mem, unsigned int *reg, FILE *file);
-void bun(unsigned int *reg, FILE *file);
-void bgt(unsigned int *reg, FILE *file);
-void beq(unsigned int *reg, FILE *file);
-void blt(unsigned int *reg, FILE *file);
-void bne(unsigned int *reg, FILE *file);
-void ble(unsigned int *reg, FILE *file);
-void bge(unsigned int *reg, FILE *file);
-void _int(unsigned int *reg, FILE *file);
+void add(unsigned int *reg, FILE *file);                    // Implemented
+void sub(unsigned int *reg, FILE *file);                    // Not Implemented
+void mul(unsigned int *reg, FILE *file);                    // Implemented
+void _div(unsigned int *reg, FILE *file);                   // Not Implemented
+void cmp(unsigned int *reg, FILE *file);                    // Implemented
+void shl(unsigned int *reg, FILE *file);                    // Implemented
+void shr(unsigned int *reg, FILE *file);                    // Implemented
+void and(unsigned int *reg, FILE *file);                    // Not Implemented
+void not(unsigned int *reg, FILE *file);                    // Not Implemented
+void or(unsigned int *reg, FILE *file);                     // Not Implemented
+void xor(unsigned int *reg, FILE *file);                    // Not Implemented
+void addi(unsigned int *reg, FILE *file);                   // Implemented
+void subi(unsigned int *reg, FILE *file);                   // Not Implemented
+void muli(unsigned int *reg, FILE *file);                   // Implemented
+void divi(unsigned int *reg, FILE *file);                   // Partial
+void cmpi(unsigned int *reg, FILE *file);                   // Implemented
+void andi(unsigned int *reg, FILE *file);                   // Not Implemented
+void noti(unsigned int *reg, FILE *file);                   // Not Implemented
+void ori(unsigned int *reg, FILE *file);                    // Not Implemented
+void xori(unsigned int *reg, FILE *file);                   // Not Implemented
+void ldw(unsigned int *mem, unsigned int *reg, FILE *file); // Implemented
+void stw(unsigned int *mem, unsigned int *reg, FILE *file); // Implemented
+void ldb(unsigned int *mem, unsigned int *reg, FILE *file); // Implemented
+void stb(unsigned int *mem, unsigned int *reg, FILE *file); // Implemented
+void bun(unsigned int *reg, FILE *file);                    // Implemented
+void bgt(unsigned int *reg, FILE *file);                    // Implemented
+void beq(unsigned int *reg, FILE *file);                    // Implemented
+void blt(unsigned int *reg, FILE *file);                    // Implemented
+void bne(unsigned int *reg, FILE *file);                    // Implemented
+void ble(unsigned int *reg, FILE *file);                    // Implemented
+void bge(unsigned int *reg, FILE *file);                    // Implemented
+void _int(unsigned int *reg, FILE *file);                   // Implemented
 
 int main(int argc, char *argv[])
 {
