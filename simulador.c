@@ -15,7 +15,7 @@ void cmp(unsigned int *reg, FILE *file);                    // Implemented
 void shl(unsigned int *reg, FILE *file);                    // Implemented
 void shr(unsigned int *reg, FILE *file);                    // Implemented
 void and(unsigned int *reg, FILE *file);                    // Implemented
-void not(unsigned int *reg, FILE *file);                    // Not Implemented
+void not(unsigned int *reg, FILE *file);                    // Implemented
 void or(unsigned int *reg, FILE *file);                     // Not Implemented
 void xor(unsigned int *reg, FILE *file);                    // Not Implemented
 void addi(unsigned int *reg, FILE *file);                   // Implemented
@@ -120,7 +120,6 @@ int main(int argc, char *argv[])
             // not
             case 0x08:
                 not(reg, file_out);
-                exit_ = 1;
                 break;
             // or
             case 0x09:
@@ -546,7 +545,28 @@ void and(unsigned int *reg, FILE *file)
 
 void not(unsigned int *reg, FILE *file)
 {
-    printf("Not implemented.\n");
+    unsigned int x, y, tmp, tmp_x, tmp_y;
+    char instruction[20];
+
+    y = (reg[33] & 0x1F);
+    x = (reg[33] & 0x3E0) >> 5;
+
+    tmp = (reg[33] & 0x38000) >> 15;
+    tmp_y = (tmp & 0x01);
+    tmp_x = (tmp & 0x02) >> 1;
+
+    if (tmp_x == 1) 
+        x |= (tmp_x << 5);
+    if (tmp_y == 1)
+        y |= (tmp_y << 5);
+
+    reg[x] = ~reg[y];
+
+    sprintf(instruction, "not %s,%s", indexToName(x, 0), indexToName(y, 0));
+    printf("[0x%08X]\t%s\t%s=~%s=0x%08X", reg[32] * 4, instruction, indexToName(x, 1), indexToName(y, 1), reg[x]);
+    fprintf(file, "[0x%08X]\t%s\t%s=~%s=0x%08X", reg[32] * 4, instruction, indexToName(x, 1), indexToName(y, 1), reg[x]);
+
+    reg[32]++;
 }
 
 void or(unsigned int *reg, FILE *file)
