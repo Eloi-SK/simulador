@@ -5,7 +5,7 @@
       "name": "(gdb) Launch",
       "type": "cppdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/${fileBasenameNoExtension}",
+      "program": "${workspaceFolder}/${fileBasenameNoExtension}.app",
       "args": ["1_factorial.hex", "1_factorial.out"],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
@@ -19,7 +19,7 @@
               "ignoreFailures": true
           }
       ],
-      "preLaunchTask": "build & debug file"
+      "preLaunchTask": "linux build & debug file"
     },
     {
       "name": "Run C/C++",
