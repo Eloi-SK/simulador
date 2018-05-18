@@ -8,7 +8,7 @@ static int endOfLine(FILE *ifp, int c);
 char * indexToName(int index, int upperCase);
 
 void add(unsigned int *reg, FILE *file);                    // Implemented
-void sub(unsigned int *reg, FILE *file);                    // Not Implemented
+void sub(unsigned int *reg, FILE *file);                    // Implemented
 void mul(unsigned int *reg, FILE *file);                    // Implemented
 void _div(unsigned int *reg, FILE *file);                   // Implemented
 void cmp(unsigned int *reg, FILE *file);                    // Implemented
@@ -19,7 +19,7 @@ void not(unsigned int *reg, FILE *file);                    // Implemented
 void or(unsigned int *reg, FILE *file);                     // Implemented
 void xor(unsigned int *reg, FILE *file);                    // Implemented
 void addi(unsigned int *reg, FILE *file);                   // Implemented
-void subi(unsigned int *reg, FILE *file);                   // Not Implemented
+void subi(unsigned int *reg, FILE *file);                   // Implemented
 void muli(unsigned int *reg, FILE *file);                   // Implemented
 void divi(unsigned int *reg, FILE *file);                   // Implemented
 void cmpi(unsigned int *reg, FILE *file);                   // Implemented
@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
 {
     if (argc < 3)
     {
-        printf("Argumento invÃ¡lido.");
+        printf("Argumento inválido.");
         return -1;
     }
 
@@ -91,7 +91,6 @@ int main(int argc, char *argv[])
             // sub
             case 0x01:
                 sub(reg, file_out);
-                exit_ = 1;
                 break;
             // mul
             case 0x02:
@@ -135,7 +134,7 @@ int main(int argc, char *argv[])
                 break;
             // subi
             case 0x11:
-                printf("Not implemented.\n");
+                subi(reg, file_out);
                 exit_ = 1;
                 break;
             // muli
@@ -262,7 +261,6 @@ void add(unsigned int *reg, FILE *file)
     reg[z] = (int_64 & 0xFFFFFFFF);
 
     unsigned int ov = (reg[35] & 0x10) >> 4;
-    unsigned int fr = reg[35];
     if(tmp_ == 1 && ov == 0)
         reg[35] |= 0x10;
     else if (tmp_ == 1 && ov == 1)
@@ -283,7 +281,49 @@ void add(unsigned int *reg, FILE *file)
 
 void sub(unsigned int *reg, FILE *file)
 {
-    printf("Not implemented.\n");
+    unsigned int x, y, z, tmp, tmp_x, tmp_y, tmp_z;
+    char instruction[20];
+
+    y = (reg[33] & 0x1F);
+    x = (reg[33] & 0x3E0) >> 5;
+    z = (reg[33] & 0x7C00) >> 10;
+
+    tmp = (reg[33] & 0x38000) >> 15;
+    tmp_y = (tmp & 0x01);
+    tmp_x = (tmp & 0x02) >> 1;
+    tmp_z = (tmp & 0x04) >> 2;
+
+    if (tmp_x == 1) 
+        x |= (tmp_x << 5);
+    if (tmp_y == 1)
+        y |= (tmp_y << 5);
+    if (tmp_z == 1)
+        z |= (tmp_z << 5);
+
+    unsigned long long int reg_x_64 =  (unsigned long long int) reg[x];
+    unsigned long long int reg_y_64 = (unsigned long long int) reg[y];
+
+    unsigned long long int int_64 = reg_x_64 - reg_y_64;
+
+    char tmp_ = (int_64 & 0xFFFFFFFF00000000) >> 32;
+    reg[z] = (int_64 & 0xFFFFFFFF);
+
+    unsigned int ov = (reg[35] & 0x10) >> 4;
+    if(tmp_ == 1 && ov == 0)
+        reg[35] |= 0x10;
+    else if (tmp_ == 1 && ov == 1)
+        reg[35] |= 0x1F;
+    else if (tmp_ == 0 && ov == 0)
+        reg[35] |= 0;
+    else if (tmp_ == 0 && ov == 1)
+        reg[35] &= 0x0F;
+
+    sprintf(instruction, "sub %s,%s,%s", indexToName(z, 0), indexToName(x, 0), indexToName(y, 0));
+
+    printf("[0x%08X]\t%-20s\tFR=0x%08X,%s=%s-%s=0x%08X\n", reg[32] * 4, instruction, reg[35], indexToName(z, 1), indexToName(x, 1), indexToName(y, 1), reg[z]);
+    fprintf(file, "[0x%08X]\t%-20s\tFR=0x%08X,%s=%s-%s=0x%08X\n", reg[32] * 4, instruction, reg[35], indexToName(z, 1), indexToName(x, 1), indexToName(y, 1), reg[z]);
+
+    reg[32]++;
 }
 
 void mul(unsigned int *reg, FILE *file)
@@ -661,7 +701,38 @@ void addi(unsigned int *reg, FILE *file)
 
 void subi(unsigned int *reg, FILE *file)
 {
-    printf("Not implemented.\n");
+    unsigned int x, y, imd;
+    char instruction[20];
+
+    y = (reg[33] & 0x1F);
+    x = (reg[33] & 0x3E0) >> 5;
+    imd = (reg[33] & 0x3FFFC00) >> 10;
+
+    unsigned long long int reg_y_64 =  (unsigned long long int) reg[y];
+    unsigned long long int imd_64 = (unsigned long long int) imd;
+
+    unsigned long long int int_64 = reg_y_64 - imd_64;
+
+    char tmp_ = (int_64 & 0xFFFFFFFF00000000) >> 32;
+    reg[x] = (int_64 & 0xFFFFFFFF);
+
+    unsigned int ov = (reg[35] & 0x10) >> 4;
+
+    if(tmp_ == 1 && ov == 0)
+        reg[35] = (reg[35] | 0x10);
+    else if (tmp_ == 1 && ov == 1)
+        reg[35] = (reg[35] | 0x1F);
+    else if (tmp_ == 0 && ov == 0)
+        reg[35] = (reg[35] | 0);
+    else if (tmp_ == 0 && ov == 1)
+        reg[35] = (reg[35] & 0x0F);
+    
+    sprintf(instruction, "subi %s,%s,%d", indexToName(x, 0), indexToName(y, 0), imd);
+
+    printf("[0x%08X]\t%-20s\t%s=0x%08X,%s=%s+0x%04X=0x%08X\n", reg[32] * 4, instruction, indexToName(35, 1), reg[35], indexToName(x, 1), indexToName(y, 1), imd, reg[x]);
+    fprintf(file, "[0x%08X]\t%-20s\t%s=0x%08X,%s=%s+0x%04X=0x%08X\n", reg[32] * 4, instruction, indexToName(35, 1), reg[35], indexToName(x, 1), indexToName(y, 1), imd, reg[x]);
+
+    reg[32]++;
 }
 
 void muli(unsigned int *reg, FILE *file)
@@ -790,7 +861,7 @@ void andi(unsigned int *reg, FILE *file)
 
 void noti(unsigned int *reg, FILE *file)
 {
-    unsigned int x, y, imd;
+    unsigned int x, imd;
     char instruction[20];
 
     x = (reg[33] & 0x3E0) >> 5;
