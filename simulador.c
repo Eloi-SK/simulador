@@ -21,7 +21,7 @@ void xor(unsigned int *reg, FILE *file);                    // Implemented
 void addi(unsigned int *reg, FILE *file);                   // Implemented
 void subi(unsigned int *reg, FILE *file);                   // Not Implemented
 void muli(unsigned int *reg, FILE *file);                   // Implemented
-void divi(unsigned int *reg, FILE *file);                   // Partial
+void divi(unsigned int *reg, FILE *file);                   // Implemented
 void cmpi(unsigned int *reg, FILE *file);                   // Implemented
 void andi(unsigned int *reg, FILE *file);                   // Implemented
 void noti(unsigned int *reg, FILE *file);                   // Implemented
@@ -709,16 +709,40 @@ void divi(unsigned int *reg, FILE *file)
     imd = (reg[33] & 0x3FFFC00) >> 10;
 
     unsigned int zd = (reg[35] & 0x08) >> 3;
+    unsigned int ov = (reg[35] & 0x10) >> 4;
+    unsigned long long int ry_64 = (unsigned long long int) reg[y];
+    unsigned long long int imd_64 = (unsigned long long int) imd;
+    unsigned long long int rx_64;
+
+    if (imd != 0)
+    {
+        rx_64 = ry_64 / imd;
+        reg[34] = ry_64 % imd;
+
+        char tmp_ = (rx_64 & 0xFFFFFFFF00000000) >> 32;
+        reg[x] = (rx_64 & 0xFFFFFFFF);
+
+        if(tmp_ == 1 && ov == 0)
+            reg[35] |= 0x10;
+        else if (tmp_ == 1 && ov == 1)
+            reg[35] |= 0x1F;
+        else if (tmp_ == 0 && ov == 0)
+            reg[35] |= 0;
+        else if (tmp_ == 0 && ov == 1)
+            reg[35] &= 0x0F;
+    }
 
     if (imd == 0 && zd == 0)
-    {
-        reg[35] = (reg[35] | 0x08);
-        sprintf(instruction, "divi %s,%s,%d", indexToName(x, 0), indexToName(y, 0), imd);
-        printf("[0x%08X]\t%-20s\t%s=0x%08X,%s=0x%08X,%s=%s/0x%04X=0x%08X\n", reg[32] * 4, instruction, indexToName(35, 1), reg[35], indexToName(34, 1), reg[34], indexToName(x, 1), indexToName(y, 1), imd, reg[x]);
-        fprintf(file, "[0x%08X]\t%-20s\t%s=0x%08X,%s=0x%08X,%s=%s/0x%04X=0x%08X\n", reg[32] * 4, instruction, indexToName(35, 1), reg[35], indexToName(34, 1), reg[34], indexToName(x, 1), indexToName(y, 1), imd, reg[x]);
+        reg[35] |= 0x08;
+    else if (imd != 0 && zd == 1)
+        reg[35] &= 0x07;
+
+
+    sprintf(instruction, "divi %s,%s,%d", indexToName(x, 0), indexToName(y, 0), imd);
+    printf("[0x%08X]\t%-20s\t%s=0x%08X,%s=0x%08X,%s=%s/0x%04X=0x%08X\n", reg[32] * 4, instruction, indexToName(35, 1), reg[35], indexToName(34, 1), reg[34], indexToName(x, 1), indexToName(y, 1), imd, reg[x]);
+    fprintf(file, "[0x%08X]\t%-20s\t%s=0x%08X,%s=0x%08X,%s=%s/0x%04X=0x%08X\n", reg[32] * 4, instruction, indexToName(35, 1), reg[35], indexToName(34, 1), reg[34], indexToName(x, 1), indexToName(y, 1), imd, reg[x]);
         
-        reg[32]++;
-    }
+    reg[32]++;
 }
 
 void cmpi(unsigned int *reg, FILE *file)
