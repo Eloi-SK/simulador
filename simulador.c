@@ -39,13 +39,13 @@ void bne(unsigned int *reg, FILE *file);                    // Implemented
 void ble(unsigned int *reg, FILE *file);                    // Implemented
 void bge(unsigned int *reg, FILE *file);                    // Implemented
 void _int(unsigned int *reg, FILE *file);                   // Implemented
-void invalid(unsigned int pc, FILE *file);
+void invalid(unsigned int pc, FILE *file);                  // Implemented
 
 int main(int argc, char *argv[])
 {
     if (argc < 3)
     {
-        printf("Argumento inválido.");
+        printf("Usage: <filename>.hex <filename>.out");
         return -1;
     }
 
@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
 
     if (file_in == NULL)
     {
-        printf("Erro ao carregar arquivo.");
+        printf("Error loading file.");
         return -1;
     }
 
