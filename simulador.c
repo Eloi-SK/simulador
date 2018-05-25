@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    int lines = getNumberLines(file_in);
+    int lines = getNumberLines(file_in) + 1;
     unsigned int *memory = (unsigned int *) malloc(sizeof(unsigned int) * lines);
     char line[10];
     int i = 0;
@@ -226,6 +226,7 @@ int main(int argc, char *argv[])
     fprintf(file_out, "[END OF SIMULATION]");
     fclose(file_in);
     fclose(file_out);
+    free(memory);
 
     return 0;
 }
@@ -265,10 +266,6 @@ void add(unsigned int *reg, FILE *file)
     unsigned int ov = (reg[35] & 0x10) >> 4;
     if(tmp_ == 1 && ov == 0)
         reg[35] |= 0x10;
-    else if (tmp_ == 1 && ov == 1)
-        reg[35] |= 0x1F;
-    else if (tmp_ == 0 && ov == 0)
-        reg[35] |= 0;
     else if (tmp_ == 0 && ov == 1)
         reg[35] &= 0x0F;
 
@@ -316,10 +313,6 @@ void sub(unsigned int *reg, FILE *file)
     unsigned int ov = (reg[35] & 0x10) >> 4;
     if(tmp_ == 1 && ov == 0)
         reg[35] |= 0x10;
-    else if (tmp_ == 1 && ov == 1)
-        reg[35] |= 0x1F;
-    else if (tmp_ == 0 && ov == 0)
-        reg[35] |= 0;
     else if (tmp_ == 0 && ov == 1)
         reg[35] &= 0x0F;
 
@@ -367,10 +360,6 @@ void mul(unsigned int *reg, FILE *file)
 
     if(reg[34] > 0 && ov == 0)
         reg[35] |= 0x10;
-    else if (reg[34] > 0 && ov == 1)
-        reg[35] |= 0x1F;
-    else if (reg[34] == 0 && ov == 0)
-        reg[35] |= 0;
     else if (reg[34] == 0 && ov == 1)
         reg[35] &= 0x0F;
 
@@ -421,10 +410,6 @@ void _div(unsigned int *reg, FILE *file)
 
         if(tmp_ == 1 && ov == 0)
             reg[35] |= 0x10;
-        else if (tmp_ == 1 && ov == 1)
-            reg[35] |= 0x1F;
-        else if (tmp_ == 0 && ov == 0)
-            reg[35] |= 0;
         else if (tmp_ == 0 && ov == 1)
             reg[35] &= 0x0F;
     }
@@ -591,8 +576,8 @@ void and(unsigned int *reg, FILE *file)
         reg[z] = reg[x] & reg[y];
 
     sprintf(instruction, "and %s,%s,%s", indexToName(z, 0), indexToName(x, 0), indexToName(y, 0));
-    printf("[0x%08X]\t%s\t%s=%s&%s=0x%08X", reg[32] * 4, instruction, indexToName(z, 1), indexToName(x, 1), indexToName(y, 1), reg[z]);
-    fprintf(file, "[0x%08X]\t%s\t%s=%s&%s=0x%08X", reg[32] * 4, instruction, indexToName(z, 1), indexToName(x, 1), indexToName(y, 1), reg[z]);
+    printf("[0x%08X]\t%-20s\t%s=%s&%s=0x%08X\n", reg[32] * 4, instruction, indexToName(z, 1), indexToName(x, 1), indexToName(y, 1), reg[z]);
+    fprintf(file, "[0x%08X]\t%-20s\t%s=%s&%s=0x%08X\n", reg[32] * 4, instruction, indexToName(z, 1), indexToName(x, 1), indexToName(y, 1), reg[z]);
 
     reg[32]++;
 }
@@ -617,8 +602,8 @@ void not(unsigned int *reg, FILE *file)
     reg[x] = ~reg[y];
 
     sprintf(instruction, "not %s,%s", indexToName(x, 0), indexToName(y, 0));
-    printf("[0x%08X]\t%s\t%s=~%s=0x%08X", reg[32] * 4, instruction, indexToName(x, 1), indexToName(y, 1), reg[x]);
-    fprintf(file, "[0x%08X]\t%s\t%s=~%s=0x%08X", reg[32] * 4, instruction, indexToName(x, 1), indexToName(y, 1), reg[x]);
+    printf("[0x%08X]\t%-20s\t%s=~%s=0x%08X\n", reg[32] * 4, instruction, indexToName(x, 1), indexToName(y, 1), reg[x]);
+    fprintf(file, "[0x%08X]\t%-20s\t%s=~%s=0x%08X\n", reg[32] * 4, instruction, indexToName(x, 1), indexToName(y, 1), reg[x]);
 
     reg[32]++;
 }
@@ -650,8 +635,8 @@ void or(unsigned int *reg, FILE *file)
         reg[z] = reg[x] | reg[y];
 
     sprintf(instruction, "or %s,%s,%s", indexToName(z, 0), indexToName(x, 0), indexToName(y, 0));
-    printf("[0x%08X]\t%s\t%s=%s|%s=0x%08X", reg[32] * 4, instruction, indexToName(z, 1), indexToName(x, 1), indexToName(y, 1), reg[z]);
-    fprintf(file, "[0x%08X]\t%s\t%s=%s|%s=0x%08X", reg[32] * 4, instruction, indexToName(z, 1), indexToName(x, 1), indexToName(y, 1), reg[z]);
+    printf("[0x%08X]\t%-20s\t%s=%s|%s=0x%08X\n", reg[32] * 4, instruction, indexToName(z, 1), indexToName(x, 1), indexToName(y, 1), reg[z]);
+    fprintf(file, "[0x%08X]\t%-20s\t%s=%s|%s=0x%08X\n", reg[32] * 4, instruction, indexToName(z, 1), indexToName(x, 1), indexToName(y, 1), reg[z]);
 
     reg[32]++;
 }
@@ -683,8 +668,8 @@ void xor(unsigned int *reg, FILE *file)
         reg[z] = reg[x] ^ reg[y];
 
     sprintf(instruction, "xor %s,%s,%s", indexToName(z, 0), indexToName(x, 0), indexToName(y, 0));
-    printf("[0x%08X]\t%s\t%s=%s^%s=0x%08X", reg[32] * 4, instruction, indexToName(z, 1), indexToName(x, 1), indexToName(y, 1), reg[z]);
-    fprintf(file, "[0x%08X]\t%s\t%s=%s^%s=0x%08X", reg[32] * 4, instruction, indexToName(z, 1), indexToName(x, 1), indexToName(y, 1), reg[z]);
+    printf("[0x%08X]\t%-20s\t%s=%s^%s=0x%08X\n", reg[32] * 4, instruction, indexToName(z, 1), indexToName(x, 1), indexToName(y, 1), reg[z]);
+    fprintf(file, "[0x%08X]\t%-20s\t%s=%s^%s=0x%08X\n", reg[32] * 4, instruction, indexToName(z, 1), indexToName(x, 1), indexToName(y, 1), reg[z]);
 
     reg[32]++;
 }
@@ -713,10 +698,6 @@ void addi(unsigned int *reg, FILE *file)
 
     if(tmp_ == 1 && ov == 0)
         reg[35] = (reg[35] | 0x10);
-    else if (tmp_ == 1 && ov == 1)
-        reg[35] = (reg[35] | 0x1F);
-    else if (tmp_ == 0 && ov == 0)
-        reg[35] = (reg[35] | 0);
     else if (tmp_ == 0 && ov == 1)
         reg[35] = (reg[35] & 0x0F);
     
@@ -752,10 +733,6 @@ void subi(unsigned int *reg, FILE *file)
 
     if(tmp_ == 1 && ov == 0)
         reg[35] = (reg[35] | 0x10);
-    else if (tmp_ == 1 && ov == 1)
-        reg[35] = (reg[35] | 0x1F);
-    else if (tmp_ == 0 && ov == 0)
-        reg[35] = (reg[35] | 0);
     else if (tmp_ == 0 && ov == 1)
         reg[35] = (reg[35] & 0x0F);
     
@@ -791,10 +768,6 @@ void muli(unsigned int *reg, FILE *file)
 
     if(reg[34] > 0 && ov == 0)
         reg[35] |= 0x10;
-    else if (reg[34] > 0 && ov == 1)
-        reg[35] |= 0x1F;
-    else if (reg[34] == 0 && ov == 0)
-        reg[35] |= 0;
     else if (reg[34] == 0 && ov == 1)
         reg[35] &= 0x0F;
 
@@ -833,10 +806,6 @@ void divi(unsigned int *reg, FILE *file)
 
         if(tmp_ == 1 && ov == 0)
             reg[35] |= 0x10;
-        else if (tmp_ == 1 && ov == 1)
-            reg[35] |= 0x1F;
-        else if (tmp_ == 0 && ov == 0)
-            reg[35] |= 0;
         else if (tmp_ == 0 && ov == 1)
             reg[35] &= 0x0F;
     }
@@ -894,8 +863,8 @@ void andi(unsigned int *reg, FILE *file)
         reg[x] = reg[y] & imd;
 
     sprintf(instruction, "andi %s,%s,%d", indexToName(x, 0), indexToName(y, 0), imd);
-    printf("[0x%08X]\t%s\t%s=%s&0x%04X=0x%08X", reg[32] * 4, instruction, indexToName(x, 1), indexToName(y, 1), imd, reg[x]);
-    fprintf(file, "[0x%08X]\t%s\t%s=%s&0x%04X=0x%08X", reg[32] * 4, instruction, indexToName(x, 1), indexToName(y, 1), imd, reg[x]);
+    printf("[0x%08X]\t%-20s\t%s=%s&0x%04X=0x%08X\n", reg[32] * 4, instruction, indexToName(x, 1), indexToName(y, 1), imd, reg[x]);
+    fprintf(file, "[0x%08X]\t%-20s\t%s=%s&0x%04X=0x%08X\n", reg[32] * 4, instruction, indexToName(x, 1), indexToName(y, 1), imd, reg[x]);
 
     reg[32]++;
 }
@@ -911,8 +880,8 @@ void noti(unsigned int *reg, FILE *file)
     reg[x] = ~imd;
 
     sprintf(instruction, "noti %s,%d", indexToName(x, 0), imd);
-    printf("[0x%08X]\t%s\t%s=~0x%04X=0x%08X", reg[32] * 4, instruction, indexToName(x, 1), imd, reg[x]);
-    fprintf(file, "[0x%08X]\t%s\t%s=~0x%04X=0x%08X", reg[32] * 4, instruction, indexToName(x, 1), imd, reg[x]);
+    printf("[0x%08X]\t%-20s\t%s=~0x%04X=0x%08X\n", reg[32] * 4, instruction, indexToName(x, 1), imd, reg[x]);
+    fprintf(file, "[0x%08X]\t%-20s\t%s=~0x%04X=0x%08X\n", reg[32] * 4, instruction, indexToName(x, 1), imd, reg[x]);
 
     reg[32]++;
 }
@@ -932,8 +901,8 @@ void ori(unsigned int *reg, FILE *file)
         reg[x] = reg[y] | imd;
 
     sprintf(instruction, "ori %s,%s,%d", indexToName(x, 0), indexToName(y, 0), imd);
-    printf("[0x%08X]\t%s\t%s=%s|0x%04X=0x%08X", reg[32] * 4, instruction, indexToName(x, 1), indexToName(y, 1), imd, reg[x]);
-    fprintf(file, "[0x%08X]\t%s\t%s=%s|0x%04X=0x%08X", reg[32] * 4, instruction, indexToName(x, 1), indexToName(y, 1), imd, reg[x]);
+    printf("[0x%08X]\t%-20s\tt%s=%s|0x%04X=0x%08X\n", reg[32] * 4, instruction, indexToName(x, 1), indexToName(y, 1), imd, reg[x]);
+    fprintf(file, "[0x%08X]\t%-20s\t%s=%s|0x%04X=0x%08X\n", reg[32] * 4, instruction, indexToName(x, 1), indexToName(y, 1), imd, reg[x]);
 
     reg[32]++;
 }
@@ -953,8 +922,8 @@ void xori(unsigned int *reg, FILE *file)
         reg[x] = reg[y] ^ imd;
 
     sprintf(instruction, "xori %s,%s,%d", indexToName(x, 0), indexToName(y, 0), imd);
-    printf("[0x%08X]\t%s\t%s=%s^0x%04X=0x%08X", reg[32] * 4, instruction, indexToName(x, 1), indexToName(y, 1), imd, reg[x]);
-    fprintf(file, "[0x%08X]\t%s\t%s=%s^0x%04X=0x%08X", reg[32] * 4, instruction, indexToName(x, 1), indexToName(y, 1), imd, reg[x]);
+    printf("[0x%08X]\t%-20s\t%s=%s^0x%04X=0x%08X\n", reg[32] * 4, instruction, indexToName(x, 1), indexToName(y, 1), imd, reg[x]);
+    fprintf(file, "[0x%08X]\t%-20s\t%s=%s^0x%04X=0x%08X\n", reg[32] * 4, instruction, indexToName(x, 1), indexToName(y, 1), imd, reg[x]);
 
     reg[32]++;
 }
