@@ -218,6 +218,10 @@ int main(int argc, char *argv[])
             case 0x30:
                 call(reg, file_out);
                 break;
+            // ret   
+            case 0x31:
+                ret(reg, file_out);
+                break;
             // int   
             case 0x3F:
                 _int(reg, file_out);
@@ -1195,6 +1199,21 @@ void call(unsigned int *reg, FILE *file)
     sprintf(instruction, "call %d,%d,0x%04X", indexToName(x, 0), indexToName(y, 0), imd);
     printf("[0x%08X]\t%-20s\t%s=(PC+4)>>2=0x%08X,PC=(%s+0x%04X)<<2\n", old * 4, instruction, indexToName(x, 1), reg[x], indexToName(y, 1), imd, reg[32]);
     fprintf(file, "[0x%08X]\t%-20s\t%s=(PC+4)>>2=0x%08X,PC=(%s+0x%04X)<<2\n", old * 4, instruction, indexToName(x, 1), reg[x], indexToName(y, 1), imd, reg[32]);
+}
+
+void ret(unsigned int *reg, FILE *file)
+{
+    unsigned int x, old;
+    char instruction[20];
+
+    x = (reg[33] & 0x3E0) >> 5;
+    old = reg[32];
+
+    reg[32] = reg[x];
+
+    sprintf(instruction, "ret %d", indexToName(x, 0));
+    printf("[0x%08X]\t%-20s\tPC=%d<<2=0x%08X\n", old * 4, instruction, indexToName(x, 1), reg[32]);
+    fprintf(file, "[0x%08X]\t%-20s\tPC=%d<<2=0x%08X\n", old * 4, instruction, indexToName(x, 1), reg[32]);
 }
 
 void _int(unsigned int *reg, FILE *file)
