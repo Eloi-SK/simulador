@@ -214,6 +214,10 @@ int main(int argc, char *argv[])
             case 0x26:
                 bge(reg, file_out);
                 break;
+            // call   
+            case 0x30:
+                call(reg, file_out);
+                break;
             // int   
             case 0x3F:
                 _int(reg, file_out);
@@ -1169,6 +1173,28 @@ void bge(unsigned int *reg, FILE *file)
     printf("[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, reg[32] * 4);
     fprintf(file, "[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, reg[32] * 4);
 
+}
+
+void call(unsigned int *reg, FILE *file)
+{
+    unsigned int x, y, imd, old;
+    char instruction[20];
+
+    y = (reg[33] & 0x1F);
+    x = (reg[33] & 0x3E0) >> 5;
+    imd = (reg[33] & 0x3FFFC00) >> 10;
+    old = reg[32];
+
+    if (x == 0)
+        reg[x] = 0;
+    else
+        reg[x] = reg[32] + 1;
+
+    reg[32] = reg[y] + imd;
+
+    sprintf(instruction, "call %d,%d,0x%04X", indexToName(x, 0), indexToName(y, 0), imd);
+    printf("[0x%08X]\t%-20s\t%s=(PC+4)>>2=0x%08X,PC=(%s+0x%04X)<<2\n", old * 4, instruction, indexToName(x, 1), reg[x], indexToName(y, 1), imd, reg[32]);
+    fprintf(file, "[0x%08X]\t%-20s\t%s=(PC+4)>>2=0x%08X,PC=(%s+0x%04X)<<2\n", old * 4, instruction, indexToName(x, 1), reg[x], indexToName(y, 1), imd, reg[32]);
 }
 
 void _int(unsigned int *reg, FILE *file)
