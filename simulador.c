@@ -14,32 +14,36 @@ void _div(unsigned int *reg, FILE *file);                   // Implemented
 void cmp(unsigned int *reg, FILE *file);                    // Implemented
 void shl(unsigned int *reg, FILE *file);                    // Implemented
 void shr(unsigned int *reg, FILE *file);                    // Implemented
-void and(unsigned int *reg, FILE *file);                    // Implemented
-void not(unsigned int *reg, FILE *file);                    // Implemented
-void or(unsigned int *reg, FILE *file);                     // Implemented
-void xor(unsigned int *reg, FILE *file);                    // Implemented
-void addi(unsigned int *reg, FILE *file);                   // Implemented
-void subi(unsigned int *reg, FILE *file);                   // Implemented
-void muli(unsigned int *reg, FILE *file);                   // Implemented
-void divi(unsigned int *reg, FILE *file);                   // Implemented
-void cmpi(unsigned int *reg, FILE *file);                   // Implemented
-void andi(unsigned int *reg, FILE *file);                   // Implemented
-void noti(unsigned int *reg, FILE *file);                   // Implemented
-void ori(unsigned int *reg, FILE *file);                    // Implemented
-void xori(unsigned int *reg, FILE *file);                   // Implemented
-void ldw(unsigned int *mem, unsigned int *reg, FILE *file); // Implemented
-void stw(unsigned int *mem, unsigned int *reg, FILE *file); // Implemented
-void ldb(unsigned int *mem, unsigned int *reg, FILE *file); // Implemented
-void stb(unsigned int *mem, unsigned int *reg, FILE *file); // Implemented
-void bun(unsigned int *reg, FILE *file);                    // Implemented
-void bgt(unsigned int *reg, FILE *file);                    // Implemented
-void beq(unsigned int *reg, FILE *file);                    // Implemented
-void blt(unsigned int *reg, FILE *file);                    // Implemented
-void bne(unsigned int *reg, FILE *file);                    // Implemented
-void ble(unsigned int *reg, FILE *file);                    // Implemented
-void bge(unsigned int *reg, FILE *file);                    // Implemented
-void _int(unsigned int *reg, FILE *file);                   // Implemented
-void invalid(unsigned int pc, FILE *file);                  // Implemented
+void and(unsigned int *reg, FILE *file);                        // Implemented
+void not(unsigned int *reg, FILE *file);                        // Implemented
+void or(unsigned int *reg, FILE *file);                         // Implemented
+void xor(unsigned int *reg, FILE *file);                        // Implemented
+void addi(unsigned int *reg, FILE *file);                       // Implemented
+void subi(unsigned int *reg, FILE *file);                       // Implemented
+void muli(unsigned int *reg, FILE *file);                       // Implemented
+void divi(unsigned int *reg, FILE *file);                       // Implemented
+void cmpi(unsigned int *reg, FILE *file);                       // Implemented
+void andi(unsigned int *reg, FILE *file);                       // Implemented
+void noti(unsigned int *reg, FILE *file);                       // Implemented
+void ori(unsigned int *reg, FILE *file);                        // Implemented
+void xori(unsigned int *reg, FILE *file);                       // Implemented
+void ldw(unsigned int *mem, unsigned int *reg, FILE *file);     // Implemented
+void stw(unsigned int *mem, unsigned int *reg, FILE *file);     // Implemented
+void ldb(unsigned int *mem, unsigned int *reg, FILE *file);     // Implemented
+void stb(unsigned int *mem, unsigned int *reg, FILE *file);     // Implemented
+void push(unsigned int *mem, unsigned int *reg, FILE *file);    // Not Implemented
+void pop(unsigned int *mem, unsigned int *reg, FILE *file);     // Not Implemented
+void bun(unsigned int *reg, FILE *file);                        // Implemented
+void bgt(unsigned int *reg, FILE *file);                        // Implemented
+void beq(unsigned int *reg, FILE *file);                        // Implemented
+void blt(unsigned int *reg, FILE *file);                        // Implemented
+void bne(unsigned int *reg, FILE *file);                        // Implemented
+void ble(unsigned int *reg, FILE *file);                        // Implemented
+void bge(unsigned int *reg, FILE *file);                        // Implemented
+void call(unsigned int *reg, FILE *file);                       // Not Implementd
+void ret(unsigned int *reg, FILE *file);                        // Not Implementd
+void _int(unsigned int *reg, FILE *file);                       // Implemented
+void invalid(unsigned int pc, FILE *file);                      // Implemented
 
 int main(int argc, char *argv[])
 {
