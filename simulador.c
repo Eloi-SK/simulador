@@ -31,8 +31,8 @@ void ldw(unsigned int *mem, unsigned int *reg, FILE *file);     // Implemented
 void stw(unsigned int *mem, unsigned int *reg, FILE *file);     // Implemented
 void ldb(unsigned int *mem, unsigned int *reg, FILE *file);     // Implemented
 void stb(unsigned int *mem, unsigned int *reg, FILE *file);     // Implemented
-void push(unsigned int *mem, unsigned int *reg, FILE *file);    // Not Implemented
-void pop(unsigned int *mem, unsigned int *reg, FILE *file);     // Not Implemented
+void push(unsigned int *mem, unsigned int *reg, FILE *file);    // Implemented
+void pop(unsigned int *mem, unsigned int *reg, FILE *file);     // Implemented
 void bun(unsigned int *reg, FILE *file);                        // Implemented
 void bgt(unsigned int *reg, FILE *file);                        // Implemented
 void beq(unsigned int *reg, FILE *file);                        // Implemented
@@ -148,7 +148,6 @@ int main(int argc, char *argv[])
             // subi
             case 0x11:
                 subi(reg, file_out);
-                exit_ = 1;
                 break;
             // muli
             case 0x12:
