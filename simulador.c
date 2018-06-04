@@ -1295,9 +1295,9 @@ void call(unsigned int *reg, FILE *file)
     if (x == 0)
         reg[x] = 0;
     else
-        reg[x] = (reg[32] + 1);
+        reg[x] = reg[32] + 1;
 
-    reg[32] = (reg[y]) + imd;
+    reg[32] = reg[y] + imd;
 
     sprintf(instruction, "call %s,%s,0x%04X", indexToName(x, 0), indexToName(y, 0), imd);
     printf("[0x%08X]\t%-20s\t%s=(PC+4)>>2=0x%08X,PC=(%s+0x%04X)<<2=0x%08X\n", old * 4, instruction, indexToName(x, 1), reg[x], indexToName(y, 1), imd, reg[32] * 4);
