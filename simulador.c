@@ -695,11 +695,12 @@ void xor(unsigned int *reg, FILE *file)
 
 void push(unsigned int *mem, unsigned int *reg, FILE *file)
 {
-    unsigned int x, y, tmp, tmp_x, tmp_y;
+    unsigned int x, y, imd, tmp, tmp_x, tmp_y;
     char instruction[20];
 
     y = (reg[33] & 0x1F);
     x = (reg[33] & 0x3E0) >> 5;
+    imd = (reg[33] & 0x3FFFC00) >> 10;
 
     tmp = (reg[33] & 0x38000) >> 15;
     tmp_y = (tmp & 0x01);
@@ -710,16 +711,13 @@ void push(unsigned int *mem, unsigned int *reg, FILE *file)
     if (tmp_y == 1)
         y |= (tmp_y << 5);
 
-    
-     unsigned int rx = reg[x];
-     unsigned int ry = reg[y];
 
-    mem[reg[x]] = reg[y]; // stw rx, ry
+    mem[reg[x] + imd] = reg[y]; // stw rx, ry
 
     unsigned long long int reg_x_64 =  (unsigned long long int) reg[x];
-    unsigned long long int imd_64 = (unsigned long long int) 4;
+    // unsigned long long int imd_64 = (unsigned long long int) imd;
 
-    unsigned long long int int_64 = reg_x_64 - imd_64;
+    unsigned long long int int_64 = reg_x_64 - 1;
 
     unsigned int tmp_ = (int_64 & 0xFFFFFFFF00000000) >> 32;
      if (x == 0)
@@ -736,19 +734,20 @@ void push(unsigned int *mem, unsigned int *reg, FILE *file)
         reg[35] = (reg[35] & 0x0F);
 
     sprintf(instruction, "push %s,%s", indexToName(x, 0), indexToName(y, 0));
-    printf("[0x%08X]\t%-20s\tMEM[%s->0x%08X]=%s=0x%08X\n", reg[32] * 4, instruction, indexToName(x, 1), x, indexToName(y, 1), y);
-    fprintf(file, "[0x%08X]\t%-20s\tMEM[%s->0x%08X]=%s=0x%08X\n", reg[32] * 4, instruction, indexToName(x, 1), x, indexToName(y, 1), y);
+    printf("[0x%08X]\t%-20s\tMEM[%s->0x%08X]=%s=0x%08X\n", reg[32] * 4, instruction, indexToName(x, 1), (reg[x] + 1) * 4, indexToName(y, 1), reg[y]);
+    fprintf(file, "[0x%08X]\t%-20s\tMEM[%s->0x%08X]=%s=0x%08X\n", reg[32] * 4, instruction, indexToName(x, 1), (reg[x] + 1) * 4, indexToName(y, 1), reg[y]);
 
     reg[32]++;
 }
 
 void pop(unsigned int *mem, unsigned int *reg, FILE *file)
 {
-    unsigned int x, y, tmp, tmp_x, tmp_y;
+    unsigned int x, y, imd, tmp, tmp_x, tmp_y;
     char instruction[20];
 
     y = (reg[33] & 0x1F);
     x = (reg[33] & 0x3E0) >> 5;
+    imd = (reg[33] & 0x3FFFC00) >> 10;
 
     tmp = (reg[33] & 0x38000) >> 15;
     tmp_y = (tmp & 0x01);
@@ -760,9 +759,9 @@ void pop(unsigned int *mem, unsigned int *reg, FILE *file)
         y |= (tmp_y << 5);
 
     unsigned long long int reg_y_64 =  (unsigned long long int) reg[y];
-    unsigned long long int imd_64 = (unsigned long long int) 1;
+    unsigned long long int imd_64 = (unsigned long long int) imd;
 
-    unsigned long long int int_64 = reg_y_64 + imd_64;
+    unsigned long long int int_64 = reg_y_64 + 1;
 
     unsigned int tmp_ = (int_64 & 0xFFFFFFFF00000000) >> 32;
      if (y == 0)
@@ -780,7 +779,7 @@ void pop(unsigned int *mem, unsigned int *reg, FILE *file)
     if(x == 0)
         reg[x] = 0;
     else
-        reg[x] = mem[reg[y]];
+        reg[x] = mem[reg[y] + imd];
 
     sprintf(instruction, "pop %s,%s", indexToName(x, 0), indexToName(y, 0));
     printf("[0x%08X]\t%-20s\t%s=MEM[%s->0x%08X]=0x%08X\n", reg[32] * 4, instruction, indexToName(x, 1), indexToName(y, 1), y, mem[reg[y]]);
@@ -1315,8 +1314,8 @@ void ret(unsigned int *reg, FILE *file)
     reg[32] = reg[x];
 
     sprintf(instruction, "ret %s", indexToName(x, 0));
-    printf("[0x%08X]\t%-20s\tPC=%s<<2=0x%08X\n", old * 4, instruction, indexToName(x, 1), reg[32]);
-    fprintf(file, "[0x%08X]\t%-20s\tPC=%s<<2=0x%08X\n", old * 4, instruction, indexToName(x, 1), reg[32]);
+    printf("[0x%08X]\t%-20s\tPC=%s<<2=0x%08X\n", old * 4, instruction, indexToName(x, 1), reg[32] * 4);
+    fprintf(file, "[0x%08X]\t%-20s\tPC=%s<<2=0x%08X\n", old * 4, instruction, indexToName(x, 1), reg[32] * 4);
 }
 
 void _int(unsigned int *reg, FILE *file)
@@ -1327,7 +1326,7 @@ void _int(unsigned int *reg, FILE *file)
     imd = (reg[33] & 0x3FFFFFF);
     reg[32] = 0;
     
-    sprintf(instruction, "int %d", imd);
+    sprintf(instruction, "int %d", 0);
     printf("[0x%08X]\t%-20s\tCR=0x00000000,PC=0x%08X\n", old * 4, instruction, reg[32]);
     fprintf(file, "[0x%08X]\t%-20s\tCR=0x00000000,PC=0x%08X\n", old * 4, instruction, reg[32]);
 
