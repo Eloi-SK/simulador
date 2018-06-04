@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
 {
     if (argc < 3)
     {
-        printf("Usage: <filename>.hex <filename>.out");
+        printf("Usage: <filename>.hex <filename>.out\n");
         return -1;
     }
 
@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
 
     if (file_in == NULL)
     {
-        printf("Error loading file.");
+        printf("Error loading file.\n");
         return -1;
     }
 
@@ -710,22 +710,27 @@ void push(unsigned int *mem, unsigned int *reg, FILE *file)
     if (tmp_y == 1)
         y |= (tmp_y << 5);
 
-    mem[reg[x]] = reg[y];
+    
+     unsigned int rx = reg[x];
+     unsigned int ry = reg[y];
+
+    mem[reg[x]] = reg[y]; // stw rx, ry
 
     unsigned long long int reg_x_64 =  (unsigned long long int) reg[x];
-    unsigned long long int imd_64 = (unsigned long long int) 1;
+    unsigned long long int imd_64 = (unsigned long long int) 4;
 
     unsigned long long int int_64 = reg_x_64 - imd_64;
 
-    char tmp_ = (int_64 & 0xFFFFFFFF00000000) >> 32;
+    unsigned int tmp_ = (int_64 & 0xFFFFFFFF00000000) >> 32;
      if (x == 0)
         reg[x] = 0;
     else
         reg[x] = (int_64 & 0xFFFFFFFF);
+    
 
     unsigned int ov = (reg[35] & 0x10) >> 4;
 
-    if(tmp_ == 1 && ov == 0)
+    if(tmp_ > 0 && ov == 0)
         reg[35] = (reg[35] | 0x10);
     else if (tmp_ == 0 && ov == 1)
         reg[35] = (reg[35] & 0x0F);
@@ -759,7 +764,7 @@ void pop(unsigned int *mem, unsigned int *reg, FILE *file)
 
     unsigned long long int int_64 = reg_y_64 + imd_64;
 
-    char tmp_ = (int_64 & 0xFFFFFFFF00000000) >> 32;
+    unsigned int tmp_ = (int_64 & 0xFFFFFFFF00000000) >> 32;
      if (y == 0)
         reg[y] = 0;
     else
@@ -767,7 +772,7 @@ void pop(unsigned int *mem, unsigned int *reg, FILE *file)
 
     unsigned int ov = (reg[35] & 0x10) >> 4;
 
-    if(tmp_ == 1 && ov == 0)
+    if(tmp_ > 0 && ov == 0)
         reg[35] = (reg[35] | 0x10);
     else if (tmp_ == 0 && ov == 1)
         reg[35] = (reg[35] & 0x0F);
@@ -833,7 +838,7 @@ void subi(unsigned int *reg, FILE *file)
 
     unsigned long long int int_64 = reg_y_64 - imd_64;
 
-    char tmp_ = (int_64 & 0xFFFFFFFF00000000) >> 32;
+    unsigned int tmp_ = (int_64 & 0xFFFFFFFF00000000) >> 32;
      if (x == 0)
         reg[x] = 0;
     else
@@ -841,15 +846,15 @@ void subi(unsigned int *reg, FILE *file)
 
     unsigned int ov = (reg[35] & 0x10) >> 4;
 
-    if(tmp_ == 1 && ov == 0)
+    if(tmp_ > 0 && ov == 0)
         reg[35] = (reg[35] | 0x10);
     else if (tmp_ == 0 && ov == 1)
         reg[35] = (reg[35] & 0x0F);
     
     sprintf(instruction, "subi %s,%s,%d", indexToName(x, 0), indexToName(y, 0), imd);
 
-    printf("[0x%08X]\t%-20s\t%s=0x%08X,%s=%s+0x%04X=0x%08X\n", reg[32] * 4, instruction, indexToName(35, 1), reg[35], indexToName(x, 1), indexToName(y, 1), imd, reg[x]);
-    fprintf(file, "[0x%08X]\t%-20s\t%s=0x%08X,%s=%s+0x%04X=0x%08X\n", reg[32] * 4, instruction, indexToName(35, 1), reg[35], indexToName(x, 1), indexToName(y, 1), imd, reg[x]);
+    printf("[0x%08X]\t%-20s\t%s=0x%08X,%s=%s-0x%04X=0x%08X\n", reg[32] * 4, instruction, indexToName(35, 1), reg[35], indexToName(x, 1), indexToName(y, 1), imd, reg[x]);
+    fprintf(file, "[0x%08X]\t%-20s\t%s=0x%08X,%s=%s-0x%04X=0x%08X\n", reg[32] * 4, instruction, indexToName(35, 1), reg[35], indexToName(x, 1), indexToName(y, 1), imd, reg[x]);
 
     reg[32]++;
 }
@@ -914,7 +919,7 @@ void divi(unsigned int *reg, FILE *file)
         char tmp_ = (rx_64 & 0xFFFFFFFF00000000) >> 32;
         reg[x] = (rx_64 & 0xFFFFFFFF);
 
-        if(tmp_ == 1 && ov == 0)
+        if(tmp_ > 0 && ov == 0)
             reg[35] |= 0x10;
         else if (tmp_ == 0 && ov == 1)
             reg[35] &= 0x0F;
@@ -1290,13 +1295,13 @@ void call(unsigned int *reg, FILE *file)
     if (x == 0)
         reg[x] = 0;
     else
-        reg[x] = reg[32] + 1;
+        reg[x] = (reg[32] + 1);
 
-    reg[32] = reg[y] + imd;
+    reg[32] = (reg[y]) + imd;
 
     sprintf(instruction, "call %s,%s,0x%04X", indexToName(x, 0), indexToName(y, 0), imd);
-    printf("[0x%08X]\t%-20s\t%s=(PC+4)>>2=0x%08X,PC=(%s+0x%04X)<<2=0x%08X\n", old * 4, instruction, indexToName(x, 1), reg[x], indexToName(y, 1), imd, reg[32]);
-    fprintf(file, "[0x%08X]\t%-20s\t%s=(PC+4)>>2=0x%08X,PC=(%s+0x%04X)<<2=0x%08X\n", old * 4, instruction, indexToName(x, 1), reg[x], indexToName(y, 1), imd, reg[32]);
+    printf("[0x%08X]\t%-20s\t%s=(PC+4)>>2=0x%08X,PC=(%s+0x%04X)<<2=0x%08X\n", old * 4, instruction, indexToName(x, 1), reg[x], indexToName(y, 1), imd, reg[32] * 4);
+    fprintf(file, "[0x%08X]\t%-20s\t%s=(PC+4)>>2=0x%08X,PC=(%s+0x%04X)<<2=0x%08X\n", old * 4, instruction, indexToName(x, 1), reg[x], indexToName(y, 1), imd, reg[32] * 4);
 }
 
 void ret(unsigned int *reg, FILE *file)

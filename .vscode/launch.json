@@ -6,7 +6,7 @@
       "type": "cppdbg",
       "request": "launch",
       "program": "${workspaceFolder}/${fileBasenameNoExtension}.app",
-      "args": ["1_factorial.hex", "1_factorial.out"],
+      "args": ["1_recursive_factorial.hex", "1_recursive_factorial.out"],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
       "environment": [],
