@@ -466,11 +466,11 @@ void cmp(unsigned int *reg, FILE *file)
     cmp = (reg[35] & 0xFFFFFFF8);
 
     if (reg[x] == reg[y])
-        cmp = (cmp | 0x00000001);
+        cmp |= 0x00000001;
     else if (reg[x] < reg[y])
-        cmp = (cmp | 0x00000002);
+        cmp |= 0x00000002;
     else
-        cmp = (cmp | 0x00000004);
+        cmp |= 0x00000004;
     
     reg[35] = cmp;
 
@@ -940,11 +940,11 @@ void cmpi(unsigned int *reg, FILE *file)
     cmp = (reg[35] & 0xFFFFFFF8);
 
     if (reg[x] == imd)
-        cmp = (cmp | 0x00000001);
+        cmp |= 0x00000001;
     else if (reg[x] < imd)
-        cmp = (cmp | 0x00000002);
+        cmp |= 0x00000002;
     else
-        cmp = (cmp | 0x00000004);
+        cmp |= 0x00000004;
     
     reg[35] = cmp;
 
