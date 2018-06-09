@@ -64,13 +64,14 @@ int main(int argc, char *argv[])
 
     int lines = getNumberLines(file_in) + 1;
     unsigned int *memory = (unsigned int *) malloc(sizeof(unsigned int) * lines);
-    char line[10];
+    unsigned int line;
     int i = 0;
     fseek(file_in, 0, SEEK_SET);
-   
-    while ((getLine(file_in, line, 11)) != EOF)
+
+    while (!feof(file_in))
     {
-        memory[i] = (unsigned int) strtoul(line, NULL, 0);
+        fscanf(file_in, "%X", &line);
+        memory[i] = line;
         i++;
     }
 
@@ -707,7 +708,6 @@ void push(unsigned int *mem, unsigned int *reg, FILE *file)
     if (ext_y == 1)
         y |= (ext_y << 5);
 
-
     mem[reg[x]] = reg[y]; // stw rx, ry
 
     unsigned long long int reg_x_64 =  (unsigned long long int) reg[x];
@@ -721,16 +721,9 @@ void push(unsigned int *mem, unsigned int *reg, FILE *file)
         reg[x] = (int_64 & 0xFFFFFFFF);
     
 
-    unsigned int ov = (reg[35] & 0x10) >> 4;
-
-    if(tmp > 0 && ov == 0)
-        reg[35] = (reg[35] | 0x10);
-    else if (tmp == 0 && ov == 1)
-        reg[35] = (reg[35] & 0x0F);
-
     sprintf(instruction, "push %s,%s", indexToName(x, 0), indexToName(y, 0));
-    printf("[0x%08X]\t%-20s\tMEM[%s->0x%08X]=%s=0x%08X\n", reg[32] * 4, instruction, indexToName(x, 1), (reg[x] + 1) * 4, indexToName(y, 1), reg[y]);
-    fprintf(file, "[0x%08X]\t%-20s\tMEM[%s->0x%08X]=%s=0x%08X\n", reg[32] * 4, instruction, indexToName(x, 1), (reg[x] + 1) * 4, indexToName(y, 1), reg[y]);
+    printf("[0x%08X]\t%-20s\tMEM[%s->0x%08X]=%s=0x%08X\n", reg[32] * 4, instruction, indexToName(x, 1), (reg[x] + 1) * 4, indexToName(y, 1), mem[reg[x] + 1]);
+    fprintf(file, "[0x%08X]\t%-20s\tMEM[%s->0x%08X]=%s=0x%08X\n", reg[32] * 4, instruction, indexToName(x, 1), (reg[x] + 1) * 4, indexToName(y, 1), mem[reg[x] + 1]);
 
     reg[32]++;
 }
@@ -761,13 +754,6 @@ void pop(unsigned int *mem, unsigned int *reg, FILE *file)
         reg[y] = 0;
     else
         reg[y] = (int_64 & 0xFFFFFFFF);
-
-    unsigned int ov = (reg[35] & 0x10) >> 4;
-
-    if(tmp > 0 && ov == 0)
-        reg[35] = (reg[35] | 0x10);
-    else if (tmp == 0 && ov == 1)
-        reg[35] = (reg[35] & 0x0F);
 
     if(x == 0)
         reg[x] = 0;
@@ -1008,7 +994,7 @@ void ori(unsigned int *reg, FILE *file)
         reg[x] = reg[y] | imd;
 
     sprintf(instruction, "ori %s,%s,%u", indexToName(x, 0), indexToName(y, 0), imd);
-    printf("[0x%08X]\t%-20s\tt%s=%s|0x%04X=0x%08X\n", reg[32] * 4, instruction, indexToName(x, 1), indexToName(y, 1), imd, reg[x]);
+    printf("[0x%08X]\t%-20s\t%s=%s|0x%04X=0x%08X\n", reg[32] * 4, instruction, indexToName(x, 1), indexToName(y, 1), imd, reg[x]);
     fprintf(file, "[0x%08X]\t%-20s\t%s=%s|0x%04X=0x%08X\n", reg[32] * 4, instruction, indexToName(x, 1), indexToName(y, 1), imd, reg[x]);
 
     reg[32]++;
@@ -1130,27 +1116,32 @@ void stb(unsigned int *mem, unsigned int *reg, FILE *file)
     index = (reg[x] + imd) / 4;
     tmp = mem[index];
     byte = (reg[x] + imd) % 4;
+    unsigned int out;
     
     switch(byte)
     {
         case 0:
             mem[index] =  (reg[y] << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (((tmp & 0xFF00) >> 8) << 8) | (tmp & 0xFF);
+            out = (reg[y] << 24) >> 24;
             break;
         case 1:
             mem[index] =  (((tmp & 0xFF000000) >> 24) << 24) | (reg[y] << 16) | (((tmp & 0xFF00) >> 8) << 8) | (tmp & 0xFF);
+            out = (reg[y] << 24) >> 24;
             break;
         case 2:
             mem[index] =  (((tmp & 0xFF000000) >> 24) << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (reg[y] << 8) | (tmp & 0xFF);
+            out = (reg[y] << 24) >> 24;
             break;
         case 3:
             mem[index] =  (((tmp & 0xFF000000) >> 24) << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (((tmp & 0xFF00) >> 8) << 8) | reg[y];
+            out = (reg[y] << 24) >> 24;
             break;
     }
 
     sprintf(instruction, "stb %s,0x%04X,%s", indexToName(x, 0), imd, indexToName(y, 0));
 
-    printf("[0x%08X]\t%-20s\tMEM[%s+0x%04X]=%s=0x%02X\n", reg[32] * 4, instruction, indexToName(x, 1), imd, indexToName(y, 1), reg[y]);
-    fprintf(file, "[0x%08X]\t%-20s\tMEM[%s+0x%04X]=%s=0x%02X\n", reg[32] * 4, instruction, indexToName(x, 1), imd, indexToName(y, 1), reg[y]);
+    printf("[0x%08X]\t%-20s\tMEM[%s+0x%04X]=%s=0x%02X\n", reg[32] * 4, instruction, indexToName(x, 1), imd, indexToName(y, 1), out);
+    fprintf(file, "[0x%08X]\t%-20s\tMEM[%s+0x%04X]=%s=0x%02X\n", reg[32] * 4, instruction, indexToName(x, 1), imd, indexToName(y, 1), out);
     
     reg[32]++;
 }
@@ -1337,54 +1328,27 @@ int getNumberLines(FILE *file)
     return lines;
 }
 
-int getLine(FILE *file, char *buffer, size_t length)
-{
-    char *end = buffer + length - 1;
-    char *dst = buffer;
-    int c;
-    while ((c = getc(file)) != EOF && !endOfLine(file, c) && dst < end)
-        *dst++ = c;
-    *dst = '\0';
-    return ((c == EOF && dst == buffer) ? EOF : dst - buffer);
-}
-
-static int endOfLine(FILE *ifp, int c)
-{
-    int eol = (c == '\r' || c == '\n');
-    if (c == '\r')
-    {
-        c = getc(ifp);
-        if (c != '\n' && c != EOF)
-            ungetc(c, ifp);
-    }
-    return(eol);
-}
-
 char * indexToName(unsigned int index, int upperCase)
 {
     char *str = (char *) malloc(sizeof(char) * 4);
-
-    if (index < 32)
-        sprintf(str, "r%u", index);
-    else
+    
+    switch (index)
     {
-        switch (index)
-        {
-            case 32:
-                sprintf(str, "pc");
-                break;
-            case 33:
-                sprintf(str, "ir");
-                break;
-            case 34:
-                sprintf(str, "er");
-                break;
-            case 35:
-                sprintf(str, "fr");
-                break;
-            default:
-                break;
-        }
+        case 32:
+            sprintf(str, "pc");
+            break;
+        case 33:
+            sprintf(str, "ir");
+            break;
+        case 34:
+            sprintf(str, "er");
+            break;
+        case 35:
+            sprintf(str, "fr");
+            break;
+        default:
+            sprintf(str, "r%u", index);
+            break;
     }
 
     if (upperCase == 1)
