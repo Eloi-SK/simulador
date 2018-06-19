@@ -1385,12 +1385,44 @@ void ret(unsigned int *reg, FILE *file)
 
 void isr(unsigned int *reg, FILE *file)
 {
+    unsigned int x, y, imd, old;
+    char instruction[20];
 
+    y = (reg[33] & 0x1F);
+    x = (reg[33] & 0x3E0) >> 5;
+    imd = (reg[33] & 0x3FFFC00) >> 10;
+    old = reg[32];
+
+    if (x == 0)
+        reg[x] = 0;
+    else
+        reg[x] = reg[37];
+    
+    if (y == 0)
+        reg[y] = 0;
+    else
+        reg[y] = reg[36];
+
+    reg[32] = imd;
+    
+    sprintf(instruction, "isr %s,%s,0x%04X", indexToName(x, 0), indexToName(y, 0), imd);
+    printf("[0x%08X]\t%-20s\t%s=IPC>>2=0x%08X,%s=CR=0x%08X,PC=0x%08X\n", old * 4, instruction, indexToName(x, 1), reg[x], indexToName(y, 1), reg[y], imd);
+    fprintf(file, "[0x%08X]\t%-20s\t%s=IPC>>2=0x%08X,%s=CR=0x%08X,PC=0x%08X\n", old * 4, instruction, indexToName(x, 1), reg[x], indexToName(y, 1), reg[y], imd);
 }
 
 void reti(unsigned int *reg, FILE *file)
 {
+    unsigned int x, old;
+    char instruction[20];
 
+    x = (reg[33] & 0x3E0) >> 5;
+    old = reg[32];
+
+    reg[32] = reg[x];
+
+    sprintf(instruction, "reti %s", indexToName(x, 0));
+    printf("[0x%08X]\t%-20s\tPC=%s<<2=0x%08X\n", old * 4, instruction, indexToName(x, 1), reg[32] * 4);
+    fprintf(file, "[0x%08X]\t%-20s\tPC=%s<<2=0x%08X\n", old * 4, instruction, indexToName(x, 1), reg[32] * 4);
 }
 
 void _int(unsigned int *reg, FILE *file)
