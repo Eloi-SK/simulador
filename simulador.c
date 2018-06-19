@@ -40,12 +40,14 @@ void blt(unsigned int *reg, FILE *file);                        // Implemented
 void bne(unsigned int *reg, FILE *file);                        // Implemented
 void ble(unsigned int *reg, FILE *file);                        // Implemented
 void bge(unsigned int *reg, FILE *file);                        // Implemented
-void bzd(unsigned int *reg, FILE *file);                        // Not Implemented
-void bnz(unsigned int *reg, FILE *file);                        // Not Implemented
-void biv(unsigned int *reg, FILE *file);                        // Not Implemented
-void bni(unsigned int *reg, FILE *file);                        // Not Implemented
+void bzd(unsigned int *reg, FILE *file);                        // Implemented
+void bnz(unsigned int *reg, FILE *file);                        // Implemented
+void biv(unsigned int *reg, FILE *file);                        // Implemented
+void bni(unsigned int *reg, FILE *file);                        // Implemented
 void call(unsigned int *reg, FILE *file);                       // Implemented
 void ret(unsigned int *reg, FILE *file);                        // Implemented
+void isr(unsigned int *reg, FILE *file);                        // Not Implemented
+void reti(unsigned int *reg, FILE *file);                       // Not Implemented
 void _int(unsigned int *reg, FILE *file);                       // Implemented
 void invalid(unsigned int pc, FILE *file);                      // Implemented
 
@@ -249,6 +251,14 @@ int main(int argc, char *argv[])
             // ret
             case 0x31:
                 ret(reg, file_out);
+                break;
+            // isr
+            case 0x32:
+                isr(reg, file_out);
+                break;
+            // reti
+            case 0x33:
+                reti(reg, file_out);
                 break;
             // int
             case 0x3F:
@@ -1371,6 +1381,16 @@ void ret(unsigned int *reg, FILE *file)
     sprintf(instruction, "ret %s", indexToName(x, 0));
     printf("[0x%08X]\t%-20s\tPC=%s<<2=0x%08X\n", old * 4, instruction, indexToName(x, 1), reg[32] * 4);
     fprintf(file, "[0x%08X]\t%-20s\tPC=%s<<2=0x%08X\n", old * 4, instruction, indexToName(x, 1), reg[32] * 4);
+}
+
+void isr(unsigned int *reg, FILE *file)
+{
+
+}
+
+void reti(unsigned int *reg, FILE *file)
+{
+
 }
 
 void _int(unsigned int *reg, FILE *file)
