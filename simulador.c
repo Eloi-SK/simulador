@@ -40,6 +40,10 @@ void blt(unsigned int *reg, FILE *file);                        // Implemented
 void bne(unsigned int *reg, FILE *file);                        // Implemented
 void ble(unsigned int *reg, FILE *file);                        // Implemented
 void bge(unsigned int *reg, FILE *file);                        // Implemented
+void bzd(unsigned int *reg, FILE *file);                        // Not Implemented
+void bnz(unsigned int *reg, FILE *file);                        // Not Implemented
+void biv(unsigned int *reg, FILE *file);                        // Not Implemented
+void bni(unsigned int *reg, FILE *file);                        // Not Implemented
 void call(unsigned int *reg, FILE *file);                       // Implemented
 void ret(unsigned int *reg, FILE *file);                        // Implemented
 void _int(unsigned int *reg, FILE *file);                       // Implemented
@@ -221,6 +225,22 @@ int main(int argc, char *argv[])
             // bge
             case 0x26:
                 bge(reg, file_out);
+                break;
+            // bzd
+            case 0x27:
+                bzd(reg, file_out);
+                break;
+            // bnz
+            case 0x28:
+                bnz(reg, file_out);
+                break;
+            // biv
+            case 0x29:
+                biv(reg, file_out);
+                break;
+            // bni
+            case 0x2A:
+                bni(reg, file_out);
                 break;
             // call
             case 0x30:
@@ -1240,6 +1260,74 @@ void bge(unsigned int *reg, FILE *file)
     sprintf(instruction, "bge 0x%08X", (reg[33] & 0x3FFFFFF));
 
     if(cmp == 1 || cmp == 4)
+        reg[32] = (reg[33] & 0x3FFFFFF);
+    else
+        reg[32]++;
+
+    printf("[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, reg[32] * 4);
+    fprintf(file, "[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, reg[32] * 4);
+}
+
+void bzd(unsigned int *reg, FILE *file)
+{
+    unsigned int old = reg[32], cmp;
+    char instruction[20];
+
+    cmp = (reg[35] & 0x08) >> 3;
+    sprintf(instruction, "bzd 0x%08X", (reg[33] & 0x3FFFFFF));
+
+    if(cmp == 1)
+        reg[32] = (reg[33] & 0x3FFFFFF);
+    else
+        reg[32]++;
+
+    printf("[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, reg[32] * 4);
+    fprintf(file, "[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, reg[32] * 4);
+}
+
+void bnz(unsigned int *reg, FILE *file)
+{
+    unsigned int old = reg[32], cmp;
+    char instruction[20];
+
+    cmp = (reg[35] & 0x08) >> 3;
+    sprintf(instruction, "bnz 0x%08X", (reg[33] & 0x3FFFFFF));
+
+    if(cmp == 0)
+        reg[32] = (reg[33] & 0x3FFFFFF);
+    else
+        reg[32]++;
+
+    printf("[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, reg[32] * 4);
+    fprintf(file, "[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, reg[32] * 4);
+}
+
+void biv(unsigned int *reg, FILE *file)
+{
+    unsigned int old = reg[32], cmp;
+    char instruction[20];
+
+    cmp = (reg[35] & 0x10) >> 4;
+    sprintf(instruction, "biv 0x%08X", (reg[33] & 0x3FFFFFF));
+
+    if(cmp == 1)
+        reg[32] = (reg[33] & 0x3FFFFFF);
+    else
+        reg[32]++;
+
+    printf("[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, reg[32] * 4);
+    fprintf(file, "[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, reg[32] * 4);
+}
+
+void bni(unsigned int *reg, FILE *file)
+{
+    unsigned int old = reg[32], cmp;
+    char instruction[20];
+
+    cmp = (reg[35] & 0x10) >> 4;
+    sprintf(instruction, "bni 0x%08X", (reg[33] & 0x3FFFFFF));
+
+    if(cmp == 0)
         reg[32] = (reg[33] & 0x3FFFFFF);
     else
         reg[32]++;
