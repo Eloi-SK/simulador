@@ -49,7 +49,7 @@ void ret(unsigned int *reg, FILE *file);                        // Implemented
 void isr(unsigned int *reg, FILE *file);                        // Not Implemented
 void reti(unsigned int *reg, FILE *file);                       // Not Implemented
 void _int(unsigned int *reg, FILE *file);                       // Implemented
-void invalid(unsigned int pc, FILE *file);                      // Implemented
+void invalid(unsigned int *reg, FILE *file);                      // Implemented
 
 int main(int argc, char *argv[])
 {
@@ -263,11 +263,10 @@ int main(int argc, char *argv[])
             // int
             case 0x3F:
                 _int(reg, file_out);
-                exit_ = 1;
+                if (reg[32] == 0) exit_ = 1;
                 break;
             default:
-                invalid(reg[32], file_out);
-                exit_ = 1;
+                invalid(reg, file_out);
                 break;
         }
     }
@@ -1431,18 +1430,27 @@ void _int(unsigned int *reg, FILE *file)
     char instruction[20];
 
     imd = (reg[33] & 0x3FFFFFF);
-    reg[32] = 0;
+    
+    if (imd == 0)
+        reg[32] = imd;
+    else
+    {
+        reg[32] = 0x0000000C;
+        reg[36] = imd;
+    }
 
-    sprintf(instruction, "int %u", imd);
-    printf("[0x%08X]\t%-20s\tCR=0x00000000,PC=0x%08X\n", old * 4, instruction, reg[32]);
-    fprintf(file, "[0x%08X]\t%-20s\tCR=0x00000000,PC=0x%08X\n", old * 4, instruction, reg[32]);
+    sprintf(instruction, "int %u", reg[32]);
+    printf("[0x%08X]\t%-20s\tCR=0x%08X,PC=0x%08X\n", old * 4, instruction, reg[36], reg[32]);
+    fprintf(file, "[0x%08X]\t%-20s\tCR=0x%08X,PC=0x%08X\n", old * 4, instruction, reg[36], reg[32]);
 
 }
 
-void invalid(unsigned int pc, FILE *file)
+void invalid(unsigned int *reg, FILE *file)
 {
-    printf("[INVALID INSTRUCTION @ 0x%08X]\n", pc);
-    fprintf(file, "[INVALID INSTRUCTION @ 0x%08X]\n", pc);
+    reg[35] |= 0x20;
+    reg[36] = reg[32];
+    printf("[INVALID INSTRUCTION @ 0x%08X]\n", reg[32] * 4);
+    fprintf(file, "[INVALID INSTRUCTION @ 0x%08X]\n", reg[32] * 4);
 }
 
 int getNumberLines(FILE *file)
