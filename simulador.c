@@ -453,12 +453,12 @@ void _div(unsigned int *reg, FILE *file)
             rz_64 = rx_64 / ry_64;
         reg[34] = reg[x] % reg[y];
 
-        char tmp_ = (rz_64 & 0xFFFFFFFF00000000) >> 32;
+        char tmp = (rz_64 & 0xFFFFFFFF00000000) >> 32;
         reg[z] = (rz_64 & 0xFFFFFFFF);
 
-        if(tmp_ == 1 && ov == 0)
+        if(tmp == 1 && ov == 0)
             reg[35] |= 0x10;
-        else if (tmp_ == 0 && ov == 1)
+        else if (tmp == 0 && ov == 1)
             reg[35] &= 0x0F;
     }
 
@@ -472,7 +472,15 @@ void _div(unsigned int *reg, FILE *file)
     printf("[0x%08X]\t%-20s\t%s=0x%08X,%s=0x%08X,%s=%s/%s=0x%08X\n", reg[32] * 4, instruction, indexToName(35, 1), reg[35], indexToName(34, 1), reg[34], indexToName(z, 1), indexToName(x, 1), indexToName(y, 1), reg[z]);
     fprintf(file, "[0x%08X]\t%-20s\t%s=0x%08X,%s=0x%08X,%s=%s/%s=0x%08X\n", reg[32] * 4, instruction, indexToName(35, 1), reg[35], indexToName(34, 1), reg[34], indexToName(z, 1), indexToName(x, 1), indexToName(y, 1), reg[z]);
 
-    reg[32]++;
+    unsigned int ie = (reg[35] & 0x40) >> 6;
+    if (reg[y] == 0 && ie == 1)
+    {
+        reg[37] = reg[32] + 1;
+        reg[32] = 3;
+        reg[36] = 1;
+    }
+    else
+        reg[32]++;
 }
 
 void cmp(unsigned int *reg, FILE *file)
@@ -932,7 +940,15 @@ void divi(unsigned int *reg, FILE *file)
     printf("[0x%08X]\t%-20s\t%s=0x%08X,%s=0x%08X,%s=%s/0x%04X=0x%08X\n", reg[32] * 4, instruction, indexToName(35, 1), reg[35], indexToName(34, 1), reg[34], indexToName(x, 1), indexToName(y, 1), imd, reg[x]);
     fprintf(file, "[0x%08X]\t%-20s\t%s=0x%08X,%s=0x%08X,%s=%s/0x%04X=0x%08X\n", reg[32] * 4, instruction, indexToName(35, 1), reg[35], indexToName(34, 1), reg[34], indexToName(x, 1), indexToName(y, 1), imd, reg[x]);
 
-    reg[32]++;
+    unsigned int ie = (reg[35] & 0x40) >> 6;
+    if (imd == 0 && ie == 1)
+    {
+        reg[37] = reg[32] + 1;
+        reg[32] = 3;
+        reg[36] = 1;
+    }
+    else
+        reg[32]++;
 }
 
 void cmpi(unsigned int *reg, FILE *file)
@@ -1316,7 +1332,7 @@ void biv(unsigned int *reg, FILE *file)
     unsigned int old = reg[32], cmp;
     char instruction[20];
 
-    cmp = (reg[35] & 0x10) >> 4;
+    cmp = (reg[35] & 0x20) >> 5;
     sprintf(instruction, "biv 0x%08X", (reg[33] & 0x3FFFFFF));
 
     if(cmp == 1)
@@ -1403,10 +1419,12 @@ void isr(unsigned int *reg, FILE *file)
         reg[y] = reg[36];
 
     reg[32] = imd;
-    
+
+    printf("[SOFTWARE INTERRUPTION]\n");
+    fprintf(file, "[SOFTWARE INTERRUPTION]\n");
     sprintf(instruction, "isr %s,%s,0x%04X", indexToName(x, 0), indexToName(y, 0), imd);
-    printf("[0x%08X]\t%-20s\t%s=IPC>>2=0x%08X,%s=CR=0x%08X,PC=0x%08X\n", old * 4, instruction, indexToName(x, 1), reg[x], indexToName(y, 1), reg[y], imd);
-    fprintf(file, "[0x%08X]\t%-20s\t%s=IPC>>2=0x%08X,%s=CR=0x%08X,PC=0x%08X\n", old * 4, instruction, indexToName(x, 1), reg[x], indexToName(y, 1), reg[y], imd);
+    printf("[0x%08X]\t%-20s\t%s=IPC>>2=0x%08X,%s=CR=0x%08X,PC=0x%08X\n", old * 4, instruction, indexToName(x, 1), reg[x], indexToName(y, 1), reg[y], imd * 4);
+    fprintf(file, "[0x%08X]\t%-20s\t%s=IPC>>2=0x%08X,%s=CR=0x%08X,PC=0x%08X\n", old * 4, instruction, indexToName(x, 1), reg[x], indexToName(y, 1), reg[y], imd * 4);
 }
 
 void reti(unsigned int *reg, FILE *file)
@@ -1432,16 +1450,20 @@ void _int(unsigned int *reg, FILE *file)
     imd = (reg[33] & 0x3FFFFFF);
     
     if (imd == 0)
+    {
         reg[32] = imd;
+        reg[36] = 0;
+    }
     else
     {
-        reg[32] = 0x0000000C;
+        reg[37] = reg[32] + 1;
+        reg[32] = 3;
         reg[36] = imd;
     }
 
-    sprintf(instruction, "int %u", reg[32]);
-    printf("[0x%08X]\t%-20s\tCR=0x%08X,PC=0x%08X\n", old * 4, instruction, reg[36], reg[32]);
-    fprintf(file, "[0x%08X]\t%-20s\tCR=0x%08X,PC=0x%08X\n", old * 4, instruction, reg[36], reg[32]);
+    sprintf(instruction, "int %u", imd);
+    printf("[0x%08X]\t%-20s\tCR=0x%08X,PC=0x%08X\n", old * 4, instruction, reg[36], reg[32] * 4);
+    fprintf(file, "[0x%08X]\t%-20s\tCR=0x%08X,PC=0x%08X\n", old * 4, instruction, reg[36], reg[32] * 4);
 
 }
 
@@ -1451,6 +1473,9 @@ void invalid(unsigned int *reg, FILE *file)
     reg[36] = reg[32];
     printf("[INVALID INSTRUCTION @ 0x%08X]\n", reg[32] * 4);
     fprintf(file, "[INVALID INSTRUCTION @ 0x%08X]\n", reg[32] * 4);
+
+    reg[37] = reg[32] + 1;
+    reg[32] = 3;
 }
 
 int getNumberLines(FILE *file)
