@@ -49,7 +49,10 @@ void ret(unsigned int *reg, FILE *file);                        // Implemented
 void isr(unsigned int *reg, FILE *file);                        // Not Implemented
 void reti(unsigned int *reg, FILE *file);                       // Not Implemented
 void _int(unsigned int *reg, FILE *file);                       // Implemented
-void invalid(unsigned int *reg, FILE *file);                      // Implemented
+void invalid(unsigned int *reg, FILE *file);                    // Implemented
+void watchdog();
+
+unsigned int wdg = 0;
 
 int main(int argc, char *argv[])
 {
@@ -86,7 +89,7 @@ int main(int argc, char *argv[])
 
     unsigned int opcode;
     unsigned int reg[64];
-    for (i = 0; i < 64; i++) reg[i] = 0;
+    for (i = 0; i < 64; i++) reg[i];
     int exit_ = 0;
 
     while(exit_ == 0)
@@ -269,6 +272,11 @@ int main(int argc, char *argv[])
                 invalid(reg, file_out);
                 break;
         }
+
+        int is_enable = (wdg >> 31);
+        printf("%u\n", wdg);
+        if (is_enable == 1)
+            watchdog(reg);
     }
 
     printf("[END OF SIMULATION]\n");
@@ -278,6 +286,29 @@ int main(int argc, char *argv[])
     free(memory);
 
     return 0;
+}
+
+void watchdog(unsigned int *reg)
+{
+    unsigned int is_enable = (wdg >> 31);
+    unsigned int counter = (wdg & 0x7FFFFFFF);
+    if (counter == 0)
+    {
+        is_enable = 0;
+        unsigned int ie = (reg[35] & 0x40) >> 6;
+        if (ie == 1)
+        {
+            reg[37] = reg[32] + 1;
+            reg[32] = 1;
+            reg[36] = 0xE1AC04DA;
+        }
+    }
+    else
+        counter --;
+    printf("%u\n", counter);
+
+    wdg = counter;
+    wdg |= (is_enable << 31);
 }
 
 void add(unsigned int *reg, FILE *file)
@@ -1070,7 +1101,12 @@ void ldw(unsigned int *mem, unsigned int *reg, FILE *file)
     if(x == 0)
         reg[x] = 0;
     else
-        reg[x] = mem[reg[y] + imd];
+    {
+        if (mem[reg[y] + imd] == 0x00002020)
+            reg[x] = wdg;
+        else
+            reg[x] = mem[reg[y] + imd]; 
+    }
 
     printf("[0x%08X]\t%-20s\tR%u=MEM[(R%u+0x%04X)<<2]=0x%08X\n", reg[32] * 4, instruction, x, y, imd, reg[x]);
     fprintf(file, "[0x%08X]\t%-20s\tR%u=MEM[(R%u+0x%04X)<<2]=0x%08X\n", reg[32] * 4, instruction, x, y, imd, reg[x]);
@@ -1089,7 +1125,10 @@ void stw(unsigned int *mem, unsigned int *reg, FILE *file)
 
     sprintf(instruction, "stw %s,0x%04X,%s", indexToName(x, 0), imd, indexToName(y, 0));
 
-    mem[reg[x] + imd] = reg[y];
+    if (mem[reg[x] + imd] == 0x00002020)
+        wdg = reg[y];
+    else
+        mem[reg[x] + imd] = reg[y];
 
     printf("[0x%08X]\t%-20s\tMEM[(%s+0x%04X)<<2]=%s=0x%08X\n", reg[32] * 4, instruction, indexToName(x, 1), imd, indexToName(y, 1), mem[reg[x] + imd]);
     fprintf(file, "[0x%08X]\t%-20s\tMEM[(%s+0x%04X)<<2]=%s=0x%08X\n", reg[32] * 4, instruction, indexToName(x, 1), imd, indexToName(y, 1), mem[reg[x] + imd]);
