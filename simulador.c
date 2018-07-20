@@ -1,58 +1,72 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <stdint.h>
+#include <math.h>
 
 int getNumberLines(FILE *file);
 int getLine(FILE *file, char *buffer, size_t length);
 static int endOfLine(FILE *ifp, int c);
-char * indexToName(unsigned int index, int upperCase);
+char * indexToName(uint32_t index, int upperCase);
 
-void add(unsigned int *reg, FILE *file);                        // Implemented
-void sub(unsigned int *reg, FILE *file);                        // Implemented
-void mul(unsigned int *reg, FILE *file);                        // Implemented
-void _div(unsigned int *reg, FILE *file);                       // Implemented
-void cmp(unsigned int *reg, FILE *file);                        // Implemented
-void shl(unsigned int *reg, FILE *file);                        // Implemented
-void shr(unsigned int *reg, FILE *file);                        // Implemented
-void and(unsigned int *reg, FILE *file);                        // Implemented
-void not(unsigned int *reg, FILE *file);                        // Implemented
-void or(unsigned int *reg, FILE *file);                         // Implemented
-void xor(unsigned int *reg, FILE *file);                        // Implemented
-void addi(unsigned int *reg, FILE *file);                       // Implemented
-void subi(unsigned int *reg, FILE *file);                       // Implemented
-void muli(unsigned int *reg, FILE *file);                       // Implemented
-void divi(unsigned int *reg, FILE *file);                       // Implemented
-void cmpi(unsigned int *reg, FILE *file);                       // Implemented
-void andi(unsigned int *reg, FILE *file);                       // Implemented
-void noti(unsigned int *reg, FILE *file);                       // Implemented
-void ori(unsigned int *reg, FILE *file);                        // Implemented
-void xori(unsigned int *reg, FILE *file);                       // Implemented
-void ldw(unsigned int *mem, unsigned int *reg, FILE *file);     // Implemented
-void stw(unsigned int *mem, unsigned int *reg, FILE *file);     // Implemented
-void ldb(unsigned int *mem, unsigned int *reg, FILE *file);     // Implemented
-void stb(unsigned int *mem, unsigned int *reg, FILE *file);     // Implemented
-void push(unsigned int *mem, unsigned int *reg, FILE *file);    // Implemented
-void pop(unsigned int *mem, unsigned int *reg, FILE *file);     // Implemented
-void bun(unsigned int *reg, FILE *file);                        // Implemented
-void bgt(unsigned int *reg, FILE *file);                        // Implemented
-void beq(unsigned int *reg, FILE *file);                        // Implemented
-void blt(unsigned int *reg, FILE *file);                        // Implemented
-void bne(unsigned int *reg, FILE *file);                        // Implemented
-void ble(unsigned int *reg, FILE *file);                        // Implemented
-void bge(unsigned int *reg, FILE *file);                        // Implemented
-void bzd(unsigned int *reg, FILE *file);                        // Implemented
-void bnz(unsigned int *reg, FILE *file);                        // Implemented
-void biv(unsigned int *reg, FILE *file);                        // Implemented
-void bni(unsigned int *reg, FILE *file);                        // Implemented
-void call(unsigned int *reg, FILE *file);                       // Implemented
-void ret(unsigned int *reg, FILE *file);                        // Implemented
-void isr(unsigned int *reg, FILE *file);                        // Not Implemented
-void reti(unsigned int *reg, FILE *file);                       // Not Implemented
-void _int(unsigned int *reg, FILE *file);                       // Implemented
-void invalid(unsigned int *reg, FILE *file);                    // Implemented
-void watchdog();
+void add(uint32_t *reg, FILE *file);                        // Implemented
+void sub(uint32_t *reg, FILE *file);                        // Implemented
+void mul(uint32_t *reg, FILE *file);                        // Implemented
+void _div(uint32_t *reg, FILE *file);                       // Implemented
+void cmp(uint32_t *reg, FILE *file);                        // Implemented
+void shl(uint32_t *reg, FILE *file);                        // Implemented
+void shr(uint32_t *reg, FILE *file);                        // Implemented
+void and(uint32_t *reg, FILE *file);                        // Implemented
+void not(uint32_t *reg, FILE *file);                        // Implemented
+void or(uint32_t *reg, FILE *file);                         // Implemented
+void xor(uint32_t *reg, FILE *file);                        // Implemented
+void addi(uint32_t *reg, FILE *file);                       // Implemented
+void subi(uint32_t *reg, FILE *file);                       // Implemented
+void muli(uint32_t *reg, FILE *file);                       // Implemented
+void divi(uint32_t *reg, FILE *file);                       // Implemented
+void cmpi(uint32_t *reg, FILE *file);                       // Implemented
+void andi(uint32_t *reg, FILE *file);                       // Implemented
+void noti(uint32_t *reg, FILE *file);                       // Implemented
+void ori(uint32_t *reg, FILE *file);                        // Implemented
+void xori(uint32_t *reg, FILE *file);                       // Implemented
+void ldw(uint32_t *mem, uint32_t *reg, FILE *file);         // Implemented
+void stw(uint32_t *mem, uint32_t *reg, FILE *file);         // Implemented
+void ldb(uint32_t *mem, uint32_t *reg, FILE *file);         // Implemented
+void stb(uint32_t *mem, uint32_t *reg, FILE *file);         // Implemented
+void push(uint32_t *mem, uint32_t *reg, FILE *file);        // Implemented
+void pop(uint32_t *mem, uint32_t *reg, FILE *file);         // Implemented
+void bun(uint32_t *reg, FILE *file);                        // Implemented
+void bgt(uint32_t *reg, FILE *file);                        // Implemented
+void beq(uint32_t *reg, FILE *file);                        // Implemented
+void blt(uint32_t *reg, FILE *file);                        // Implemented
+void bne(uint32_t *reg, FILE *file);                        // Implemented
+void ble(uint32_t *reg, FILE *file);                        // Implemented
+void bge(uint32_t *reg, FILE *file);                        // Implemented
+void bzd(uint32_t *reg, FILE *file);                        // Implemented
+void bnz(uint32_t *reg, FILE *file);                        // Implemented
+void biv(uint32_t *reg, FILE *file);                        // Implemented
+void bni(uint32_t *reg, FILE *file);                        // Implemented
+void call(uint32_t *reg, FILE *file);                       // Implemented
+void ret(uint32_t *reg, FILE *file);                        // Implemented
+void isr(uint32_t *reg, FILE *file);                        // Not Implemented
+void reti(uint32_t *reg, FILE *file);                       // Not Implemented
+void _int(uint32_t *reg, FILE *file);                       // Implemented
+void invalid(uint32_t *reg, FILE *file);                    // Implemented
+void watchdog(uint32_t *reg, FILE *file);                   // Implemented
+void fpu(uint32_t *reg, FILE *file);                        // Implemented
+void fpu_add(float fx, float fy, float fz);                 // Implemented
+void fpu_sub(float fx, float fy, float fz);                 // Implemented
+void fpu_mul(float fx, float fy, float fz);                 // Implemented
+void fpu_div(float fx, float fy, float fz);                 // Implemented
+void fpu_assign_x(float fz);                                // Implemented
+void fpu_assign_y(float fz);                                // Implemented
+void fpu_ceil(float fz);                                    // Implemented
+void fpu_floor(float fz);                                   // Implemented
+void fpu_round(float fz);                                   // Implemented
 
-unsigned int wdg = 0;
+uint32_t fpu_x, fpu_y, fpu_z, fpu_control, fpu_counter = 0xFFFFFFFF;
+uint32_t wdg, terminal;
+uint32_t int_ctrl[3];
 
 int main(int argc, char *argv[])
 {
@@ -72,8 +86,8 @@ int main(int argc, char *argv[])
     }
 
     int lines = getNumberLines(file_in) + 1;
-    unsigned int *memory = (unsigned int *) malloc(sizeof(unsigned int) * lines);
-    unsigned int line;
+    uint32_t *memory = (uint32_t *) malloc(sizeof(uint32_t) * lines);
+    uint32_t line;
     int i = 0;
     fseek(file_in, 0, SEEK_SET);
 
@@ -87,9 +101,9 @@ int main(int argc, char *argv[])
     printf("[START OF SIMULATION]\n");
     fprintf(file_out, "[START OF SIMULATION]\n");
 
-    unsigned int opcode;
-    unsigned int reg[64];
-    for (i = 0; i < 64; i++) reg[i];
+    uint32_t opcode;
+    uint32_t reg[64];
+    for (i = 0; i < 64; i++) reg[i] = 0;
     int exit_ = 0;
 
     while(exit_ == 0)
@@ -274,9 +288,10 @@ int main(int argc, char *argv[])
         }
 
         int is_enable = (wdg >> 31);
-        printf("%u\n", wdg);
         if (is_enable == 1)
-            watchdog(reg);
+            watchdog(reg, file_out);
+        
+        fpu(reg, file_out);
     }
 
     printf("[END OF SIMULATION]\n");
@@ -288,32 +303,222 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-void watchdog(unsigned int *reg)
+void watchdog(uint32_t *reg, FILE *file)
 {
-    unsigned int is_enable = (wdg >> 31);
-    unsigned int counter = (wdg & 0x7FFFFFFF);
+    uint32_t is_enable = (wdg >> 31);
+    uint32_t counter = (wdg & 0x7FFFFFFF);
     if (counter == 0)
     {
         is_enable = 0;
-        unsigned int ie = (reg[35] & 0x40) >> 6;
+        uint32_t ie = (reg[35] & 0x40) >> 6;
         if (ie == 1)
         {
             reg[37] = reg[32] + 1;
             reg[32] = 1;
             reg[36] = 0xE1AC04DA;
+
+            printf("[HARDWARE INTERRUPTION %u]\n", reg[32]);
+            fprintf(file, "[HARDWARE INTERRUPTION %u]\n", reg[32]);
         }
     }
     else
         counter --;
-    printf("%u\n", counter);
 
     wdg = counter;
     wdg |= (is_enable << 31);
 }
 
-void add(unsigned int *reg, FILE *file)
+void fpu(uint32_t *reg, FILE *file)
 {
-    unsigned int x, y, z, ext, ext_x, ext_y, ext_z;
+    float f_x, f_y, f_z;
+    uint32_t op, status;
+
+    op = fpu_control & 0x1F;
+
+    if (fpu_counter == 0)
+    {
+        uint32_t ie = (reg[35] & 0x40) >> 6;
+        if (ie == 1)
+        {
+            reg[37] = reg[32];
+            reg[32] = 2;
+            reg[36] = 0x01EEE754;
+
+            printf("[HARDWARE INTERRUPTION %u]\n", reg[32]);
+            fprintf(file, "[HARDWARE INTERRUPTION %u]\n", reg[32]);
+        }
+    }
+    
+    f_x = (float) fpu_x;
+    f_y = (float) fpu_y;
+    f_z = (float) fpu_z;
+
+    switch (op)
+    {
+        case 0x00:
+            break;
+        case 0x01:
+            fpu_add(f_x, f_y, f_z);
+            break;
+        case 0x02:
+            fpu_sub(f_x, f_y, f_z);
+            break;
+        case 0x03:
+            fpu_mul(f_x, f_y, f_z);
+            break;
+        case 0x04:
+            fpu_div(f_x, f_y, f_z);
+            break;
+        case 0x05:
+            fpu_assign_x(f_z);
+            break;
+        case 0x06:
+            fpu_assign_y(f_z);
+            break;
+        case 0x07:
+            fpu_ceil(f_z);
+            break;
+        case 0x08:
+            fpu_floor(f_z);
+            break;
+        case 0x09:
+            fpu_round(f_z);
+            break;
+        default:
+            fpu_control = 0x20;
+            fpu_counter = 1;
+            break;
+    }
+    
+    fpu_counter--;
+}
+
+void fpu_add(float fx, float fy, float fz)
+{
+    uint32_t *pfx = (uint32_t *) &fx;
+    uint32_t *pfy = (uint32_t *) &fy;
+
+    uint32_t exp_x, exp_y;
+
+    exp_x = (*pfx & 0x7F800000) >> 23;
+    exp_y = (*pfy & 0x7F800000) >> 23;
+
+    fpu_counter = (exp_x - exp_y) + 1;
+    
+    fz = fx + fy;
+    
+    uint32_t *pfz = (uint32_t *) &fz;
+    fpu_z = *pfz;
+    
+    fpu_control = 0;
+}
+
+void fpu_sub(float fx, float fy, float fz)
+{
+    uint32_t *pfx = (uint32_t *) &fx;
+    uint32_t *pfy = (uint32_t *) &fy;
+
+    uint32_t exp_x, exp_y;
+
+    exp_x = (*pfx & 0x7F800000) >> 23;
+    exp_y = (*pfy & 0x7F800000) >> 23;
+
+    fpu_counter = (exp_x - exp_y) + 1;
+    
+    fz = fx - fy;
+    
+    uint32_t *pfz = (uint32_t *) &fz;
+    fpu_z = *pfz;
+    
+    fpu_control = 0;
+}
+
+void fpu_mul(float fx, float fy, float fz)
+{
+    uint32_t *pfx = (uint32_t *) &fx;
+    uint32_t *pfy = (uint32_t *) &fy;
+
+    uint32_t exp_x, exp_y;
+
+    exp_x = (*pfx & 0x7F800000) >> 23;
+    exp_y = (*pfy & 0x7F800000) >> 23;
+
+    fpu_counter = (exp_x - exp_y) + 1;
+    
+    fz = fx * fy;
+    
+    uint32_t *pfz = (uint32_t *) &fz;
+    fpu_z = *pfz;
+    
+    fpu_control = 0;
+}
+
+void fpu_div(float fx, float fy, float fz)
+{
+    if (fy == 0)
+    {
+        fpu_control = 0x20;
+        fpu_counter = 1;
+    }
+    else
+    {
+        uint32_t *pfx = (uint32_t *) &fx;
+        uint32_t *pfy = (uint32_t *) &fy;
+
+        uint32_t exp_x, exp_y;
+
+        exp_x = (*pfx & 0x7F800000) >> 23;
+        exp_y = (*pfy & 0x7F800000) >> 23;
+
+        fpu_counter = (exp_x - exp_y) + 1;
+        
+        fz = fx / fy;
+        
+        uint32_t *pfz = (uint32_t *) &fz;
+        fpu_z = *pfz;
+        
+        fpu_control = 0;
+    }
+}
+
+void fpu_assign_x(float fz)
+{
+    fpu_x = (uint32_t) fz;
+    fpu_counter = 1;
+    fpu_control = 0;
+}
+
+void fpu_assign_y(float fz)
+{
+    fpu_y = (uint32_t) fz;
+    fpu_counter = 1;
+    fpu_control = 0;
+}
+
+void fpu_ceil(float fz)
+{
+    fpu_z = (uint32_t) ceilf(fz);
+    fpu_counter = 1;
+    fpu_control = 0;
+}
+
+void fpu_floor(float fz)
+{
+    fpu_z = (uint32_t) floorf(fz);
+    fpu_counter = 1;
+    fpu_control = 0;
+}
+
+void fpu_round(float fz)
+{
+    fpu_z = (uint32_t) roundf(fz);
+    fpu_counter = 1;
+    fpu_control = 0;
+}
+
+void add(uint32_t *reg, FILE *file)
+{
+    uint32_t x, y, z, ext, ext_x, ext_y, ext_z;
     char instruction[20];
 
     y = (reg[33] & 0x1F);
@@ -343,7 +548,7 @@ void add(unsigned int *reg, FILE *file)
     else
         reg[z] = (int_64 & 0xFFFFFFFF);
 
-    unsigned int ov = (reg[35] & 0x10) >> 4;
+    uint32_t ov = (reg[35] & 0x10) >> 4;
     if(tmp == 1 && ov == 0)
         reg[35] |= 0x10;
     else if (tmp == 0 && ov == 1)
@@ -357,9 +562,9 @@ void add(unsigned int *reg, FILE *file)
     reg[32]++;
 }
 
-void sub(unsigned int *reg, FILE *file)
+void sub(uint32_t *reg, FILE *file)
 {
-    unsigned int x, y, z, ext, ext_x, ext_y, ext_z;
+    uint32_t x, y, z, ext, ext_x, ext_y, ext_z;
     char instruction[20];
 
     y = (reg[33] & 0x1F);
@@ -389,7 +594,7 @@ void sub(unsigned int *reg, FILE *file)
     else
         reg[z] = (int_64 & 0xFFFFFFFF);
 
-    unsigned int ov = (reg[35] & 0x10) >> 4;
+    uint32_t ov = (reg[35] & 0x10) >> 4;
     if(tmp == 1 && ov == 0)
         reg[35] |= 0x10;
     else if (tmp == 0 && ov == 1)
@@ -403,9 +608,9 @@ void sub(unsigned int *reg, FILE *file)
     reg[32]++;
 }
 
-void mul(unsigned int *reg, FILE *file)
+void mul(uint32_t *reg, FILE *file)
 {
-    unsigned int x, y, z, ext, ext_x, ext_y, ext_z;
+    uint32_t x, y, z, ext, ext_x, ext_y, ext_z;
     char instruction[20];
 
     y = (reg[33] & 0x1F);
@@ -435,7 +640,7 @@ void mul(unsigned int *reg, FILE *file)
     else
         reg[z] = (int_64 & 0xFFFFFFFF);
 
-    unsigned int ov = (reg[35] & 0x10) >> 4;
+    uint32_t ov = (reg[35] & 0x10) >> 4;
 
     if(reg[34] > 0 && ov == 0)
         reg[35] |= 0x10;
@@ -449,9 +654,9 @@ void mul(unsigned int *reg, FILE *file)
     reg[32]++;
 }
 
-void _div(unsigned int *reg, FILE *file)
+void _div(uint32_t *reg, FILE *file)
 {
-    unsigned int x, y, z, ext, ext_x, ext_y, ext_z;
+    uint32_t x, y, z, ext, ext_x, ext_y, ext_z;
     char instruction[20];
 
     y = (reg[33] & 0x1F);
@@ -470,8 +675,8 @@ void _div(unsigned int *reg, FILE *file)
     if (ext_z == 1)
         z |= (ext_z << 5);
 
-    unsigned int zd = (reg[35] & 0x08) >> 3;
-    unsigned int ov = (reg[35] & 0x10) >> 4;
+    uint32_t zd = (reg[35] & 0x08) >> 3;
+    uint32_t ov = (reg[35] & 0x10) >> 4;
     unsigned long long int rx_64 = (unsigned long long int) reg[x];
     unsigned long long int ry_64 = (unsigned long long int) reg[y];
     unsigned long long int rz_64;
@@ -503,20 +708,23 @@ void _div(unsigned int *reg, FILE *file)
     printf("[0x%08X]\t%-20s\t%s=0x%08X,%s=0x%08X,%s=%s/%s=0x%08X\n", reg[32] * 4, instruction, indexToName(35, 1), reg[35], indexToName(34, 1), reg[34], indexToName(z, 1), indexToName(x, 1), indexToName(y, 1), reg[z]);
     fprintf(file, "[0x%08X]\t%-20s\t%s=0x%08X,%s=0x%08X,%s=%s/%s=0x%08X\n", reg[32] * 4, instruction, indexToName(35, 1), reg[35], indexToName(34, 1), reg[34], indexToName(z, 1), indexToName(x, 1), indexToName(y, 1), reg[z]);
 
-    unsigned int ie = (reg[35] & 0x40) >> 6;
+    uint32_t ie = (reg[35] & 0x40) >> 6;
     if (reg[y] == 0 && ie == 1)
     {
         reg[37] = reg[32] + 1;
         reg[32] = 3;
         reg[36] = 1;
+
+        printf("[SOFTWARE INTERRUPTION]\n");
+        fprintf(file, "[SOFTWARE INTERRUPTION]\n");
     }
     else
         reg[32]++;
 }
 
-void cmp(unsigned int *reg, FILE *file)
+void cmp(uint32_t *reg, FILE *file)
 {
-    unsigned int x, y, cmp, ext, ext_x, ext_y;
+    uint32_t x, y, cmp, ext, ext_x, ext_y;
     char instruction[20];
 
     x = (reg[33] & 0x3E0) >> 5;
@@ -550,9 +758,9 @@ void cmp(unsigned int *reg, FILE *file)
     reg[32]++;
 }
 
-void shl(unsigned int *reg, FILE *file)
+void shl(uint32_t *reg, FILE *file)
 {
-    unsigned int x, y, z, ext, ext_x, ext_y, ext_z;
+    uint32_t x, y, z, ext, ext_x, ext_y, ext_z;
     char instruction[20];
 
     y = (reg[33] & 0x1F);
@@ -592,9 +800,9 @@ void shl(unsigned int *reg, FILE *file)
     reg[32]++;
 }
 
-void shr(unsigned int *reg, FILE *file)
+void shr(uint32_t *reg, FILE *file)
 {
-    unsigned int x, y, z, ext, ext_x, ext_y, ext_z;
+    uint32_t x, y, z, ext, ext_x, ext_y, ext_z;
     char instruction[20];
 
     y = (reg[33] & 0x1F);
@@ -634,9 +842,9 @@ void shr(unsigned int *reg, FILE *file)
     reg[32]++;
 }
 
-void and(unsigned int *reg, FILE *file)
+void and(uint32_t *reg, FILE *file)
 {
-    unsigned int x, y, z, ext, ext_x, ext_y, ext_z;
+    uint32_t x, y, z, ext, ext_x, ext_y, ext_z;
     char instruction[20];
 
     y = (reg[33] & 0x1F);
@@ -667,9 +875,9 @@ void and(unsigned int *reg, FILE *file)
     reg[32]++;
 }
 
-void not(unsigned int *reg, FILE *file)
+void not(uint32_t *reg, FILE *file)
 {
-    unsigned int x, y, ext, ext_x, ext_y;
+    uint32_t x, y, ext, ext_x, ext_y;
     char instruction[20];
 
     y = (reg[33] & 0x1F);
@@ -693,9 +901,9 @@ void not(unsigned int *reg, FILE *file)
     reg[32]++;
 }
 
-void or(unsigned int *reg, FILE *file)
+void or(uint32_t *reg, FILE *file)
 {
-    unsigned int x, y, z, ext, ext_x, ext_y, ext_z;
+    uint32_t x, y, z, ext, ext_x, ext_y, ext_z;
     char instruction[20];
 
     y = (reg[33] & 0x1F);
@@ -726,9 +934,9 @@ void or(unsigned int *reg, FILE *file)
     reg[32]++;
 }
 
-void xor(unsigned int *reg, FILE *file)
+void xor(uint32_t *reg, FILE *file)
 {
-    unsigned int x, y, z, ext, ext_x, ext_y, ext_z;
+    uint32_t x, y, z, ext, ext_x, ext_y, ext_z;
     char instruction[20];
 
     y = (reg[33] & 0x1F);
@@ -759,9 +967,9 @@ void xor(unsigned int *reg, FILE *file)
     reg[32]++;
 }
 
-void push(unsigned int *mem, unsigned int *reg, FILE *file)
+void push(uint32_t *mem, uint32_t *reg, FILE *file)
 {
-    unsigned int x, y, ext, ext_x, ext_y;
+    uint32_t x, y, ext, ext_x, ext_y;
     char instruction[20];
 
     y = (reg[33] & 0x1F);
@@ -791,9 +999,9 @@ void push(unsigned int *mem, unsigned int *reg, FILE *file)
     reg[32]++;
 }
 
-void pop(unsigned int *mem, unsigned int *reg, FILE *file)
+void pop(uint32_t *mem, uint32_t *reg, FILE *file)
 {
-    unsigned int x, y, ext, ext_x, ext_y;
+    uint32_t x, y, ext, ext_x, ext_y;
     char instruction[20];
 
     y = (reg[33] & 0x1F);
@@ -825,9 +1033,9 @@ void pop(unsigned int *mem, unsigned int *reg, FILE *file)
     reg[32]++;
 }
 
-void addi(unsigned int *reg, FILE *file)
+void addi(uint32_t *reg, FILE *file)
 {
-    unsigned int x, y, imd;
+    uint32_t x, y, imd;
     char instruction[20];
 
     y = (reg[33] & 0x1F);
@@ -845,7 +1053,7 @@ void addi(unsigned int *reg, FILE *file)
     else
         reg[x] = (int_64 & 0xFFFFFFFF);
 
-    unsigned int ov = (reg[35] & 0x10) >> 4;
+    uint32_t ov = (reg[35] & 0x10) >> 4;
 
     if(tmp == 1 && ov == 0)
         reg[35] = (reg[35] | 0x10);
@@ -860,9 +1068,9 @@ void addi(unsigned int *reg, FILE *file)
     reg[32]++;
 }
 
-void subi(unsigned int *reg, FILE *file)
+void subi(uint32_t *reg, FILE *file)
 {
-    unsigned int x, y, imd;
+    uint32_t x, y, imd;
     char instruction[20];
 
     y = (reg[33] & 0x1F);
@@ -874,13 +1082,13 @@ void subi(unsigned int *reg, FILE *file)
 
     unsigned long long int int_64 = reg_y_64 - imd_64;
 
-    unsigned int tmp = (int_64 & 0xFFFFFFFF00000000) >> 32;
+    uint32_t tmp = (int_64 & 0xFFFFFFFF00000000) >> 32;
      if (x == 0)
         reg[x] = 0;
     else
         reg[x] = (int_64 & 0xFFFFFFFF);
 
-    unsigned int ov = (reg[35] & 0x10) >> 4;
+    uint32_t ov = (reg[35] & 0x10) >> 4;
 
     if(tmp > 0 && ov == 0)
         reg[35] |= 0x10;
@@ -895,9 +1103,9 @@ void subi(unsigned int *reg, FILE *file)
     reg[32]++;
 }
 
-void muli(unsigned int *reg, FILE *file)
+void muli(uint32_t *reg, FILE *file)
 {
-    unsigned int x, y, imd;
+    uint32_t x, y, imd;
     char instruction[20];
 
     y = (reg[33] & 0x1F);
@@ -915,7 +1123,7 @@ void muli(unsigned int *reg, FILE *file)
     else
         reg[x] = (int_64 & 0xFFFFFFFF);
 
-    unsigned int ov = (reg[35] & 0x10) >> 4;
+    uint32_t ov = (reg[35] & 0x10) >> 4;
 
     if(reg[34] > 0 && ov == 0)
         reg[35] |= 0x10;
@@ -929,17 +1137,17 @@ void muli(unsigned int *reg, FILE *file)
     reg[32]++;
 }
 
-void divi(unsigned int *reg, FILE *file)
+void divi(uint32_t *reg, FILE *file)
 {
-    unsigned int x, y, imd;
+    uint32_t x, y, imd;
     char instruction[20];
 
     y = (reg[33] & 0x1F);
     x = (reg[33] & 0x3E0) >> 5;
     imd = (reg[33] & 0x3FFFC00) >> 10;
 
-    unsigned int zd = (reg[35] & 0x08) >> 3;
-    unsigned int ov = (reg[35] & 0x10) >> 4;
+    uint32_t zd = (reg[35] & 0x08) >> 3;
+    uint32_t ov = (reg[35] & 0x10) >> 4;
     unsigned long long int ry_64 = (unsigned long long int) reg[y];
     unsigned long long int imd_64 = (unsigned long long int) imd;
     unsigned long long int rx_64;
@@ -971,20 +1179,23 @@ void divi(unsigned int *reg, FILE *file)
     printf("[0x%08X]\t%-20s\t%s=0x%08X,%s=0x%08X,%s=%s/0x%04X=0x%08X\n", reg[32] * 4, instruction, indexToName(35, 1), reg[35], indexToName(34, 1), reg[34], indexToName(x, 1), indexToName(y, 1), imd, reg[x]);
     fprintf(file, "[0x%08X]\t%-20s\t%s=0x%08X,%s=0x%08X,%s=%s/0x%04X=0x%08X\n", reg[32] * 4, instruction, indexToName(35, 1), reg[35], indexToName(34, 1), reg[34], indexToName(x, 1), indexToName(y, 1), imd, reg[x]);
 
-    unsigned int ie = (reg[35] & 0x40) >> 6;
+    uint32_t ie = (reg[35] & 0x40) >> 6;
     if (imd == 0 && ie == 1)
     {
         reg[37] = reg[32] + 1;
         reg[32] = 3;
         reg[36] = 1;
+
+        printf("[SOFTWARE INTERRUPTION]\n");
+        fprintf(file, "[SOFTWARE INTERRUPTION]\n");
     }
     else
         reg[32]++;
 }
 
-void cmpi(unsigned int *reg, FILE *file)
+void cmpi(uint32_t *reg, FILE *file)
 {
-    unsigned int x, imd, cmp;
+    uint32_t x, imd, cmp;
     char instruction[20];
 
     x = (reg[33] & 0x3E0) >> 5;
@@ -1007,9 +1218,9 @@ void cmpi(unsigned int *reg, FILE *file)
     reg[32]++;
 }
 
-void andi(unsigned int *reg, FILE *file)
+void andi(uint32_t *reg, FILE *file)
 {
-    unsigned int x, y, imd;
+    uint32_t x, y, imd;
     char instruction[20];
 
     y = (reg[33] & 0x1F);
@@ -1028,9 +1239,9 @@ void andi(unsigned int *reg, FILE *file)
     reg[32]++;
 }
 
-void noti(unsigned int *reg, FILE *file)
+void noti(uint32_t *reg, FILE *file)
 {
-    unsigned int x, imd;
+    uint32_t x, imd;
     char instruction[20];
 
     x = (reg[33] & 0x3E0) >> 5;
@@ -1045,9 +1256,9 @@ void noti(unsigned int *reg, FILE *file)
     reg[32]++;
 }
 
-void ori(unsigned int *reg, FILE *file)
+void ori(uint32_t *reg, FILE *file)
 {
-    unsigned int x, y, imd;
+    uint32_t x, y, imd;
     char instruction[20];
 
     y = (reg[33] & 0x1F);
@@ -1066,9 +1277,9 @@ void ori(unsigned int *reg, FILE *file)
     reg[32]++;
 }
 
-void xori(unsigned int *reg, FILE *file)
+void xori(uint32_t *reg, FILE *file)
 {
-    unsigned int x, y, imd;
+    uint32_t x, y, imd;
     char instruction[20];
 
     y = (reg[33] & 0x1F);
@@ -1087,9 +1298,9 @@ void xori(unsigned int *reg, FILE *file)
     reg[32]++;
 }
 
-void ldw(unsigned int *mem, unsigned int *reg, FILE *file)
+void ldw(uint32_t *mem, uint32_t *reg, FILE *file)
 {
-    unsigned int x, y, imd;
+    uint32_t x, y, imd;
     char instruction[20];
 
     y = (reg[33] & 0x1F);
@@ -1102,10 +1313,36 @@ void ldw(unsigned int *mem, unsigned int *reg, FILE *file)
         reg[x] = 0;
     else
     {
-        if (mem[reg[y] + imd] == 0x00002020)
-            reg[x] = wdg;
-        else
-            reg[x] = mem[reg[y] + imd]; 
+        switch(reg[y] + imd)
+        {
+            // watchdog
+            case 0x00002020:
+                reg[x] = wdg;
+                break;
+            // terminal
+            case 0x0000888B:
+                reg[x] = terminal;
+                break;
+            // fpu_x:
+	        case 0x00002200:
+                reg[x] = fpu_x;
+                break;
+            // fpu_y:
+	        case 0x00002201:
+                reg[x] = fpu_y;
+                break;
+            // fpu_z:
+	        case 0x00002202:
+                reg[x] = fpu_z;
+                break;
+            // fpu_control:
+	        case 0x00002203:
+                reg[x] = fpu_control;
+                break;
+            default:
+                reg[x] = mem[reg[y] + imd];
+                break;
+        }
     }
 
     printf("[0x%08X]\t%-20s\tR%u=MEM[(R%u+0x%04X)<<2]=0x%08X\n", reg[32] * 4, instruction, x, y, imd, reg[x]);
@@ -1114,9 +1351,9 @@ void ldw(unsigned int *mem, unsigned int *reg, FILE *file)
     reg[32]++;
 }
 
-void stw(unsigned int *mem, unsigned int *reg, FILE *file)
+void stw(uint32_t *mem, uint32_t *reg, FILE *file)
 {
-    unsigned int x, y, imd;
+    uint32_t x, y, imd;
     char instruction[20];
 
     y = (reg[33] & 0x1F);
@@ -1125,20 +1362,46 @@ void stw(unsigned int *mem, unsigned int *reg, FILE *file)
 
     sprintf(instruction, "stw %s,0x%04X,%s", indexToName(x, 0), imd, indexToName(y, 0));
 
-    if (mem[reg[x] + imd] == 0x00002020)
-        wdg = reg[y];
-    else
-        mem[reg[x] + imd] = reg[y];
+    switch(reg[x] + imd)
+    {
+        // watchdog
+        case 0x00002020:
+            wdg = reg[y];
+            break;
+        // terminal
+        case 0x0000888B:
+            terminal = reg[y];
+            break;
+        // fpu_x:
+        case 0x00002200:
+            fpu_x = reg[y];
+            break;
+        // fpu_y:
+        case 0x00002201:
+            fpu_y = reg[y];
+            break;
+        // fpu_z:
+        case 0x00002202:
+            fpu_z = reg[y];
+            break;
+        // fpu_control:
+        case 0x00002203:
+            fpu_control = reg[y];
+            break;
+        default:
+            mem[reg[x] + imd] = reg[y];
+            break;
+    }
 
-    printf("[0x%08X]\t%-20s\tMEM[(%s+0x%04X)<<2]=%s=0x%08X\n", reg[32] * 4, instruction, indexToName(x, 1), imd, indexToName(y, 1), mem[reg[x] + imd]);
-    fprintf(file, "[0x%08X]\t%-20s\tMEM[(%s+0x%04X)<<2]=%s=0x%08X\n", reg[32] * 4, instruction, indexToName(x, 1), imd, indexToName(y, 1), mem[reg[x] + imd]);
+    printf("[0x%08X]\t%-20s\tMEM[(%s+0x%04X)<<2]=%s=0x%08X\n", reg[32] * 4, instruction, indexToName(x, 1), imd, indexToName(y, 1), reg[y]);
+    fprintf(file, "[0x%08X]\t%-20s\tMEM[(%s+0x%04X)<<2]=%s=0x%08X\n", reg[32] * 4, instruction, indexToName(x, 1), imd, indexToName(y, 1), reg[y]);
 
     reg[32]++;
 }
 
-void ldb(unsigned int *mem, unsigned int *reg, FILE *file)
+void ldb(uint32_t *mem, uint32_t *reg, FILE *file)
 {
-    unsigned int index, byte, x, y, imd, tmp;
+    uint32_t index, byte, x, y, imd, tmp;
     char instruction[20];
 
     y = (reg[33] & 0x1F);
@@ -1178,9 +1441,9 @@ void ldb(unsigned int *mem, unsigned int *reg, FILE *file)
     reg[32]++;
 }
 
-void stb(unsigned int *mem, unsigned int *reg, FILE *file)
+void stb(uint32_t *mem, uint32_t *reg, FILE *file)
 {
-    unsigned int index, byte, x, y, imd, tmp;
+    uint32_t index, byte, x, y, imd, tmp;
     char instruction[20];
 
     y = (reg[33] & 0x1F);
@@ -1190,7 +1453,7 @@ void stb(unsigned int *mem, unsigned int *reg, FILE *file)
     index = (reg[x] + imd) / 4;
     tmp = mem[index];
     byte = (reg[x] + imd) % 4;
-    unsigned int out;
+    uint32_t out;
 
     switch(byte)
     {
@@ -1220,9 +1483,9 @@ void stb(unsigned int *mem, unsigned int *reg, FILE *file)
     reg[32]++;
 }
 
-void bun(unsigned int *reg, FILE *file)
+void bun(uint32_t *reg, FILE *file)
 {
-    unsigned int old = reg[32];
+    uint32_t old = reg[32];
     reg[32] = (reg[33] & 0x3FFFFFF);
     char instruction[20];
     sprintf(instruction, "bun 0x%08X", reg[32]);
@@ -1230,9 +1493,9 @@ void bun(unsigned int *reg, FILE *file)
     fprintf(file, "[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, reg[32] * 4);
 }
 
-void beq(unsigned int *reg, FILE *file)
+void beq(uint32_t *reg, FILE *file)
 {
-    unsigned int old = reg[32], cmp;
+    uint32_t old = reg[32], cmp;
     char instruction[20];
 
     cmp = (reg[35] & 0x07);
@@ -1247,9 +1510,9 @@ void beq(unsigned int *reg, FILE *file)
     fprintf(file, "[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, reg[32] * 4);
 }
 
-void blt(unsigned int *reg, FILE *file)
+void blt(uint32_t *reg, FILE *file)
 {
-    unsigned int old = reg[32], cmp;
+    uint32_t old = reg[32], cmp;
     char instruction[20];
 
     cmp = (reg[35] & 0x07);
@@ -1264,9 +1527,9 @@ void blt(unsigned int *reg, FILE *file)
     fprintf(file, "[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, reg[32] * 4);
 }
 
-void bgt(unsigned int *reg, FILE *file)
+void bgt(uint32_t *reg, FILE *file)
 {
-    unsigned int old = reg[32], cmp;
+    uint32_t old = reg[32], cmp;
     char instruction[20];
 
     cmp = (reg[35] & 0x07);
@@ -1281,9 +1544,9 @@ void bgt(unsigned int *reg, FILE *file)
     fprintf(file, "[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, reg[32] * 4);
 }
 
-void bne(unsigned int *reg, FILE *file)
+void bne(uint32_t *reg, FILE *file)
 {
-    unsigned int old = reg[32], cmp;
+    uint32_t old = reg[32], cmp;
     char instruction[20];
 
     cmp = (reg[35] & 0x07);
@@ -1298,9 +1561,9 @@ void bne(unsigned int *reg, FILE *file)
     fprintf(file, "[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, reg[32] * 4);
 }
 
-void ble(unsigned int *reg, FILE *file)
+void ble(uint32_t *reg, FILE *file)
 {
-    unsigned int old = reg[32], cmp;
+    uint32_t old = reg[32], cmp;
     char instruction[20];
 
     cmp = (reg[35] & 0x07);
@@ -1315,9 +1578,9 @@ void ble(unsigned int *reg, FILE *file)
     fprintf(file, "[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, reg[32] * 4);
 }
 
-void bge(unsigned int *reg, FILE *file)
+void bge(uint32_t *reg, FILE *file)
 {
-    unsigned int old = reg[32], cmp;
+    uint32_t old = reg[32], cmp;
     char instruction[20];
 
     cmp = (reg[35] & 0x07);
@@ -1332,9 +1595,9 @@ void bge(unsigned int *reg, FILE *file)
     fprintf(file, "[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, reg[32] * 4);
 }
 
-void bzd(unsigned int *reg, FILE *file)
+void bzd(uint32_t *reg, FILE *file)
 {
-    unsigned int old = reg[32], cmp;
+    uint32_t old = reg[32], cmp;
     char instruction[20];
 
     cmp = (reg[35] & 0x08) >> 3;
@@ -1349,9 +1612,9 @@ void bzd(unsigned int *reg, FILE *file)
     fprintf(file, "[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, reg[32] * 4);
 }
 
-void bnz(unsigned int *reg, FILE *file)
+void bnz(uint32_t *reg, FILE *file)
 {
-    unsigned int old = reg[32], cmp;
+    uint32_t old = reg[32], cmp;
     char instruction[20];
 
     cmp = (reg[35] & 0x08) >> 3;
@@ -1366,9 +1629,9 @@ void bnz(unsigned int *reg, FILE *file)
     fprintf(file, "[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, reg[32] * 4);
 }
 
-void biv(unsigned int *reg, FILE *file)
+void biv(uint32_t *reg, FILE *file)
 {
-    unsigned int old = reg[32], cmp;
+    uint32_t old = reg[32], cmp;
     char instruction[20];
 
     cmp = (reg[35] & 0x20) >> 5;
@@ -1383,9 +1646,9 @@ void biv(unsigned int *reg, FILE *file)
     fprintf(file, "[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, reg[32] * 4);
 }
 
-void bni(unsigned int *reg, FILE *file)
+void bni(uint32_t *reg, FILE *file)
 {
-    unsigned int old = reg[32], cmp;
+    uint32_t old = reg[32], cmp;
     char instruction[20];
 
     cmp = (reg[35] & 0x10) >> 4;
@@ -1400,9 +1663,9 @@ void bni(unsigned int *reg, FILE *file)
     fprintf(file, "[0x%08X]\t%-20s\tPC=0x%08X\n", old * 4, instruction, reg[32] * 4);
 }
 
-void call(unsigned int *reg, FILE *file)
+void call(uint32_t *reg, FILE *file)
 {
-    unsigned int x, y, imd, old;
+    uint32_t x, y, imd, old;
     char instruction[20];
 
     y = (reg[33] & 0x1F);
@@ -1422,9 +1685,9 @@ void call(unsigned int *reg, FILE *file)
     fprintf(file, "[0x%08X]\t%-20s\t%s=(PC+4)>>2=0x%08X,PC=(%s+0x%04X)<<2=0x%08X\n", old * 4, instruction, indexToName(x, 1), reg[x], indexToName(y, 1), imd, reg[32] * 4);
 }
 
-void ret(unsigned int *reg, FILE *file)
+void ret(uint32_t *reg, FILE *file)
 {
-    unsigned int x, old;
+    uint32_t x, old;
     char instruction[20];
 
     x = (reg[33] & 0x3E0) >> 5;
@@ -1437,9 +1700,9 @@ void ret(unsigned int *reg, FILE *file)
     fprintf(file, "[0x%08X]\t%-20s\tPC=%s<<2=0x%08X\n", old * 4, instruction, indexToName(x, 1), reg[32] * 4);
 }
 
-void isr(unsigned int *reg, FILE *file)
+void isr(uint32_t *reg, FILE *file)
 {
-    unsigned int x, y, imd, old;
+    uint32_t x, y, imd, old;
     char instruction[20];
 
     y = (reg[33] & 0x1F);
@@ -1459,16 +1722,14 @@ void isr(unsigned int *reg, FILE *file)
 
     reg[32] = imd;
 
-    printf("[SOFTWARE INTERRUPTION]\n");
-    fprintf(file, "[SOFTWARE INTERRUPTION]\n");
     sprintf(instruction, "isr %s,%s,0x%04X", indexToName(x, 0), indexToName(y, 0), imd);
     printf("[0x%08X]\t%-20s\t%s=IPC>>2=0x%08X,%s=CR=0x%08X,PC=0x%08X\n", old * 4, instruction, indexToName(x, 1), reg[x], indexToName(y, 1), reg[y], imd * 4);
     fprintf(file, "[0x%08X]\t%-20s\t%s=IPC>>2=0x%08X,%s=CR=0x%08X,PC=0x%08X\n", old * 4, instruction, indexToName(x, 1), reg[x], indexToName(y, 1), reg[y], imd * 4);
 }
 
-void reti(unsigned int *reg, FILE *file)
+void reti(uint32_t *reg, FILE *file)
 {
-    unsigned int x, old;
+    uint32_t x, old;
     char instruction[20];
 
     x = (reg[33] & 0x3E0) >> 5;
@@ -1481,9 +1742,9 @@ void reti(unsigned int *reg, FILE *file)
     fprintf(file, "[0x%08X]\t%-20s\tPC=%s<<2=0x%08X\n", old * 4, instruction, indexToName(x, 1), reg[32] * 4);
 }
 
-void _int(unsigned int *reg, FILE *file)
+void _int(uint32_t *reg, FILE *file)
 {
-    unsigned int imd, old = reg[32];
+    uint32_t imd, old = reg[32];
     char instruction[20];
 
     imd = (reg[33] & 0x3FFFFFF);
@@ -1504,9 +1765,15 @@ void _int(unsigned int *reg, FILE *file)
     printf("[0x%08X]\t%-20s\tCR=0x%08X,PC=0x%08X\n", old * 4, instruction, reg[36], reg[32] * 4);
     fprintf(file, "[0x%08X]\t%-20s\tCR=0x%08X,PC=0x%08X\n", old * 4, instruction, reg[36], reg[32] * 4);
 
+    if (imd != 0)
+    {
+        printf("[SOFTWARE INTERRUPTION]\n");
+        fprintf(file, "[SOFTWARE INTERRUPTION]\n");
+    }
+
 }
 
-void invalid(unsigned int *reg, FILE *file)
+void invalid(uint32_t *reg, FILE *file)
 {
     reg[35] |= 0x20;
     reg[36] = reg[32];
@@ -1530,7 +1797,7 @@ int getNumberLines(FILE *file)
     return lines;
 }
 
-char * indexToName(unsigned int index, int upperCase)
+char * indexToName(uint32_t index, int upperCase)
 {
     char *str = (char *) malloc(sizeof(char) * 4);
 
