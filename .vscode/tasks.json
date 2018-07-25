@@ -9,7 +9,8 @@
           "-g",
           "-o",
           "${fileBasenameNoExtension}.app",
-          "${file}"
+          "${file}",
+          "-lm"
         ],
         "group": {
           "kind": "build",

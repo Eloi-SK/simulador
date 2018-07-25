@@ -3,11 +3,11 @@
 #include <ctype.h>
 #include <stdint.h>
 #include <math.h>
+#include <string.h>
 
 int getNumberLines(FILE *file);
-int getLine(FILE *file, char *buffer, size_t length);
-static int endOfLine(FILE *ifp, int c);
 char * indexToName(uint32_t index, int upperCase);
+void append(char* s, char c);
 
 void add(uint32_t *reg, FILE *file);                        // Implemented
 void sub(uint32_t *reg, FILE *file);                        // Implemented
@@ -48,8 +48,8 @@ void biv(uint32_t *reg, FILE *file);                        // Implemented
 void bni(uint32_t *reg, FILE *file);                        // Implemented
 void call(uint32_t *reg, FILE *file);                       // Implemented
 void ret(uint32_t *reg, FILE *file);                        // Implemented
-void isr(uint32_t *reg, FILE *file);                        // Not Implemented
-void reti(uint32_t *reg, FILE *file);                       // Not Implemented
+void isr(uint32_t *reg, FILE *file);                        // Implemented
+void reti(uint32_t *reg, FILE *file);                       // Implemented
 void _int(uint32_t *reg, FILE *file);                       // Implemented
 void invalid(uint32_t *reg, FILE *file);                    // Implemented
 void watchdog(uint32_t *reg, FILE *file);                   // Implemented
@@ -63,13 +63,21 @@ void fpu_assign_y(float fz);                                // Implemented
 void fpu_ceil(float fz);                                    // Implemented
 void fpu_floor(float fz);                                   // Implemented
 void fpu_round(float fz);                                   // Implemented
+void imprime(FILE *file);
 
 uint32_t fpu_x, fpu_y, fpu_z, fpu_control, fpu_counter = 0xFFFFFFFF;
-uint32_t wdg, terminal;
+uint32_t wdg, terminal_in, terminal_out;
 uint32_t int_ctrl[3];
+uint32_t fpux_is_ieee = 0;
+uint32_t fpuy_is_ieee = 0;
+uint32_t fpuz_is_ieee = 0;
+char *terminal_in_str;
+char terminal_out_str[] = "";
 
 int main(int argc, char *argv[])
 {
+    for(int i = 0; i < 3; i++) int_ctrl[i] = 0;
+    
     if (argc < 3)
     {
         printf("Usage: <filename>.hex <filename>.out\n");
@@ -293,7 +301,8 @@ int main(int argc, char *argv[])
         
         fpu(reg, file_out);
     }
-
+    
+    imprime(file_out);
     printf("[END OF SIMULATION]\n");
     fprintf(file_out, "[END OF SIMULATION]\n");
     fclose(file_in);
@@ -303,17 +312,26 @@ int main(int argc, char *argv[])
     return 0;
 }
 
+void imprime(FILE *file)
+{
+    printf("[TERMINAL]\n");
+    fprintf(file, "[TERMINAL]\n");
+    printf("%s\n", terminal_out_str);
+    fprintf(file, "%s\n", terminal_out_str);
+}
+
 void watchdog(uint32_t *reg, FILE *file)
 {
     uint32_t is_enable = (wdg >> 31);
     uint32_t counter = (wdg & 0x7FFFFFFF);
     if (counter == 0)
     {
-        is_enable = 0;
         uint32_t ie = (reg[35] & 0x40) >> 6;
-        if (ie == 1)
+        if (ie == 1 && int_ctrl[0] == 0)
         {
-            reg[37] = reg[32] + 1;
+            is_enable = 0;
+            int_ctrl[1] = 1;
+            reg[37] = reg[32];
             reg[32] = 1;
             reg[36] = 0xE1AC04DA;
 
@@ -331,15 +349,15 @@ void watchdog(uint32_t *reg, FILE *file)
 void fpu(uint32_t *reg, FILE *file)
 {
     float f_x, f_y, f_z;
-    uint32_t op, status;
+    uint32_t op;
 
     op = fpu_control & 0x1F;
-
-    if (fpu_counter == 0)
+    if (fpu_counter <= 0)
     {
         uint32_t ie = (reg[35] & 0x40) >> 6;
-        if (ie == 1)
+        if (ie == 1 && int_ctrl[0] == 0 && int_ctrl[1] == 0)
         {
+            int_ctrl[2] = 1;
             reg[37] = reg[32];
             reg[32] = 2;
             reg[36] = 0x01EEE754;
@@ -349,9 +367,28 @@ void fpu(uint32_t *reg, FILE *file)
         }
     }
     
-    f_x = (float) fpu_x;
-    f_y = (float) fpu_y;
-    f_z = (float) fpu_z;
+    if (fpux_is_ieee == 0)
+        f_x = (float) fpu_x;
+    else
+    {
+        float *x = (float*) &fpu_x;
+        f_x = *x;
+    }
+    if(fpuy_is_ieee == 0)
+        f_y = (float) fpu_y;
+    else
+    {
+        float *y = (float*) &fpu_y;
+        f_z = *y;
+    }
+    if(fpuz_is_ieee == 0)
+        f_z = (float) fpu_z;
+    else
+    {
+        float *z = (float*) &fpu_z;
+        f_z = *z;
+    }
+        
 
     switch (op)
     {
@@ -411,6 +448,7 @@ void fpu_add(float fx, float fy, float fz)
     fpu_z = *pfz;
     
     fpu_control = 0;
+    fpuz_is_ieee = 1;
 }
 
 void fpu_sub(float fx, float fy, float fz)
@@ -431,6 +469,7 @@ void fpu_sub(float fx, float fy, float fz)
     fpu_z = *pfz;
     
     fpu_control = 0;
+    fpuz_is_ieee = 1;
 }
 
 void fpu_mul(float fx, float fy, float fz)
@@ -451,6 +490,7 @@ void fpu_mul(float fx, float fy, float fz)
     fpu_z = *pfz;
     
     fpu_control = 0;
+    fpuz_is_ieee = 1;
 }
 
 void fpu_div(float fx, float fy, float fz)
@@ -478,21 +518,26 @@ void fpu_div(float fx, float fy, float fz)
         fpu_z = *pfz;
         
         fpu_control = 0;
+        fpuz_is_ieee = 1;
     }
 }
 
 void fpu_assign_x(float fz)
 {
-    fpu_x = (uint32_t) fz;
+    uint32_t *pfz = (uint32_t *) &fz;
+    fpu_x = *pfz;
     fpu_counter = 1;
     fpu_control = 0;
+    fpux_is_ieee = 1;
 }
 
 void fpu_assign_y(float fz)
 {
-    fpu_y = (uint32_t) fz;
+    uint32_t *pfz = (uint32_t *) &fz;
+    fpu_y = *pfz;
     fpu_counter = 1;
     fpu_control = 0;
+    fpuy_is_ieee = 1;
 }
 
 void fpu_ceil(float fz)
@@ -500,6 +545,7 @@ void fpu_ceil(float fz)
     fpu_z = (uint32_t) ceilf(fz);
     fpu_counter = 1;
     fpu_control = 0;
+    fpuz_is_ieee = 0;
 }
 
 void fpu_floor(float fz)
@@ -507,6 +553,7 @@ void fpu_floor(float fz)
     fpu_z = (uint32_t) floorf(fz);
     fpu_counter = 1;
     fpu_control = 0;
+    fpuz_is_ieee = 0;
 }
 
 void fpu_round(float fz)
@@ -514,6 +561,7 @@ void fpu_round(float fz)
     fpu_z = (uint32_t) roundf(fz);
     fpu_counter = 1;
     fpu_control = 0;
+    fpuz_is_ieee = 0;
 }
 
 void add(uint32_t *reg, FILE *file)
@@ -1315,27 +1363,24 @@ void ldw(uint32_t *mem, uint32_t *reg, FILE *file)
     {
         switch(reg[y] + imd)
         {
-            // watchdog
             case 0x00002020:
                 reg[x] = wdg;
                 break;
-            // terminal
-            case 0x0000888B:
-                reg[x] = terminal;
+            case 0x0000888A:
+                reg[x] = terminal_in;
                 break;
-            // fpu_x:
+            case 0x0000888B:
+                reg[x] = terminal_out;
+                break;
 	        case 0x00002200:
                 reg[x] = fpu_x;
                 break;
-            // fpu_y:
 	        case 0x00002201:
                 reg[x] = fpu_y;
                 break;
-            // fpu_z:
 	        case 0x00002202:
                 reg[x] = fpu_z;
                 break;
-            // fpu_control:
 	        case 0x00002203:
                 reg[x] = fpu_control;
                 break;
@@ -1364,27 +1409,24 @@ void stw(uint32_t *mem, uint32_t *reg, FILE *file)
 
     switch(reg[x] + imd)
     {
-        // watchdog
         case 0x00002020:
             wdg = reg[y];
             break;
-        // terminal
-        case 0x0000888B:
-            terminal = reg[y];
+        case 0x0000888A:
+            //terminal_in = reg[y];
             break;
-        // fpu_x:
+        case 0x0000888B:
+            terminal_out = reg[y];
+            break;
         case 0x00002200:
             fpu_x = reg[y];
             break;
-        // fpu_y:
         case 0x00002201:
             fpu_y = reg[y];
             break;
-        // fpu_z:
         case 0x00002202:
             fpu_z = reg[y];
             break;
-        // fpu_control:
         case 0x00002203:
             fpu_control = reg[y];
             break;
@@ -1419,16 +1461,120 @@ void ldb(uint32_t *mem, uint32_t *reg, FILE *file)
         switch(byte)
         {
             case 0:
-                reg[x] = (tmp & 0xFF000000) >> 24;
+                switch(reg[y] + imd)
+                {
+                    case 0x00002020:
+                        reg[x] = (wdg & 0xFF000000) >> 24;
+                        break;
+                    case 0x0000888A:
+                        reg[x] = (terminal_in & 0xFF000000) >> 24;
+                        break;
+                    case 0x0000888B:
+                        reg[x] = (terminal_out & 0xFF000000) >> 24;
+                        break;
+                    case 0x00002200:
+                        reg[x] = (fpu_x & 0xFF000000) >> 24;
+                        break;
+                    case 0x00002201:
+                        reg[x] = (fpu_y & 0xFF000000) >> 24;
+                        break;
+                    case 0x00002202:
+                        reg[x] = (fpu_z & 0xFF000000) >> 24;
+                        break;
+                    case 0x00002203:
+                        reg[x] = (fpu_control & 0xFF000000) >> 24;
+                        break;
+                    default:
+                        reg[x] = (tmp & 0xFF000000) >> 24;
+                        break;
+                }
                 break;
             case 1:
-                reg[x] = (tmp & 0xFF0000) >> 16;
+                switch(reg[y] + imd)
+                {
+                    case 0x00002020:
+                        reg[x] = (wdg & 0xFF0000) >> 16;
+                        break;
+                    case 0x0000888A:
+                        reg[x] = (terminal_in & 0xFF0000) >> 16;
+                        break;
+                    case 0x0000888B:
+                        reg[x] = (terminal_out & 0xFF0000) >> 16;
+                        break;
+                    case 0x00002200:
+                        reg[x] = (fpu_x & 0xFF0000) >> 16;
+                        break;
+                    case 0x00002201:
+                        reg[x] = (fpu_y & 0xFF0000) >> 16;
+                        break;
+                    case 0x00002202:
+                        reg[x] = (fpu_z & 0xFF000) >> 16;
+                        break;
+                    case 0x00002203:
+                        reg[x] = (fpu_control & 0xFF000) >> 16;
+                        break;
+                    default:
+                        reg[x] = (tmp & 0xFF0000) >> 16;
+                        break;
+                }
                 break;
             case 2:
-                reg[x] = (tmp & 0xFF00) >> 8;
+                switch(reg[y] + imd)
+                {
+                    case 0x00002020:
+                        reg[x] = (wdg & 0xFF00) >> 8;
+                        break;
+                    case 0x0000888A:
+                        reg[x] = (terminal_in & 0xFF00) >> 8;
+                        break;
+                    case 0x0000888B:
+                        reg[x] = (terminal_out & 0xFF00) >> 8;
+                        break;
+                    case 0x00002200:
+                        reg[x] = (fpu_x & 0xFF00) >> 8;
+                        break;
+                    case 0x00002201:
+                        reg[x] = (fpu_y & 0xFF00) >> 8;
+                        break;
+                    case 0x00002202:
+                        reg[x] = (fpu_z & 0xFF00) >> 8;
+                        break;
+                    case 0x00002203:
+                        reg[x] = (fpu_control & 0xFF00) >> 8;
+                        break;
+                    default:
+                        reg[x] = (tmp & 0xFF00) >> 8;
+                        break;
+                }
                 break;
             case 3:
-                reg[x] = (tmp & 0xFF);
+                switch(reg[y] + imd)
+                {
+                    case 0x00002020:
+                        reg[x] = (wdg & 0xFF);
+                        break;
+                    case 0x0000888A:
+                        reg[x] = (terminal_in & 0xFF);
+                        break;
+                    case 0x0000888B:
+                        reg[x] = (terminal_out & 0xFF);
+                        break;
+                    case 0x00002200:
+                        reg[x] = (fpu_x & 0xFF);
+                        break;
+                    case 0x00002201:
+                        reg[x] = (fpu_y & 0xFF);
+                        break;
+                    case 0x00002202:
+                        reg[x] = (fpu_z & 0xFF);
+                        break;
+                    case 0x00002203:
+                        reg[x] = (fpu_control & 0xFF);
+                        break;
+                    default:
+                        reg[x] = (tmp & 0xFF);
+                        break;
+                }
                 break;
         }
     }
@@ -1451,28 +1597,193 @@ void stb(uint32_t *mem, uint32_t *reg, FILE *file)
     imd = (reg[33] & 0x3FFFC00) >> 10;
 
     index = (reg[x] + imd) / 4;
-    tmp = mem[index];
+
+    switch(reg[x] + imd)
+    {
+        case 0x00002020:
+            tmp = wdg;
+            break;
+            case 0x0000888A:
+            tmp = terminal_in;
+        case 0x0000888B:
+            tmp = terminal_out;
+            break;
+        case 0x00002200:
+            tmp = fpu_x;
+            break;
+        case 0x00002201:
+            tmp = fpu_y;
+            break;
+        case 0x00002202:
+            tmp = fpu_z;
+            break;
+        case 0x00002203:
+            tmp = fpu_control;
+            break;
+        default:
+            tmp = mem[index];
+            break;
+    }
+
     byte = (reg[x] + imd) % 4;
     uint32_t out;
 
-    switch(byte)
+    if (byte == 0)
     {
-        case 0:
-            mem[index] =  (reg[y] << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (((tmp & 0xFF00) >> 8) << 8) | (tmp & 0xFF);
-            out = (reg[y] << 24) >> 24;
-            break;
-        case 1:
-            mem[index] =  (((tmp & 0xFF000000) >> 24) << 24) | (reg[y] << 16) | (((tmp & 0xFF00) >> 8) << 8) | (tmp & 0xFF);
-            out = (reg[y] << 24) >> 24;
-            break;
-        case 2:
-            mem[index] =  (((tmp & 0xFF000000) >> 24) << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (reg[y] << 8) | (tmp & 0xFF);
-            out = (reg[y] << 24) >> 24;
-            break;
-        case 3:
-            mem[index] =  (((tmp & 0xFF000000) >> 24) << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (((tmp & 0xFF00) >> 8) << 8) | reg[y];
-            out = (reg[y] << 24) >> 24;
-            break;
+        switch (reg[x] + imd)
+        {
+            case 0x00002020:
+                wdg = (reg[y] << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (((tmp & 0xFF00) >> 8) << 8) | (tmp & 0xFF);
+                out = (reg[y] << 24) >> 24;
+                break;
+            case 0x0000888A:
+                //terminal_in = (reg[y] << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (((tmp & 0xFF00) >> 8) << 8) | (tmp & 0xFF);
+                out = (reg[y] << 24) >> 24;
+                break;
+            case 0x0000888B:
+                terminal_out = (reg[y] << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (((tmp & 0xFF00) >> 8) << 8) | (tmp & 0xFF);
+                out = (reg[y] << 24) >> 24;
+                append(terminal_out_str, (char)terminal_out);
+                break;
+            case 0x00002200:
+                fpu_x = (reg[y] << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (((tmp & 0xFF00) >> 8) << 8) | (tmp & 0xFF);
+                out = (reg[y] << 24) >> 24;
+                break;
+            case 0x00002201:
+                fpu_y = (reg[y] << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (((tmp & 0xFF00) >> 8) << 8) | (tmp & 0xFF);
+                out = (reg[y] << 24) >> 24;
+                break;
+            case 0x00002202:
+                fpu_z = (reg[y] << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (((tmp & 0xFF00) >> 8) << 8) | (tmp & 0xFF);
+                out = (reg[y] << 24) >> 24;
+                break;
+            case 0x00002203:
+                fpu_control = (reg[y] << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (((tmp & 0xFF00) >> 8) << 8) | (tmp & 0xFF);
+                out = (reg[y] << 24) >> 24;
+                break;
+            default:
+                mem[index] =  (reg[y] << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (((tmp & 0xFF00) >> 8) << 8) | (tmp & 0xFF);
+                out = (reg[y] << 24) >> 24;
+                break;
+        }
+    }
+    else if (byte == 1)
+    {
+        switch (reg[x] + imd)
+        {
+            case 0x00002020:
+                wdg = (((tmp & 0xFF000000) >> 24) << 24) | (reg[y] << 16) | (((tmp & 0xFF00) >> 8) << 8) | (tmp & 0xFF);
+                out = (reg[y] << 24) >> 24;
+                break;
+            case 0x0000888A:
+                //terminal_in = (((tmp & 0xFF000000) >> 24) << 24) | (reg[y] << 16) | (((tmp & 0xFF00) >> 8) << 8) | (tmp & 0xFF);
+                out = (reg[y] << 24) >> 24;
+                break;
+            case 0x0000888B:
+                terminal_out = (((tmp & 0xFF000000) >> 24) << 24) | (reg[y] << 16) | (((tmp & 0xFF00) >> 8) << 8) | (tmp & 0xFF);
+                out = (reg[y] << 24) >> 24;
+                append(terminal_out_str, (char)terminal_out);
+                break;
+            case 0x00002200:
+                fpu_x = (((tmp & 0xFF000000) >> 24) << 24) | (reg[y] << 16) | (((tmp & 0xFF00) >> 8) << 8) | (tmp & 0xFF);
+                out = (reg[y] << 24) >> 24;
+                break;
+            case 0x00002201:
+                fpu_y = (((tmp & 0xFF000000) >> 24) << 24) | (reg[y] << 16) | (((tmp & 0xFF00) >> 8) << 8) | (tmp & 0xFF);
+                out = (reg[y] << 24) >> 24;
+                break;
+            case 0x00002202:
+                fpu_z = (((tmp & 0xFF000000) >> 24) << 24) | (reg[y] << 16) | (((tmp & 0xFF00) >> 8) << 8) | (tmp & 0xFF);
+                out = (reg[y] << 24) >> 24;
+                break;
+            case 0x00002203:
+                fpu_control =  (((tmp & 0xFF000000) >> 24) << 24) | (reg[y] << 16) | (((tmp & 0xFF00) >> 8) << 8) | (tmp & 0xFF);
+                out = (reg[y] << 24) >> 24;
+                break;
+            default:
+                mem[index] = (((tmp & 0xFF000000) >> 24) << 24) | (reg[y] << 16) | (((tmp & 0xFF00) >> 8) << 8) | (tmp & 0xFF);
+                out = (reg[y] << 24) >> 24;
+                break;
+        }
+
+    }
+    else if (byte == 2)
+    {
+        switch (reg[x] + imd)
+        {
+            case 0x00002020:
+                wdg = (((tmp & 0xFF000000) >> 24) << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (reg[y] << 8) | (tmp & 0xFF);
+                out = (reg[y] << 24) >> 24;
+                break;
+            case 0x0000888A:
+                //terminal_in = (((tmp & 0xFF000000) >> 24) << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (reg[y] << 8) | (tmp & 0xFF);
+                out = (reg[y] << 24) >> 24;
+                break;
+            case 0x0000888B:
+                terminal_out = (((tmp & 0xFF000000) >> 24) << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (reg[y] << 8) | (tmp & 0xFF);
+                out = (reg[y] << 24) >> 24;
+                append(terminal_out_str, (char) terminal_out);
+                break;
+            case 0x00002200:
+                fpu_x = (((tmp & 0xFF000000) >> 24) << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (reg[y] << 8) | (tmp & 0xFF);
+                out = (reg[y] << 24) >> 24;
+                break;
+            case 0x00002201:
+                fpu_y = (((tmp & 0xFF000000) >> 24) << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (reg[y] << 8) | (tmp & 0xFF);
+                out = (reg[y] << 24) >> 24;
+                break;
+            case 0x00002202:
+                fpu_z = (((tmp & 0xFF000000) >> 24) << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (reg[y] << 8) | (tmp & 0xFF);
+                out = (reg[y] << 24) >> 24;
+                break;
+            case 0x00002203:
+                fpu_control = (((tmp & 0xFF000000) >> 24) << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (reg[y] << 8) | (tmp & 0xFF);
+                out = (reg[y] << 24) >> 24;
+                break;
+            default:
+                mem[index] = (((tmp & 0xFF000000) >> 24) << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (reg[y] << 8) | (tmp & 0xFF);
+                out = (reg[y] << 24) >> 24;
+                break;
+        }
+    }
+    else if (byte == 3)
+    {
+        switch (reg[x] + imd)
+        {
+            case 0x00002020:
+                wdg = (((tmp & 0xFF000000) >> 24) << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (((tmp & 0xFF00) >> 8) << 8) | reg[y];
+                out = (reg[y] << 24) >> 24;
+                break;
+            case 0x0000888A:
+                //terminal_in = (((tmp & 0xFF000000) >> 24) << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (((tmp & 0xFF00) >> 8) << 8) | reg[y];
+                out = (reg[y] << 24) >> 24;
+                break;
+            case 0x0000888B:
+                terminal_out = (((tmp & 0xFF000000) >> 24) << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (((tmp & 0xFF00) >> 8) << 8) | reg[y];
+                out = (reg[y] << 24) >> 24;
+                append(terminal_out_str, (char) terminal_out);
+                break;
+            case 0x00002200:
+                fpu_x = (((tmp & 0xFF000000) >> 24) << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (((tmp & 0xFF00) >> 8) << 8) | reg[y];
+                out = (reg[y] << 24) >> 24;
+                break;
+            case 0x00002201:
+                fpu_y = (((tmp & 0xFF000000) >> 24) << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (((tmp & 0xFF00) >> 8) << 8) | reg[y];
+                out = (reg[y] << 24) >> 24;
+                break;
+            case 0x00002202:
+                fpu_z = (((tmp & 0xFF000000) >> 24) << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (((tmp & 0xFF00) >> 8) << 8) | reg[y];
+                out = (reg[y] << 24) >> 24;
+                break;
+            case 0x00002203:
+                fpu_control = (((tmp & 0xFF000000) >> 24) << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (((tmp & 0xFF00) >> 8) << 8) | reg[y];
+                out = (reg[y] << 24) >> 24;
+                break;
+            default:
+                mem[index] = (((tmp & 0xFF000000) >> 24) << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (((tmp & 0xFF00) >> 8) << 8) | reg[y];
+                out = (reg[y] << 24) >> 24;
+                break;
+        }
     }
 
     sprintf(instruction, "stb %s,0x%04X,%s", indexToName(x, 0), imd, indexToName(y, 0));
@@ -1736,6 +2047,13 @@ void reti(uint32_t *reg, FILE *file)
     old = reg[32];
 
     reg[32] = reg[x];
+    
+    if (int_ctrl[0] == 1)
+        int_ctrl[0] = 0;
+    else if (int_ctrl[1] == 1)
+        int_ctrl[1] = 0;
+    else if (int_ctrl[2] == 1)
+        int_ctrl[2] = 0;
 
     sprintf(instruction, "reti %s", indexToName(x, 0));
     printf("[0x%08X]\t%-20s\tPC=%s<<2=0x%08X\n", old * 4, instruction, indexToName(x, 1), reg[32] * 4);
@@ -1827,4 +2145,11 @@ char * indexToName(uint32_t index, int upperCase)
         }
     }
     return str;
+}
+
+void append(char* s, char c)
+{
+    int len = strlen(s);
+    s[len] = c;
+    s[len+1] = '\0';
 }
