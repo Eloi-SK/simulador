@@ -5,79 +5,90 @@
 #include <math.h>
 #include <string.h>
 
+typedef struct node
+{
+    char character;
+    struct node *next;
+} Node;
+
+typedef struct list
+{
+    int size;
+    Node* head;
+} List;
+
 int getNumberLines(FILE *file);
 char * indexToName(uint32_t index, int upperCase);
-void append(char* s, char c);
+List* createList();
+void insert(List *list, char c);
 
-void add(uint32_t *reg, FILE *file);                        // Implemented
-void sub(uint32_t *reg, FILE *file);                        // Implemented
-void mul(uint32_t *reg, FILE *file);                        // Implemented
-void _div(uint32_t *reg, FILE *file);                       // Implemented
-void cmp(uint32_t *reg, FILE *file);                        // Implemented
-void shl(uint32_t *reg, FILE *file);                        // Implemented
-void shr(uint32_t *reg, FILE *file);                        // Implemented
-void and(uint32_t *reg, FILE *file);                        // Implemented
-void not(uint32_t *reg, FILE *file);                        // Implemented
-void or(uint32_t *reg, FILE *file);                         // Implemented
-void xor(uint32_t *reg, FILE *file);                        // Implemented
-void addi(uint32_t *reg, FILE *file);                       // Implemented
-void subi(uint32_t *reg, FILE *file);                       // Implemented
-void muli(uint32_t *reg, FILE *file);                       // Implemented
-void divi(uint32_t *reg, FILE *file);                       // Implemented
-void cmpi(uint32_t *reg, FILE *file);                       // Implemented
-void andi(uint32_t *reg, FILE *file);                       // Implemented
-void noti(uint32_t *reg, FILE *file);                       // Implemented
-void ori(uint32_t *reg, FILE *file);                        // Implemented
-void xori(uint32_t *reg, FILE *file);                       // Implemented
-void ldw(uint32_t *mem, uint32_t *reg, FILE *file);         // Implemented
-void stw(uint32_t *mem, uint32_t *reg, FILE *file);         // Implemented
-void ldb(uint32_t *mem, uint32_t *reg, FILE *file);         // Implemented
-void stb(uint32_t *mem, uint32_t *reg, FILE *file);         // Implemented
-void push(uint32_t *mem, uint32_t *reg, FILE *file);        // Implemented
-void pop(uint32_t *mem, uint32_t *reg, FILE *file);         // Implemented
-void bun(uint32_t *reg, FILE *file);                        // Implemented
-void bgt(uint32_t *reg, FILE *file);                        // Implemented
-void beq(uint32_t *reg, FILE *file);                        // Implemented
-void blt(uint32_t *reg, FILE *file);                        // Implemented
-void bne(uint32_t *reg, FILE *file);                        // Implemented
-void ble(uint32_t *reg, FILE *file);                        // Implemented
-void bge(uint32_t *reg, FILE *file);                        // Implemented
-void bzd(uint32_t *reg, FILE *file);                        // Implemented
-void bnz(uint32_t *reg, FILE *file);                        // Implemented
-void biv(uint32_t *reg, FILE *file);                        // Implemented
-void bni(uint32_t *reg, FILE *file);                        // Implemented
-void call(uint32_t *reg, FILE *file);                       // Implemented
-void ret(uint32_t *reg, FILE *file);                        // Implemented
-void isr(uint32_t *reg, FILE *file);                        // Implemented
-void reti(uint32_t *reg, FILE *file);                       // Implemented
-void _int(uint32_t *reg, FILE *file);                       // Implemented
-void invalid(uint32_t *reg, FILE *file);                    // Implemented
-void watchdog(uint32_t *reg, FILE *file);                   // Implemented
-void fpu(uint32_t *reg, FILE *file);                        // Implemented
-void fpu_add(float fx, float fy, float fz);                 // Implemented
-void fpu_sub(float fx, float fy, float fz);                 // Implemented
-void fpu_mul(float fx, float fy, float fz);                 // Implemented
-void fpu_div(float fx, float fy, float fz);                 // Implemented
-void fpu_assign_x(float fz);                                // Implemented
-void fpu_assign_y(float fz);                                // Implemented
-void fpu_ceil(float fz);                                    // Implemented
-void fpu_floor(float fz);                                   // Implemented
-void fpu_round(float fz);                                   // Implemented
-void imprime(FILE *file);
+void add(uint32_t *reg, FILE *file);                                // Implemented
+void sub(uint32_t *reg, FILE *file);                                // Implemented
+void mul(uint32_t *reg, FILE *file);                                // Implemented
+void _div(uint32_t *reg, FILE *file);                               // Implemented
+void cmp(uint32_t *reg, FILE *file);                                // Implemented
+void shl(uint32_t *reg, FILE *file);                                // Implemented
+void shr(uint32_t *reg, FILE *file);                                // Implemented
+void and(uint32_t *reg, FILE *file);                                // Implemented
+void not(uint32_t *reg, FILE *file);                                // Implemented
+void or(uint32_t *reg, FILE *file);                                 // Implemented
+void xor(uint32_t *reg, FILE *file);                                // Implemented
+void addi(uint32_t *reg, FILE *file);                               // Implemented
+void subi(uint32_t *reg, FILE *file);                               // Implemented
+void muli(uint32_t *reg, FILE *file);                               // Implemented
+void divi(uint32_t *reg, FILE *file);                               // Implemented
+void cmpi(uint32_t *reg, FILE *file);                               // Implemented
+void andi(uint32_t *reg, FILE *file);                               // Implemented
+void noti(uint32_t *reg, FILE *file);                               // Implemented
+void ori(uint32_t *reg, FILE *file);                                // Implemented
+void xori(uint32_t *reg, FILE *file);                               // Implemented
+void ldw(uint32_t *mem, uint32_t *reg, FILE *file);                 // Implemented
+void stw(uint32_t *mem, uint32_t *reg, FILE *file);                 // Implemented
+void ldb(uint32_t *mem, uint32_t *reg, FILE *file);                 // Implemented
+void stb(uint32_t *mem, uint32_t *reg, FILE *file, List *terminal); // Implemented
+void push(uint32_t *mem, uint32_t *reg, FILE *file);                // Implemented
+void pop(uint32_t *mem, uint32_t *reg, FILE *file);                 // Implemented
+void bun(uint32_t *reg, FILE *file);                                // Implemented
+void bgt(uint32_t *reg, FILE *file);                                // Implemented
+void beq(uint32_t *reg, FILE *file);                                // Implemented
+void blt(uint32_t *reg, FILE *file);                                // Implemented
+void bne(uint32_t *reg, FILE *file);                                // Implemented
+void ble(uint32_t *reg, FILE *file);                                // Implemented
+void bge(uint32_t *reg, FILE *file);                                // Implemented
+void bzd(uint32_t *reg, FILE *file);                                // Implemented
+void bnz(uint32_t *reg, FILE *file);                                // Implemented
+void biv(uint32_t *reg, FILE *file);                                // Implemented
+void bni(uint32_t *reg, FILE *file);                                // Implemented
+void call(uint32_t *reg, FILE *file);                               // Implemented
+void ret(uint32_t *reg, FILE *file);                                // Implemented
+void isr(uint32_t *reg, FILE *file);                                // Implemented
+void reti(uint32_t *reg, FILE *file);                               // Implemented
+void _int(uint32_t *reg, FILE *file);                               // Implemented
+void invalid(uint32_t *reg, FILE *file);                            // Implemented
+void watchdog(uint32_t *reg, FILE *file);                           // Implemented
+void fpu(uint32_t *reg, FILE *file);                                // Implemented
+void fpu_add(float fx, float fy, float fz);                         // Implemented
+void fpu_sub(float fx, float fy, float fz);                         // Implemented
+void fpu_mul(float fx, float fy, float fz);                         // Implemented
+void fpu_div(float fx, float fy, float fz);                         // Implemented
+void fpu_assign_x(float fz);                                        // Implemented
+void fpu_assign_y(float fz);                                        // Implemented
+void fpu_ceil(float fz);                                            // Implemented
+void fpu_floor(float fz);                                           // Implemented
+void fpu_round(float fz);                                           // Implemented
+void imprime(FILE *file, List *LISTA);                              // Implemented
 
-uint32_t fpu_x, fpu_y, fpu_z, fpu_control, fpu_counter = 0xFFFFFFFF;
+uint32_t fpu_x, fpu_y, fpu_z, fpu_control, fpu_int, fpu_fez_op;
 uint32_t wdg, terminal_in, terminal_out;
-uint32_t int_ctrl[3];
+uint32_t int_ctrl = 4;
 uint32_t fpux_is_ieee = 0;
 uint32_t fpuy_is_ieee = 0;
 uint32_t fpuz_is_ieee = 0;
-char *terminal_in_str;
-char terminal_out_str[] = "";
+uint32_t fpu_counter = 0xFFFFFFFF;
 
 int main(int argc, char *argv[])
 {
-    for(int i = 0; i < 3; i++) int_ctrl[i] = 0;
-    
+    List* terminalOut = createList();
     if (argc < 3)
     {
         printf("Usage: <filename>.hex <filename>.out\n");
@@ -113,6 +124,8 @@ int main(int argc, char *argv[])
     uint32_t reg[64];
     for (i = 0; i < 64; i++) reg[i] = 0;
     int exit_ = 0;
+
+    int_ctrl = 0;
 
     while(exit_ == 0)
     {
@@ -223,7 +236,7 @@ int main(int argc, char *argv[])
                 break;
             // stb
             case 0x1C:
-                stb(memory, reg, file_out);
+                stb(memory, reg, file_out, terminalOut);
                 break;
             // bun
             case 0x20:
@@ -300,9 +313,10 @@ int main(int argc, char *argv[])
             watchdog(reg, file_out);
         
         fpu(reg, file_out);
+
     }
     
-    imprime(file_out);
+    imprime(file_out, terminalOut);
     printf("[END OF SIMULATION]\n");
     fprintf(file_out, "[END OF SIMULATION]\n");
     fclose(file_in);
@@ -312,12 +326,24 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-void imprime(FILE *file)
+void imprime(FILE *file, List *list)
 {
-    printf("[TERMINAL]\n");
-    fprintf(file, "[TERMINAL]\n");
-    printf("%s\n", terminal_out_str);
-    fprintf(file, "%s\n", terminal_out_str);
+    if (list->size > 0)
+    {
+        printf("[TERMINAL]\n");
+        fprintf(file, "[TERMINAL]\n");
+        
+        Node* aux = list->head;
+        while(aux->next != NULL)
+        {
+            printf("%c", aux->character);
+            fprintf(file, "%c", aux->character);
+            aux = aux->next;
+        }
+        
+        printf("\n");
+        fprintf(file, "\n");
+    }
 }
 
 void watchdog(uint32_t *reg, FILE *file)
@@ -327,10 +353,10 @@ void watchdog(uint32_t *reg, FILE *file)
     if (counter == 0)
     {
         uint32_t ie = (reg[35] & 0x40) >> 6;
-        if (ie == 1 && int_ctrl[0] == 0)
+        if (ie == 1 && (int_ctrl == 0 || int_ctrl == 4))
         {
             is_enable = 0;
-            int_ctrl[1] = 1;
+            int_ctrl |= 0x02;
             reg[37] = reg[32];
             reg[32] = 1;
             reg[36] = 0xE1AC04DA;
@@ -352,12 +378,16 @@ void fpu(uint32_t *reg, FILE *file)
     uint32_t op;
 
     op = fpu_control & 0x1F;
+
     if (fpu_counter <= 0)
     {
+        fpu_control &= 0x20;
         uint32_t ie = (reg[35] & 0x40) >> 6;
-        if (ie == 1 && int_ctrl[0] == 0 && int_ctrl[1] == 0)
+        if (ie == 1 && int_ctrl == 0 && fpu_int == 0)
         {
-            int_ctrl[2] = 1;
+            int_ctrl|= 0x04;
+            fpu_fez_op = 0;
+            fpu_int = 1;
             reg[37] = reg[32];
             reg[32] = 2;
             reg[36] = 0x01EEE754;
@@ -367,67 +397,80 @@ void fpu(uint32_t *reg, FILE *file)
         }
     }
     
-    if (fpux_is_ieee == 0)
-        f_x = (float) fpu_x;
-    else
+    if (op != 0 && fpu_fez_op == 0)
     {
-        float *x = (float*) &fpu_x;
-        f_x = *x;
-    }
-    if(fpuy_is_ieee == 0)
-        f_y = (float) fpu_y;
-    else
-    {
-        float *y = (float*) &fpu_y;
-        f_z = *y;
-    }
-    if(fpuz_is_ieee == 0)
-        f_z = (float) fpu_z;
-    else
-    {
-        float *z = (float*) &fpu_z;
-        f_z = *z;
-    }
-        
+        fpu_int = 0;
 
-    switch (op)
-    {
-        case 0x00:
-            break;
-        case 0x01:
-            fpu_add(f_x, f_y, f_z);
-            break;
-        case 0x02:
-            fpu_sub(f_x, f_y, f_z);
-            break;
-        case 0x03:
-            fpu_mul(f_x, f_y, f_z);
-            break;
-        case 0x04:
-            fpu_div(f_x, f_y, f_z);
-            break;
-        case 0x05:
-            fpu_assign_x(f_z);
-            break;
-        case 0x06:
-            fpu_assign_y(f_z);
-            break;
-        case 0x07:
-            fpu_ceil(f_z);
-            break;
-        case 0x08:
-            fpu_floor(f_z);
-            break;
-        case 0x09:
-            fpu_round(f_z);
-            break;
-        default:
-            fpu_control = 0x20;
-            fpu_counter = 1;
-            break;
+        if (fpux_is_ieee == 0)
+        f_x = (float) fpu_x;
+        else
+        {
+            float *x = (float*) &fpu_x;
+            f_x = *x;
+        }
+        if(fpuy_is_ieee == 0)
+            f_y = (float) fpu_y;
+        else
+        {
+            float *y = (float*) &fpu_y;
+            f_z = *y;
+        }
+        if(fpuz_is_ieee == 0)
+            f_z = (float) fpu_z;
+        else
+        {
+            float *z = (float*) &fpu_z;
+            f_z = *z;
+        }
+
+        switch (op)
+        {
+            case 0x01:
+                fpu_add(f_x, f_y, f_z);
+                fpu_fez_op = 1;
+                break;
+            case 0x02:
+                fpu_sub(f_x, f_y, f_z);
+                fpu_fez_op = 1;
+                break;
+            case 0x03:
+                fpu_mul(f_x, f_y, f_z);
+                fpu_fez_op = 1;
+                break;
+            case 0x04:
+                fpu_div(f_x, f_y, f_z);
+                fpu_fez_op = 1;
+                break;
+            case 0x05:
+                fpu_assign_x(f_z);
+                fpu_fez_op = 1;
+                break;
+            case 0x06:
+                fpu_assign_y(f_z);
+                fpu_fez_op = 1;
+                break;
+            case 0x07:
+                fpu_ceil(f_z);
+                fpu_fez_op = 1;
+                break;
+            case 0x08:
+                fpu_floor(f_z);
+                fpu_fez_op = 1;
+                break;
+            case 0x09:
+                fpu_round(f_z);
+                fpu_fez_op = 1;
+                break;
+            default:
+                fpu_control = 0x20;
+                fpu_counter = 1;
+                break;
+        }
+
     }
+    if (fpu_counter > 0)
+            fpu_counter--;
     
-    fpu_counter--;
 }
 
 void fpu_add(float fx, float fy, float fz)
@@ -447,7 +490,6 @@ void fpu_add(float fx, float fy, float fz)
     uint32_t *pfz = (uint32_t *) &fz;
     fpu_z = *pfz;
     
-    fpu_control = 0;
     fpuz_is_ieee = 1;
 }
 
@@ -463,12 +505,12 @@ void fpu_sub(float fx, float fy, float fz)
 
     fpu_counter = (exp_x - exp_y) + 1;
     
+    
     fz = fx - fy;
     
     uint32_t *pfz = (uint32_t *) &fz;
     fpu_z = *pfz;
     
-    fpu_control = 0;
     fpuz_is_ieee = 1;
 }
 
@@ -489,7 +531,7 @@ void fpu_mul(float fx, float fy, float fz)
     uint32_t *pfz = (uint32_t *) &fz;
     fpu_z = *pfz;
     
-    fpu_control = 0;
+
     fpuz_is_ieee = 1;
 }
 
@@ -517,7 +559,6 @@ void fpu_div(float fx, float fy, float fz)
         uint32_t *pfz = (uint32_t *) &fz;
         fpu_z = *pfz;
         
-        fpu_control = 0;
         fpuz_is_ieee = 1;
     }
 }
@@ -527,7 +568,6 @@ void fpu_assign_x(float fz)
     uint32_t *pfz = (uint32_t *) &fz;
     fpu_x = *pfz;
     fpu_counter = 1;
-    fpu_control = 0;
     fpux_is_ieee = 1;
 }
 
@@ -536,7 +576,6 @@ void fpu_assign_y(float fz)
     uint32_t *pfz = (uint32_t *) &fz;
     fpu_y = *pfz;
     fpu_counter = 1;
-    fpu_control = 0;
     fpuy_is_ieee = 1;
 }
 
@@ -544,7 +583,6 @@ void fpu_ceil(float fz)
 {
     fpu_z = (uint32_t) ceilf(fz);
     fpu_counter = 1;
-    fpu_control = 0;
     fpuz_is_ieee = 0;
 }
 
@@ -552,7 +590,6 @@ void fpu_floor(float fz)
 {
     fpu_z = (uint32_t) floorf(fz);
     fpu_counter = 1;
-    fpu_control = 0;
     fpuz_is_ieee = 0;
 }
 
@@ -560,7 +597,6 @@ void fpu_round(float fz)
 {
     fpu_z = (uint32_t) roundf(fz);
     fpu_counter = 1;
-    fpu_control = 0;
     fpuz_is_ieee = 0;
 }
 
@@ -1413,7 +1449,7 @@ void stw(uint32_t *mem, uint32_t *reg, FILE *file)
             wdg = reg[y];
             break;
         case 0x0000888A:
-            //terminal_in = reg[y];
+            terminal_in = reg[y];
             break;
         case 0x0000888B:
             terminal_out = reg[y];
@@ -1587,7 +1623,7 @@ void ldb(uint32_t *mem, uint32_t *reg, FILE *file)
     reg[32]++;
 }
 
-void stb(uint32_t *mem, uint32_t *reg, FILE *file)
+void stb(uint32_t *mem, uint32_t *reg, FILE *file, List *terminal)
 {
     uint32_t index, byte, x, y, imd, tmp;
     char instruction[20];
@@ -1603,7 +1639,7 @@ void stb(uint32_t *mem, uint32_t *reg, FILE *file)
         case 0x00002020:
             tmp = wdg;
             break;
-            case 0x0000888A:
+        case 0x0000888A:
             tmp = terminal_in;
         case 0x0000888B:
             tmp = terminal_out;
@@ -1637,13 +1673,13 @@ void stb(uint32_t *mem, uint32_t *reg, FILE *file)
                 out = (reg[y] << 24) >> 24;
                 break;
             case 0x0000888A:
-                //terminal_in = (reg[y] << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (((tmp & 0xFF00) >> 8) << 8) | (tmp & 0xFF);
+                terminal_in = (reg[y] << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (((tmp & 0xFF00) >> 8) << 8) | (tmp & 0xFF);
                 out = (reg[y] << 24) >> 24;
                 break;
             case 0x0000888B:
                 terminal_out = (reg[y] << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (((tmp & 0xFF00) >> 8) << 8) | (tmp & 0xFF);
                 out = (reg[y] << 24) >> 24;
-                append(terminal_out_str, (char)terminal_out);
+                insert(terminal, (char)terminal_out);
                 break;
             case 0x00002200:
                 fpu_x = (reg[y] << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (((tmp & 0xFF00) >> 8) << 8) | (tmp & 0xFF);
@@ -1676,13 +1712,13 @@ void stb(uint32_t *mem, uint32_t *reg, FILE *file)
                 out = (reg[y] << 24) >> 24;
                 break;
             case 0x0000888A:
-                //terminal_in = (((tmp & 0xFF000000) >> 24) << 24) | (reg[y] << 16) | (((tmp & 0xFF00) >> 8) << 8) | (tmp & 0xFF);
+                terminal_in = (((tmp & 0xFF000000) >> 24) << 24) | (reg[y] << 16) | (((tmp & 0xFF00) >> 8) << 8) | (tmp & 0xFF);
                 out = (reg[y] << 24) >> 24;
                 break;
             case 0x0000888B:
                 terminal_out = (((tmp & 0xFF000000) >> 24) << 24) | (reg[y] << 16) | (((tmp & 0xFF00) >> 8) << 8) | (tmp & 0xFF);
                 out = (reg[y] << 24) >> 24;
-                append(terminal_out_str, (char)terminal_out);
+                insert(terminal, (char)terminal_out);
                 break;
             case 0x00002200:
                 fpu_x = (((tmp & 0xFF000000) >> 24) << 24) | (reg[y] << 16) | (((tmp & 0xFF00) >> 8) << 8) | (tmp & 0xFF);
@@ -1716,13 +1752,13 @@ void stb(uint32_t *mem, uint32_t *reg, FILE *file)
                 out = (reg[y] << 24) >> 24;
                 break;
             case 0x0000888A:
-                //terminal_in = (((tmp & 0xFF000000) >> 24) << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (reg[y] << 8) | (tmp & 0xFF);
+                terminal_in = (((tmp & 0xFF000000) >> 24) << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (reg[y] << 8) | (tmp & 0xFF);
                 out = (reg[y] << 24) >> 24;
                 break;
             case 0x0000888B:
                 terminal_out = (((tmp & 0xFF000000) >> 24) << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (reg[y] << 8) | (tmp & 0xFF);
                 out = (reg[y] << 24) >> 24;
-                append(terminal_out_str, (char) terminal_out);
+               insert(terminal, (char)terminal_out);
                 break;
             case 0x00002200:
                 fpu_x = (((tmp & 0xFF000000) >> 24) << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (reg[y] << 8) | (tmp & 0xFF);
@@ -1755,13 +1791,13 @@ void stb(uint32_t *mem, uint32_t *reg, FILE *file)
                 out = (reg[y] << 24) >> 24;
                 break;
             case 0x0000888A:
-                //terminal_in = (((tmp & 0xFF000000) >> 24) << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (((tmp & 0xFF00) >> 8) << 8) | reg[y];
+                terminal_in = (((tmp & 0xFF000000) >> 24) << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (((tmp & 0xFF00) >> 8) << 8) | reg[y];
                 out = (reg[y] << 24) >> 24;
                 break;
             case 0x0000888B:
                 terminal_out = (((tmp & 0xFF000000) >> 24) << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (((tmp & 0xFF00) >> 8) << 8) | reg[y];
                 out = (reg[y] << 24) >> 24;
-                append(terminal_out_str, (char) terminal_out);
+                insert(terminal, (char)terminal_out);
                 break;
             case 0x00002200:
                 fpu_x = (((tmp & 0xFF000000) >> 24) << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (((tmp & 0xFF00) >> 8) << 8) | reg[y];
@@ -1962,7 +1998,7 @@ void bni(uint32_t *reg, FILE *file)
     uint32_t old = reg[32], cmp;
     char instruction[20];
 
-    cmp = (reg[35] & 0x10) >> 4;
+    cmp = (reg[35] & 0x20) >> 4;
     sprintf(instruction, "bni 0x%08X", (reg[33] & 0x3FFFFFF));
 
     if(cmp == 0)
@@ -2048,12 +2084,12 @@ void reti(uint32_t *reg, FILE *file)
 
     reg[32] = reg[x];
     
-    if (int_ctrl[0] == 1)
-        int_ctrl[0] = 0;
-    else if (int_ctrl[1] == 1)
-        int_ctrl[1] = 0;
-    else if (int_ctrl[2] == 1)
-        int_ctrl[2] = 0;
+    if ((int_ctrl & 0x01) == 1)
+        int_ctrl &= 0xFFFFFFFE;
+    else if ((int_ctrl & 0x02) >> 1 == 1)
+        int_ctrl &= 0xFFFFFFFD;
+    else if ((int_ctrl & 0x04) >> 2 == 1)
+        int_ctrl &= 0xFFFFFFFB;
 
     sprintf(instruction, "reti %s", indexToName(x, 0));
     printf("[0x%08X]\t%-20s\tPC=%s<<2=0x%08X\n", old * 4, instruction, indexToName(x, 1), reg[32] * 4);
@@ -2100,6 +2136,9 @@ void invalid(uint32_t *reg, FILE *file)
 
     reg[37] = reg[32] + 1;
     reg[32] = 3;
+
+    printf("[SOFTWARE INTERRUPTION]\n");
+    fprintf(file, "[SOFTWARE INTERRUPTION]\n");
 }
 
 int getNumberLines(FILE *file)
@@ -2133,6 +2172,9 @@ char * indexToName(uint32_t index, int upperCase)
         case 35:
             sprintf(str, "fr");
             break;
+        case 36:
+            sprintf(str, "cr");
+            break;
         default:
             sprintf(str, "r%u", index);
             break;
@@ -2147,9 +2189,29 @@ char * indexToName(uint32_t index, int upperCase)
     return str;
 }
 
-void append(char* s, char c)
+List* createList()
 {
-    int len = strlen(s);
-    s[len] = c;
-    s[len+1] = '\0';
+    List* list = (List*) malloc(sizeof(List));
+    
+    list->head = NULL;
+    list->size = 0;
+    
+    return list;
+}
+
+void insert(List *list, char c)
+{
+    Node *node = (Node*) malloc(sizeof(Node));
+    node->character = c;
+    node->next = NULL;
+    if (list->head == NULL && list->size == 0)
+        list->head = node;
+    else
+    {
+        Node* aux = list->head;
+        while (aux->next != NULL)
+            aux = aux->next;
+        aux->next = node;
+    }
+    list->size++;
 }
