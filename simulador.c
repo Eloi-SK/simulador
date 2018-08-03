@@ -17,8 +17,23 @@ typedef struct list
     Node* head;
 } List;
 
+typedef struct set
+{
+    uint32_t age;
+     uint32_t block[4];
+    uint32_t id;
+    uint32_t valid;
+} Set;
+
+typedef struct cache
+{
+    Set set[2];
+} Cache;
+
 int getNumberLines(FILE *file);
 char * indexToName(uint32_t index, int upperCase);
+char * validToString(uint32_t valid);
+char * blockToString(uint32_t *block);
 List* createList();
 void insert(List *list, char c);
 
@@ -77,6 +92,8 @@ void fpu_ceil(float fz);                                            // Implement
 void fpu_floor(float fz);                                           // Implemented
 void fpu_round(float fz);                                           // Implemented
 void imprime(FILE *file, List *LISTA);                              // Implemented
+uint32_t getInstruction(uint32_t  index, uint32_t *mem, uint32_t length, FILE *file);
+void cacheStats(FILE *file);
 
 uint32_t fpu_x, fpu_y, fpu_z, fpu_control, fpu_int, fpu_fez_op;
 uint32_t wdg, terminal_in, terminal_out;
@@ -85,6 +102,13 @@ uint32_t fpux_is_ieee = 0;
 uint32_t fpuy_is_ieee = 0;
 uint32_t fpuz_is_ieee = 0;
 uint32_t fpu_counter = 0xFFFFFFFF;
+uint32_t cache_i_miss_counter = 0;
+uint32_t cache_i_hit_counter = 0;
+uint32_t cache_d_miss_counter = 0;
+uint32_t cache_d_hit_counter = 0;
+
+Cache cache_d[8];
+Cache cache_i[8];
 
 int main(int argc, char *argv[])
 {
@@ -104,7 +128,7 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    int lines = getNumberLines(file_in) + 1;
+    uint32_t lines = getNumberLines(file_in) + 1;
     uint32_t *memory = (uint32_t *) malloc(sizeof(uint32_t) * lines);
     uint32_t line;
     int i = 0;
@@ -129,7 +153,7 @@ int main(int argc, char *argv[])
 
     while(exit_ == 0)
     {
-        reg[33] = memory[reg[32]];
+        reg[33] = getInstruction(reg[32], memory, lines, file_out);//memory[reg[32]];
         opcode = (reg[33] & 0xFC000000) >> 26;
 
         switch(opcode)
@@ -319,6 +343,7 @@ int main(int argc, char *argv[])
     imprime(file_out, terminalOut);
     printf("[END OF SIMULATION]\n");
     fprintf(file_out, "[END OF SIMULATION]\n");
+    cacheStats(file_out);
     fclose(file_in);
     fclose(file_out);
     free(memory);
@@ -2141,6 +2166,508 @@ void invalid(uint32_t *reg, FILE *file)
     fprintf(file, "[SOFTWARE INTERRUPTION]\n");
 }
 
+uint32_t getInstruction(uint32_t index, uint32_t *mem, uint32_t length, FILE *file)
+{
+    index *= 4;
+    uint32_t alignment = (index & 0x03);
+    uint32_t word = (index & 0x0C) >> 2;
+    uint32_t line = (index & 0x70) >> 4;
+    uint32_t id = (index & 0xFFFFFF80);
+
+    char instruction[20], str_set0[80], str_set1[80];
+    
+    for (int i = 0; i <  8; i++)
+    {
+        for (int j = 0; j < 2; j++)
+        {
+            if (cache_i[i].set[j].valid == 1)
+                cache_i[i].set[j].age ++;
+        }
+    }
+    
+    int old = 0;
+    
+    for (int i = 0; i < 2; i++)
+    {
+        if (cache_i[line].set[i].valid == 1 )
+        {
+            if (cache_i[line].set[i].id == id)
+            {
+                cache_i[line].set[i].age = 0;
+                sprintf(instruction, "read_hit I->%u", line);
+                sprintf(str_set0, "SET=0:STATUS=%s,AGE=%u,DATA=%s", validToString(cache_i[line].set[0].valid), cache_i[line].set[0].age, blockToString(cache_i[line].set[0].block));
+                sprintf(str_set1, "SET=1:STATUS=%s,AGE=%u,DATA=%s", validToString(cache_i[line].set[1].valid), cache_i[line].set[1].age, blockToString(cache_i[line].set[1].block));
+                printf("[0x%08X]\t%-20s\t%s\n\t\t\t\t\t\t%s\n", index, instruction, str_set0, str_set1);
+                fprintf(file, "[0x%08X]\t%-20s\t%s\n\t\t\t\t\t\t\t\t\t\t%s\n", index, instruction, str_set0, str_set1);
+                cache_i_hit_counter++;
+                return cache_i[line].set[i].block[word];
+            }
+            else if (cache_i[line].set[i].id != id)
+            {
+                if (old < cache_i[line].set[i].age)
+                    old = cache_i[line].set[i].age;
+
+                if (i == 1)
+                {
+                    sprintf(instruction, "read_miss I->%u", line);
+                    sprintf(str_set0, "SET=0:STATUS=%s,AGE=%u,DATA=%s", validToString(cache_i[line].set[0].valid), cache_i[line].set[0].age, blockToString(cache_i[line].set[0].block));
+                    sprintf(str_set1, "SET=1:STATUS=%s,AGE=%u,DATA=%s", validToString(cache_i[line].set[1].valid), cache_i[line].set[1].age, blockToString(cache_i[line].set[1].block));
+                    printf("[0x%08X]\t%-20s\t%s\n\t\t\t\t\t%s\n", index, instruction, str_set0, str_set1);
+                    fprintf(file, "[0x%08X]\t%-20s\t%s\n\t\t\t\t\t\t\t\t\t\t%s\n", index, instruction, str_set0, str_set1);
+                    if (old == cache_i[line].set[0].age)
+                    {
+                        int k = index >> 2;
+                        if (length % 4 != 0)
+                        {
+                            int diff = length - (index / 4);
+                            if (diff < 4)
+                            {
+                                switch(diff)
+                                {
+                                    case 3:
+                                        for (int j = 0; j < 3; j++)
+                                        {
+                                            cache_i[line].set[0].block[j] = mem[k];
+                                            k++;
+                                        }
+                                        cache_i[line].set[0].block[3] = 0;
+                                        break;
+                                    case 2:
+                                        for (int j = 0; j < 2; j++)
+                                        {
+                                            cache_i[line].set[0].block[j] = mem[k];
+                                            k++;
+                                        }
+                                        cache_i[line].set[0].block[2] = 0;
+                                        cache_i[line].set[0].block[3] = 0;
+                                        break;
+                                    case 1:
+                                        for (int j = 0; j < 1; j++)
+                                        {
+                                            cache_i[line].set[0].block[j] = mem[k];
+                                            k++;
+                                        }
+                                        cache_i[line].set[0].block[1] = 0;
+                                        cache_i[line].set[0].block[2] = 0;
+                                        cache_i[line].set[0].block[3] = 0;
+                                        break;
+                                }
+                            }
+                            else
+                            {
+                                for (int j = 0; j < 4; j++)
+                                {
+                                    cache_i[line].set[0].block[j] = mem[k];
+                                    k++;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            for (int j = 0; j < 4; j++)
+                            {
+                                cache_i[line].set[0].block[j] = mem[k];
+                                k++;
+                            }
+                        }
+                        cache_i[line].set[0].age = 0;
+                        cache_i[line].set[0].id = id;
+                        cache_i_miss_counter++;
+                        return mem[index / 4];
+                    }
+                    else
+                    {
+                        int k = index >> 2;
+                        if (length % 4 != 0)
+                        {
+                            int diff = length - (index / 4);
+                            if (diff < 4)
+                            {
+                                switch(diff)
+                                {
+                                    case 3:
+                                        for (int j = 0; j < 3; j++)
+                                        {
+                                            cache_i[line].set[1].block[j] = mem[k];
+                                            k++;
+                                        }
+                                        cache_i[line].set[1].block[3] = 0;
+                                        break;
+                                    case 2:
+                                        for (int j = 0; j < 2; j++)
+                                        {
+                                            cache_i[line].set[1].block[j] = mem[k];
+                                            k++;
+                                        }
+                                        cache_i[line].set[1].block[2] = 0;
+                                        cache_i[line].set[1].block[3] = 0;
+                                        break;
+                                    case 1:
+                                        for (int j = 0; j < 1; j++)
+                                        {
+                                            cache_i[line].set[1].block[j] = mem[k];
+                                            k++;
+                                        }
+                                        cache_i[line].set[1].block[1] = 0;
+                                        cache_i[line].set[1].block[2] = 0;
+                                        cache_i[line].set[1].block[3] = 0;
+                                        break;
+                                }
+                            }
+                            else
+                            {
+                                for (int j = 0; j < 4; j++)
+                                {
+                                    cache_i[line].set[1].block[j] = mem[k];
+                                    k++;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            for (int j = 0; j < 4; j++)
+                            {
+                                cache_i[line].set[1].block[j] = mem[k];
+                                k++;
+                            }
+                        }
+                        cache_i[line].set[1].age = 0;
+                        cache_i[line].set[1].id = id;
+                        cache_i_miss_counter++;
+                        return mem[index / 4];
+                    }
+                }
+            }
+        }
+        else
+        {
+            sprintf(instruction, "read_miss I->%u", line);
+            sprintf(str_set0, "SET=0:STATUS=%s,AGE=%u,DATA=%s", validToString(cache_i[line].set[0].valid), cache_i[line].set[0].age, blockToString(cache_i[line].set[0].block));
+            sprintf(str_set1, "SET=1:STATUS=%s,AGE=%u,DATA=%s", validToString(cache_i[line].set[1].valid), cache_i[line].set[1].age, blockToString(cache_i[line].set[1].block));
+            printf("[0x%08X]\t%-20s\t%s\n\t\t\t\t\t%s\n", index, instruction, str_set0, str_set1);
+            fprintf(file, "[0x%08X]\t%-20s\t%s\n\t\t\t\t\t\t\t\t\t\t%s\n", index, instruction, str_set0, str_set1);
+            int k = index >> 2;
+            if (length % 4 != 0)
+            {
+                int diff = length - (index / 4);
+                if (diff < 4)
+                {
+                    switch(diff)
+                    {
+                        case 3:
+                            for (int j = 0; j < 3; j++)
+                            {
+                                cache_i[line].set[i].block[j] = mem[k];
+                                k++;
+                            }
+                            cache_i[line].set[i].block[3] = 0;
+                            break;
+                        case 2:
+                            for (int j = 0; j < 2; j++)
+                            {
+                                cache_i[line].set[i].block[j] = mem[k];
+                                k++;
+                            }
+                            cache_i[line].set[i].block[2] = 0;
+                            cache_i[line].set[i].block[3] = 0;
+                            break;
+                        case 1:
+                            for (int j = 0; j < 1; j++)
+                            {
+                                cache_i[line].set[i].block[j] = mem[k];
+                                k++;
+                            }
+                            cache_i[line].set[i].block[1] = 0;
+                            cache_i[line].set[i].block[2] = 0;
+                            cache_i[line].set[i].block[3] = 0;
+                            break;
+                    }
+                }
+                else
+                {
+                    for (int j = 0; j < 4; j++)
+                    {
+                        cache_i[line].set[i].block[j] = mem[k];
+                        k++;
+                    }
+                }
+            }
+            else
+            {
+                for (int j = 0; j < 4; j++)
+                {
+                    cache_i[line].set[i].block[j] = mem[k];
+                    k++;
+                }
+            }
+            cache_i[line].set[i].valid = 1;
+            cache_i[line].set[i].id = id;
+            cache_i_miss_counter++;
+            return mem[index / 4];
+        }
+    }
+}
+
+uint32_t getData(uint32_t index, uint32_t *mem, uint32_t length, FILE *file)
+{
+    index *= 4;
+    uint32_t alignment = (index & 0x03);
+    uint32_t word = (index & 0x0C) >> 2;
+    uint32_t line = (index & 0x70) >> 4;
+    uint32_t id = (index & 0xFFFFFF80);
+
+    char instruction[20], str_set0[80], str_set1[80];
+    
+    for (int i = 0; i <  8; i++)
+    {
+        for (int j = 0; j < 2; j++)
+        {
+            if (cache_d[i].set[j].valid == 1)
+                cache_d[i].set[j].age ++;
+        }
+    }
+    
+    int old = 0;
+    
+    for (int i = 0; i < 2; i++)
+    {
+        if (cache_d[line].set[i].valid == 1 )
+        {
+            if (cache_d[line].set[i].id == id)
+            {
+                cache_d[line].set[i].age = 0;
+                sprintf(instruction, "read_hit D->%u", line);
+                sprintf(str_set0, "SET=0:STATUS=%s,AGE=%u,DATA=%s", validToString(cache_d[line].set[0].valid), cache_d[line].set[0].age, blockToString(cache_d[line].set[0].block));
+                sprintf(str_set1, "SET=1:STATUS=%s,AGE=%u,DATA=%s", validToString(cache_d[line].set[1].valid), cache_d[line].set[1].age, blockToString(cache_d[line].set[1].block));
+                printf("[0x%08X]\t%-20s\t%s\n\t\t\t\t\t\t%s\n", index, instruction, str_set0, str_set1);
+                fprintf(file, "[0x%08X]\t%-20s\t%s\n\t\t\t\t\t\t\t\t\t\t%s\n", index, instruction, str_set0, str_set1);
+                cache_d_hit_counter++;
+                return cache_d[line].set[i].block[word];
+            }
+            else if (cache_d[line].set[i].id != id)
+            {
+                if (old < cache_d[line].set[i].age)
+                    old = cache_d[line].set[i].age;
+
+                if (i == 1)
+                {
+                    sprintf(instruction, "read_miss D->%u", line);
+                    sprintf(str_set0, "SET=0:STATUS=%s,AGE=%u,DATA=%s", validToString(cache_d[line].set[0].valid), cache_d[line].set[0].age, blockToString(cache_d[line].set[0].block));
+                    sprintf(str_set1, "SET=1:STATUS=%s,AGE=%u,DATA=%s", validToString(cache_d[line].set[1].valid), cache_d[line].set[1].age, blockToString(cache_d[line].set[1].block));
+                    printf("[0x%08X]\t%-20s\t%s\n\t\t\t\t\t%s\n", index, instruction, str_set0, str_set1);
+                    fprintf(file, "[0x%08X]\t%-20s\t%s\n\t\t\t\t\t\t\t\t\t\t%s\n", index, instruction, str_set0, str_set1);
+                    if (old == cache_i[line].set[0].age)
+                    {
+                        int k = index >> 2;
+                        if (length % 4 != 0)
+                        {
+                            int diff = length - (index / 4);
+                            if (diff < 4)
+                            {
+                                switch(diff)
+                                {
+                                    case 3:
+                                        for (int j = 0; j < 3; j++)
+                                        {
+                                            cache_d[line].set[0].block[j] = mem[k];
+                                            k++;
+                                        }
+                                        cache_d[line].set[0].block[3] = 0;
+                                        break;
+                                    case 2:
+                                        for (int j = 0; j < 2; j++)
+                                        {
+                                            cache_d[line].set[0].block[j] = mem[k];
+                                            k++;
+                                        }
+                                        cache_d[line].set[0].block[2] = 0;
+                                        cache_d[line].set[0].block[3] = 0;
+                                        break;
+                                    case 1:
+                                        for (int j = 0; j < 1; j++)
+                                        {
+                                            cache_d[line].set[0].block[j] = mem[k];
+                                            k++;
+                                        }
+                                        cache_d[line].set[0].block[1] = 0;
+                                        cache_d[line].set[0].block[2] = 0;
+                                        cache_d[line].set[0].block[3] = 0;
+                                        break;
+                                }
+                            }
+                            else
+                            {
+                                for (int j = 0; j < 4; j++)
+                                {
+                                    cache_d[line].set[0].block[j] = mem[k];
+                                    k++;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            for (int j = 0; j < 4; j++)
+                            {
+                                cache_d[line].set[0].block[j] = mem[k];
+                                k++;
+                            }
+                        }
+                        cache_d[line].set[0].age = 0;
+                        cache_d[line].set[0].id = id;
+                        cache_d_miss_counter++;
+                        return mem[index / 4];
+                    }
+                    else
+                    {
+                        int k = index >> 2;
+                        if (length % 4 != 0)
+                        {
+                            int diff = length - (index / 4);
+                            if (diff < 4)
+                            {
+                                switch(diff)
+                                {
+                                    case 3:
+                                        for (int j = 0; j < 3; j++)
+                                        {
+                                            cache_d[line].set[1].block[j] = mem[k];
+                                            k++;
+                                        }
+                                        cache_d[line].set[1].block[3] = 0;
+                                        break;
+                                    case 2:
+                                        for (int j = 0; j < 2; j++)
+                                        {
+                                            cache_d[line].set[1].block[j] = mem[k];
+                                            k++;
+                                        }
+                                        cache_d[line].set[1].block[2] = 0;
+                                        cache_d[line].set[1].block[3] = 0;
+                                        break;
+                                    case 1:
+                                        for (int j = 0; j < 1; j++)
+                                        {
+                                            cache_d[line].set[1].block[j] = mem[k];
+                                            k++;
+                                        }
+                                        cache_d[line].set[1].block[1] = 0;
+                                        cache_d[line].set[1].block[2] = 0;
+                                        cache_d[line].set[1].block[3] = 0;
+                                        break;
+                                }
+                            }
+                            else
+                            {
+                                for (int j = 0; j < 4; j++)
+                                {
+                                    cache_d[line].set[1].block[j] = mem[k];
+                                    k++;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            for (int j = 0; j < 4; j++)
+                            {
+                                cache_d[line].set[1].block[j] = mem[k];
+                                k++;
+                            }
+                        }
+                        cache_d[line].set[1].age = 0;
+                        cache_d[line].set[1].id = id;
+                        cache_d_miss_counter++;
+                        return mem[index / 4];
+                    }
+                }
+            }
+        }
+        else
+        {
+            sprintf(instruction, "read_miss D->%u", line);
+            sprintf(str_set0, "SET=0:STATUS=%s,AGE=%u,DATA=%s", validToString(cache_d[line].set[0].valid), cache_d[line].set[0].age, blockToString(cache_d[line].set[0].block));
+            sprintf(str_set1, "SET=1:STATUS=%s,AGE=%u,DATA=%s", validToString(cache_d[line].set[1].valid), cache_d[line].set[1].age, blockToString(cache_d[line].set[1].block));
+            printf("[0x%08X]\t%-20s\t%s\n\t\t\t\t\t%s\n", index, instruction, str_set0, str_set1);
+            fprintf(file, "[0x%08X]\t%-20s\t%s\n\t\t\t\t\t\t\t\t\t\t%s\n", index, instruction, str_set0, str_set1);
+            int k = index >> 2;
+            if (length % 4 != 0)
+            {
+                int diff = length - (index / 4);
+                if (diff < 4)
+                {
+                    switch(diff)
+                    {
+                        case 3:
+                            for (int j = 0; j < 3; j++)
+                            {
+                                cache_d[line].set[i].block[j] = mem[k];
+                                k++;
+                            }
+                            cache_d[line].set[i].block[3] = 0;
+                            break;
+                        case 2:
+                            for (int j = 0; j < 2; j++)
+                            {
+                                cache_d[line].set[i].block[j] = mem[k];
+                                k++;
+                            }
+                            cache_d[line].set[i].block[2] = 0;
+                            cache_d[line].set[i].block[3] = 0;
+                            break;
+                        case 1:
+                            for (int j = 0; j < 1; j++)
+                            {
+                                cache_d[line].set[i].block[j] = mem[k];
+                                k++;
+                            }
+                            cache_d[line].set[i].block[1] = 0;
+                            cache_d[line].set[i].block[2] = 0;
+                            cache_d[line].set[i].block[3] = 0;
+                            break;
+                    }
+                }
+                else
+                {
+                    for (int j = 0; j < 4; j++)
+                    {
+                        cache_d[line].set[i].block[j] = mem[k];
+                        k++;
+                    }
+                }
+            }
+            else
+            {
+                for (int j = 0; j < 4; j++)
+                {
+                    cache_d[line].set[i].block[j] = mem[k];
+                    k++;
+                }
+            }
+            cache_d[line].set[i].valid = 1;
+            cache_d[line].set[i].id = id;
+            cache_d_miss_counter++;
+            return mem[index / 4];
+        }
+    }
+}
+
+void cacheStats(FILE *file)
+{
+    float total_i = (float)(cache_i_hit_counter + cache_i_miss_counter);
+    float ta_i_f = (float)(cache_i_hit_counter / total_i) * 100;
+    float tf_i_f = (float)(cache_i_miss_counter / total_i) * 100;
+    uint32_t ta_i =  (uint32_t) roundf(ta_i_f);
+    uint32_t tf_i = (uint32_t) roundf(tf_i_f);
+    float total_d = (float)(cache_d_hit_counter + cache_d_miss_counter);
+    float ta_d_f = (float)(cache_i_hit_counter / total_d) * 100;
+    float tf_d_f = (float)(cache_i_miss_counter / total_d) * 100;
+    uint32_t ta_d =  (uint32_t) roundf(ta_d_f);
+    uint32_t tf_d = (uint32_t) roundf(tf_d_f);
+    printf("[CACHE D STATISTICS] #Hit = %u (%u%%), #Miss = %u (%u%%)\n", cache_d_hit_counter, ta_d, cache_d_miss_counter, tf_d);
+    fprintf(file, "[CACHE D STATISTICS] #Hit = %u (%u%%), #Miss = %u (%u%%)\n", cache_d_hit_counter, ta_d, cache_d_miss_counter, tf_d);
+    printf("[CACHE I STATISTICS] #Hit = %u (%u%%), #Miss = %u (%u%%)\n", cache_i_hit_counter, ta_i, cache_i_miss_counter, tf_i);
+    fprintf(file, "[CACHE I STATISTICS] #Hit = %u (%u%%), #Miss = %u (%u%%)\n", cache_i_hit_counter, ta_i, cache_i_miss_counter, tf_i);
+}
+
 int getNumberLines(FILE *file)
 {
     int lines = 0;
@@ -2186,6 +2713,23 @@ char * indexToName(uint32_t index, int upperCase)
             str[i] = toupper(str[i]);
         }
     }
+    return str;
+}
+char * validToString(uint32_t valid)
+{
+    char *str = (char *) malloc(sizeof(char) * 7);
+
+    if (valid == 0)
+        sprintf(str, "INVALID");
+    else
+        sprintf(str, "VALID");
+    return str;
+}
+
+char * blockToString(uint32_t *block)
+{
+    char *str = (char *) malloc(sizeof(char) * 43);
+    sprintf(str, "0x%08X|0x%08X|0x%08X|0x%08X", block[0], block[1], block[2], block[3]);
     return str;
 }
 
