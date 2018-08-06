@@ -59,7 +59,7 @@ void ori(uint32_t *reg, FILE *file);                                // Implement
 void xori(uint32_t *reg, FILE *file);                               // Implemented
 void ldw(uint32_t *mem, uint32_t length, uint32_t *reg, FILE *file);                 // Implemented
 void stw(uint32_t *mem, uint32_t *reg, FILE *file);                 // Implemented
-void ldb(uint32_t *mem, uint32_t *reg, FILE *file);                 // Implemented
+void ldb(uint32_t *mem, uint32_t length, uint32_t *reg, FILE *file);                 // Implemented
 void stb(uint32_t *mem, uint32_t *reg, FILE *file, List *terminal); // Implemented
 void push(uint32_t *mem, uint32_t *reg, FILE *file);                // Implemented
 void pop(uint32_t *mem, uint32_t *reg, FILE *file);                 // Implemented
@@ -94,6 +94,7 @@ void fpu_round(float fz);                                           // Implement
 void imprime(FILE *file, List *LISTA);                              // Implemented
 uint32_t getInstruction(uint32_t  index, uint32_t *mem, uint32_t length, FILE *file);
 uint32_t getData(uint32_t index, uint32_t *mem, uint32_t length, FILE *file);
+void setData(uint32_t index, uint32_t *mem, uint32_t data, FILE *file);
 void cacheStats(FILE *file);
 
 uint32_t fpu_x, fpu_y, fpu_z, fpu_control, fpu_int, fpu_fez_op;
@@ -259,7 +260,7 @@ int main(int argc, char *argv[])
                 break;
             // ldb
             case 0x1B:
-                ldb(memory, reg, file_out);
+                ldb(memory,lines, reg, file_out);
                 break;
             // stb
             case 0x1C:
@@ -1449,7 +1450,7 @@ void ldw(uint32_t *mem, uint32_t length, uint32_t *reg, FILE *file)
                 reg[x] = fpu_control;
                 break;
             default:
-                reg[x] = getData(reg[y]+imd, mem, length, file);//mem[reg[y] + imd];
+                reg[x] = getData(reg[y]+imd, mem, length, file);
                 break;
         }
     }
@@ -1495,7 +1496,7 @@ void stw(uint32_t *mem, uint32_t *reg, FILE *file)
             fpu_control = reg[y];
             break;
         default:
-            mem[reg[x] + imd] = reg[y];
+            setData(reg[x] + imd, mem, reg[y], file);//mem[reg[x] + imd] = reg[y];
             break;
     }
 
@@ -1505,7 +1506,7 @@ void stw(uint32_t *mem, uint32_t *reg, FILE *file)
     reg[32]++;
 }
 
-void ldb(uint32_t *mem, uint32_t *reg, FILE *file)
+void ldb(uint32_t *mem, uint32_t length, uint32_t *reg, FILE *file)
 {
     uint32_t index, byte, x, y, imd, tmp;
     char instruction[20];
@@ -1515,7 +1516,7 @@ void ldb(uint32_t *mem, uint32_t *reg, FILE *file)
     imd = (reg[33] & 0x3FFFC00) >> 10;
 
     index = (reg[y] + imd) / 4;
-    tmp = mem[index];
+    tmp = getData(index, mem, length, file);//mem[index];
     byte = (reg[y] + imd) % 4;
 
     if (x == 0)
@@ -2218,7 +2219,8 @@ uint32_t getInstruction(uint32_t index, uint32_t *mem, uint32_t length, FILE *fi
                     fprintf(file, "[0x%08X]\t%-20s\t%s\n\t\t\t\t\t\t\t\t\t\t%s\n", index, instruction, str_set0, str_set1);
                     if (old == cache_i[line].set[0].age)
                     {
-                        int k = index >> 2;
+                        int k = index >> 4;
+                        k *= 4;
                         if (length % 4 != 0)
                         {
                             int diff = length - (index / 4);
@@ -2279,7 +2281,8 @@ uint32_t getInstruction(uint32_t index, uint32_t *mem, uint32_t length, FILE *fi
                     }
                     else
                     {
-                        int k = index >> 2;
+                        int k = index >> 4;
+                        k *= 4;
                         if (length % 4 != 0)
                         {
                             int diff = length - (index / 4);
@@ -2348,7 +2351,8 @@ uint32_t getInstruction(uint32_t index, uint32_t *mem, uint32_t length, FILE *fi
             sprintf(str_set1, "SET=1:STATUS=%s,AGE=%u,DATA=%s", validToString(cache_i[line].set[1].valid), cache_i[line].set[1].age, blockToString(cache_i[line].set[1].block));
             printf("[0x%08X]\t%-20s\t%s\n\t\t\t\t\t%s\n", index, instruction, str_set0, str_set1);
             fprintf(file, "[0x%08X]\t%-20s\t%s\n\t\t\t\t\t\t\t\t\t\t%s\n", index, instruction, str_set0, str_set1);
-            int k = index >> 2;
+            int k = index >> 4;
+            k *= 4;
             if (length % 4 != 0)
             {
                 int diff = length - (index / 4);
@@ -2459,7 +2463,8 @@ uint32_t getData(uint32_t index, uint32_t *mem, uint32_t length, FILE *file)
                     fprintf(file, "[0x%08X]\t%-20s\t%s\n\t\t\t\t\t\t\t\t\t\t%s\n", index, instruction, str_set0, str_set1);
                     if (old == cache_i[line].set[0].age)
                     {
-                        int k = index >> 2;
+                        int k = index >> 4;
+                        k *=4;
                         if (length % 4 != 0)
                         {
                             int diff = length - (index / 4);
@@ -2520,7 +2525,8 @@ uint32_t getData(uint32_t index, uint32_t *mem, uint32_t length, FILE *file)
                     }
                     else
                     {
-                        int k = index >> 2;
+                        int k = index >> 4;
+                        k *=4;
                         if (length % 4 != 0)
                         {
                             int diff = length - (index / 4);
@@ -2589,7 +2595,9 @@ uint32_t getData(uint32_t index, uint32_t *mem, uint32_t length, FILE *file)
             sprintf(str_set1, "SET=1:STATUS=%s,AGE=%u,DATA=%s", validToString(cache_d[line].set[1].valid), cache_d[line].set[1].age, blockToString(cache_d[line].set[1].block));
             printf("[0x%08X]\t%-20s\t%s\n\t\t\t\t\t%s\n", index, instruction, str_set0, str_set1);
             fprintf(file, "[0x%08X]\t%-20s\t%s\n\t\t\t\t\t\t\t\t\t\t%s\n", index, instruction, str_set0, str_set1);
-            int k = index >> 2;
+            int k = index >> 4;
+            k *=4;
+            printf(">>>>>>%d\n", k);
             if (length % 4 != 0)
             {
                 int diff = length - (index / 4);
@@ -2600,7 +2608,7 @@ uint32_t getData(uint32_t index, uint32_t *mem, uint32_t length, FILE *file)
                         case 3:
                             for (int j = 0; j < 3; j++)
                             {
-                                cache_d[line].set[i].block[j] = mem[k];
+                                cache_d[line].set[i].block[j] = mem[k*4];
                                 k++;
                             }
                             cache_d[line].set[i].block[3] = 0;
@@ -2608,7 +2616,7 @@ uint32_t getData(uint32_t index, uint32_t *mem, uint32_t length, FILE *file)
                         case 2:
                             for (int j = 0; j < 2; j++)
                             {
-                                cache_d[line].set[i].block[j] = mem[k];
+                                cache_d[line].set[i].block[j] = mem[k*4];
                                 k++;
                             }
                             cache_d[line].set[i].block[2] = 0;
@@ -2617,7 +2625,7 @@ uint32_t getData(uint32_t index, uint32_t *mem, uint32_t length, FILE *file)
                         case 1:
                             for (int j = 0; j < 1; j++)
                             {
-                                cache_d[line].set[i].block[j] = mem[k];
+                                cache_d[line].set[i].block[j] = mem[k*4];
                                 k++;
                             }
                             cache_d[line].set[i].block[1] = 0;
@@ -2630,7 +2638,7 @@ uint32_t getData(uint32_t index, uint32_t *mem, uint32_t length, FILE *file)
                 {
                     for (int j = 0; j < 4; j++)
                     {
-                        cache_d[line].set[i].block[j] = mem[k];
+                        cache_d[line].set[i].block[j] = mem[k*4];
                         k++;
                     }
                 }
@@ -2640,6 +2648,7 @@ uint32_t getData(uint32_t index, uint32_t *mem, uint32_t length, FILE *file)
                 for (int j = 0; j < 4; j++)
                 {
                     cache_d[line].set[i].block[j] = mem[k];
+                    printf(">>>>%d", k);
                     k++;
                 }
             }
@@ -2647,6 +2656,66 @@ uint32_t getData(uint32_t index, uint32_t *mem, uint32_t length, FILE *file)
             cache_d[line].set[i].id = id;
             cache_d_miss_counter++;
             return mem[index / 4];
+        }
+    }
+}
+
+void setData(uint32_t index, uint32_t *mem, uint32_t data, FILE *file)
+{
+    index *= 4;
+    uint32_t word = (index & 0x0C) >> 2;
+    uint32_t line = (index & 0x70) >> 4;
+    uint32_t id = (index & 0xFFFFFF80);
+
+    char instruction[20], str_set0[80], str_set1[80];
+    
+    for (int i = 0; i <  8; i++)
+    {
+        for (int j = 0; j < 2; j++)
+        {
+            if (cache_d[i].set[j].valid == 1)
+                cache_d[i].set[j].age ++;
+        }
+    }
+        
+    for (int i = 0; i < 2; i++)
+    {
+        if (cache_d[line].set[i].valid == 1 )
+        {
+            if (cache_d[line].set[i].id == id)
+            {
+                cache_d[line].set[i].age = 0;
+                sprintf(instruction, "write_hit D->%u", line);
+                sprintf(str_set0, "SET=0:STATUS=%s,AGE=%u,DATA=%s", validToString(cache_d[line].set[0].valid), cache_d[line].set[0].age, blockToString(cache_d[line].set[0].block));
+                sprintf(str_set1, "SET=1:STATUS=%s,AGE=%u,DATA=%s", validToString(cache_d[line].set[1].valid), cache_d[line].set[1].age, blockToString(cache_d[line].set[1].block));
+                printf("[0x%08X]\t%-20s\t%s\n\t\t\t\t\t\t%s\n", index, instruction, str_set0, str_set1);
+                fprintf(file, "[0x%08X]\t%-20s\t%s\n\t\t\t\t\t\t\t\t\t\t%s\n", index, instruction, str_set0, str_set1);
+                cache_d_hit_counter++;
+                mem[index / 4] = cache_d[line].set[i].block[word] = data;
+                return;
+            }
+            else
+            {
+                sprintf(instruction, "write_miss D->%u", line);
+                sprintf(str_set0, "SET=0:STATUS=%s,AGE=%u,DATA=%s", validToString(cache_d[line].set[0].valid), cache_d[line].set[0].age, blockToString(cache_d[line].set[0].block));
+                sprintf(str_set1, "SET=1:STATUS=%s,AGE=%u,DATA=%s", validToString(cache_d[line].set[1].valid), cache_d[line].set[1].age, blockToString(cache_d[line].set[1].block));
+                printf("[0x%08X]\t%-20s\t%s\n\t\t\t\t\t%s\n", index, instruction, str_set0, str_set1);
+                fprintf(file, "[0x%08X]\t%-20s\t%s\n\t\t\t\t\t\t\t\t\t\t%s\n", index, instruction, str_set0, str_set1);
+                mem[index / 4] = data;
+                cache_d_miss_counter++;
+                return;
+            }
+        }
+        else
+        {
+            sprintf(instruction, "write_miss D->%u", line);
+            sprintf(str_set0, "SET=0:STATUS=%s,AGE=%u,DATA=%s", validToString(cache_d[line].set[0].valid), cache_d[line].set[0].age, blockToString(cache_d[line].set[0].block));
+            sprintf(str_set1, "SET=1:STATUS=%s,AGE=%u,DATA=%s", validToString(cache_d[line].set[1].valid), cache_d[line].set[1].age, blockToString(cache_d[line].set[1].block));
+            printf("[0x%08X]\t%-20s\t%s\n\t\t\t\t\t%s\n", index, instruction, str_set0, str_set1);
+            fprintf(file, "[0x%08X]\t%-20s\t%s\n\t\t\t\t\t\t\t\t\t\t%s\n", index, instruction, str_set0, str_set1);
+            mem[index / 4] = data;
+            cache_d_miss_counter++;
+            return;
         }
     }
 }
