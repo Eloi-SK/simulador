@@ -57,7 +57,7 @@ void andi(uint32_t *reg, FILE *file);                               // Implement
 void noti(uint32_t *reg, FILE *file);                               // Implemented
 void ori(uint32_t *reg, FILE *file);                                // Implemented
 void xori(uint32_t *reg, FILE *file);                               // Implemented
-void ldw(uint32_t *mem, uint32_t *reg, FILE *file);                 // Implemented
+void ldw(uint32_t *mem, uint32_t length, uint32_t *reg, FILE *file);                 // Implemented
 void stw(uint32_t *mem, uint32_t *reg, FILE *file);                 // Implemented
 void ldb(uint32_t *mem, uint32_t *reg, FILE *file);                 // Implemented
 void stb(uint32_t *mem, uint32_t *reg, FILE *file, List *terminal); // Implemented
@@ -93,6 +93,7 @@ void fpu_floor(float fz);                                           // Implement
 void fpu_round(float fz);                                           // Implemented
 void imprime(FILE *file, List *LISTA);                              // Implemented
 uint32_t getInstruction(uint32_t  index, uint32_t *mem, uint32_t length, FILE *file);
+uint32_t getData(uint32_t index, uint32_t *mem, uint32_t length, FILE *file);
 void cacheStats(FILE *file);
 
 uint32_t fpu_x, fpu_y, fpu_z, fpu_control, fpu_int, fpu_fez_op;
@@ -140,6 +141,8 @@ int main(int argc, char *argv[])
         memory[i] = line;
         i++;
     }
+
+    lines = i;
 
     printf("[START OF SIMULATION]\n");
     fprintf(file_out, "[START OF SIMULATION]\n");
@@ -248,7 +251,7 @@ int main(int argc, char *argv[])
                 break;
             // ldw
             case 0x19:
-                ldw(memory, reg, file_out);
+                ldw(memory, lines, reg, file_out);
                 break;
             // stw
             case 0x1A:
@@ -1407,7 +1410,7 @@ void xori(uint32_t *reg, FILE *file)
     reg[32]++;
 }
 
-void ldw(uint32_t *mem, uint32_t *reg, FILE *file)
+void ldw(uint32_t *mem, uint32_t length, uint32_t *reg, FILE *file)
 {
     uint32_t x, y, imd;
     char instruction[20];
@@ -1446,7 +1449,7 @@ void ldw(uint32_t *mem, uint32_t *reg, FILE *file)
                 reg[x] = fpu_control;
                 break;
             default:
-                reg[x] = mem[reg[y] + imd];
+                reg[x] = getData(reg[y]+imd, mem, length, file);//mem[reg[y] + imd];
                 break;
         }
     }
@@ -2169,7 +2172,6 @@ void invalid(uint32_t *reg, FILE *file)
 uint32_t getInstruction(uint32_t index, uint32_t *mem, uint32_t length, FILE *file)
 {
     index *= 4;
-    uint32_t alignment = (index & 0x03);
     uint32_t word = (index & 0x0C) >> 2;
     uint32_t line = (index & 0x70) >> 4;
     uint32_t id = (index & 0xFFFFFF80);
@@ -2411,7 +2413,6 @@ uint32_t getInstruction(uint32_t index, uint32_t *mem, uint32_t length, FILE *fi
 uint32_t getData(uint32_t index, uint32_t *mem, uint32_t length, FILE *file)
 {
     index *= 4;
-    uint32_t alignment = (index & 0x03);
     uint32_t word = (index & 0x0C) >> 2;
     uint32_t line = (index & 0x70) >> 4;
     uint32_t id = (index & 0xFFFFFF80);
@@ -2658,8 +2659,8 @@ void cacheStats(FILE *file)
     uint32_t ta_i =  (uint32_t) roundf(ta_i_f);
     uint32_t tf_i = (uint32_t) roundf(tf_i_f);
     float total_d = (float)(cache_d_hit_counter + cache_d_miss_counter);
-    float ta_d_f = (float)(cache_i_hit_counter / total_d) * 100;
-    float tf_d_f = (float)(cache_i_miss_counter / total_d) * 100;
+    float ta_d_f = (float)(cache_d_hit_counter / total_d) * 100;
+    float tf_d_f = (float)(cache_d_miss_counter / total_d) * 100;
     uint32_t ta_d =  (uint32_t) roundf(ta_d_f);
     uint32_t tf_d = (uint32_t) roundf(tf_d_f);
     printf("[CACHE D STATISTICS] #Hit = %u (%u%%), #Miss = %u (%u%%)\n", cache_d_hit_counter, ta_d, cache_d_miss_counter, tf_d);
