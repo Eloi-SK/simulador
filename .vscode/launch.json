@@ -6,7 +6,7 @@
       "type": "cppdbg",
       "request": "launch",
       "program": "${workspaceFolder}/${fileBasenameNoExtension}.app",
-      "args": ["poxim2.hex", "poxim2.out"],
+      "args": ["1_factorial.hex.hex", "3_factorial_cache.out"],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",
       "environment": [],
