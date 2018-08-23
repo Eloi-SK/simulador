@@ -20,7 +20,7 @@ typedef struct list
 typedef struct set
 {
     uint32_t age;
-     uint32_t block[4];
+    uint32_t block[4];
     uint32_t id;
     uint32_t valid;
 } Set;
@@ -37,61 +37,61 @@ char * blockToString(uint32_t *block);
 List* createList();
 void insert(List *list, char c);
 
-void add(uint32_t *reg, FILE *file);                                // Implemented
-void sub(uint32_t *reg, FILE *file);                                // Implemented
-void mul(uint32_t *reg, FILE *file);                                // Implemented
-void _div(uint32_t *reg, FILE *file);                               // Implemented
-void cmp(uint32_t *reg, FILE *file);                                // Implemented
-void shl(uint32_t *reg, FILE *file);                                // Implemented
-void shr(uint32_t *reg, FILE *file);                                // Implemented
-void and(uint32_t *reg, FILE *file);                                // Implemented
-void not(uint32_t *reg, FILE *file);                                // Implemented
-void or(uint32_t *reg, FILE *file);                                 // Implemented
-void xor(uint32_t *reg, FILE *file);                                // Implemented
-void addi(uint32_t *reg, FILE *file);                               // Implemented
-void subi(uint32_t *reg, FILE *file);                               // Implemented
-void muli(uint32_t *reg, FILE *file);                               // Implemented
-void divi(uint32_t *reg, FILE *file);                               // Implemented
-void cmpi(uint32_t *reg, FILE *file);                               // Implemented
-void andi(uint32_t *reg, FILE *file);                               // Implemented
-void noti(uint32_t *reg, FILE *file);                               // Implemented
-void ori(uint32_t *reg, FILE *file);                                // Implemented
-void xori(uint32_t *reg, FILE *file);                               // Implemented
-void ldw(uint32_t *mem, uint32_t length, uint32_t *reg, FILE *file);                 // Implemented
-void stw(uint32_t *mem, uint32_t *reg, FILE *file);                 // Implemented
-void ldb(uint32_t *mem, uint32_t length, uint32_t *reg, FILE *file);                 // Implemented
-void stb(uint32_t *mem, uint32_t *reg, uint32_t length, FILE *file, List *terminal); // Implemented
-void push(uint32_t *mem, uint32_t *reg, FILE *file);                // Implemented
-void pop(uint32_t *mem, uint32_t *reg, FILE *file);                 // Implemented
-void bun(uint32_t *reg, FILE *file);                                // Implemented
-void bgt(uint32_t *reg, FILE *file);                                // Implemented
-void beq(uint32_t *reg, FILE *file);                                // Implemented
-void blt(uint32_t *reg, FILE *file);                                // Implemented
-void bne(uint32_t *reg, FILE *file);                                // Implemented
-void ble(uint32_t *reg, FILE *file);                                // Implemented
-void bge(uint32_t *reg, FILE *file);                                // Implemented
-void bzd(uint32_t *reg, FILE *file);                                // Implemented
-void bnz(uint32_t *reg, FILE *file);                                // Implemented
-void biv(uint32_t *reg, FILE *file);                                // Implemented
-void bni(uint32_t *reg, FILE *file);                                // Implemented
-void call(uint32_t *reg, FILE *file);                               // Implemented
-void ret(uint32_t *reg, FILE *file);                                // Implemented
-void isr(uint32_t *reg, FILE *file);                                // Implemented
-void reti(uint32_t *reg, FILE *file);                               // Implemented
-void _int(uint32_t *reg, FILE *file);                               // Implemented
-void invalid(uint32_t *reg, FILE *file);                            // Implemented
-void watchdog(uint32_t *reg, FILE *file);                           // Implemented
-void fpu(uint32_t *reg, FILE *file);                                // Implemented
-void fpu_add(float fx, float fy, float fz);                         // Implemented
-void fpu_sub(float fx, float fy, float fz);                         // Implemented
-void fpu_mul(float fx, float fy, float fz);                         // Implemented
-void fpu_div(float fx, float fy, float fz);                         // Implemented
-void fpu_assign_x(float fz);                                        // Implemented
-void fpu_assign_y(float fz);                                        // Implemented
-void fpu_ceil(float fz);                                            // Implemented
-void fpu_floor(float fz);                                           // Implemented
-void fpu_round(float fz);                                           // Implemented
-void imprime(FILE *file, List *LISTA);                              // Implemented
+void add(uint32_t *reg, FILE *file);
+void sub(uint32_t *reg, FILE *file);
+void mul(uint32_t *reg, FILE *file);
+void _div(uint32_t *reg, FILE *file);
+void cmp(uint32_t *reg, FILE *file);
+void shl(uint32_t *reg, FILE *file);
+void shr(uint32_t *reg, FILE *file);
+void and(uint32_t *reg, FILE *file);
+void not(uint32_t *reg, FILE *file);
+void or(uint32_t *reg, FILE *file);
+void xor(uint32_t *reg, FILE *file);
+void addi(uint32_t *reg, FILE *file);
+void subi(uint32_t *reg, FILE *file);
+void muli(uint32_t *reg, FILE *file);
+void divi(uint32_t *reg, FILE *file);
+void cmpi(uint32_t *reg, FILE *file);
+void andi(uint32_t *reg, FILE *file);
+void noti(uint32_t *reg, FILE *file);
+void ori(uint32_t *reg, FILE *file);
+void xori(uint32_t *reg, FILE *file);
+void ldw(uint32_t *mem, uint32_t length, uint32_t *reg, FILE *file);
+void stw(uint32_t *mem, uint32_t *reg, FILE *file);
+void ldb(uint32_t *mem, uint32_t length, uint32_t *reg, FILE *file);
+void stb(uint32_t *mem, uint32_t length, uint32_t *reg, FILE *file, List *terminal);
+void push(uint32_t *mem, uint32_t *reg, FILE *file);
+void pop(uint32_t *mem, uint32_t *reg, uint32_t length, FILE *file);
+void bun(uint32_t *reg, FILE *file);
+void bgt(uint32_t *reg, FILE *file);
+void beq(uint32_t *reg, FILE *file);
+void blt(uint32_t *reg, FILE *file);
+void bne(uint32_t *reg, FILE *file);
+void ble(uint32_t *reg, FILE *file);
+void bge(uint32_t *reg, FILE *file);
+void bzd(uint32_t *reg, FILE *file);
+void bnz(uint32_t *reg, FILE *file);
+void biv(uint32_t *reg, FILE *file);
+void bni(uint32_t *reg, FILE *file);
+void call(uint32_t *reg, FILE *file);
+void ret(uint32_t *reg, FILE *file);
+void isr(uint32_t *reg, FILE *file);
+void reti(uint32_t *reg, FILE *file);
+void _int(uint32_t *reg, FILE *file);
+void invalid(uint32_t *reg, FILE *file);
+void watchdog(uint32_t *reg, FILE *file);
+void fpu(uint32_t *reg, FILE *file);
+void fpu_add(float fx, float fy, float fz);
+void fpu_sub(float fx, float fy, float fz);
+void fpu_mul(float fx, float fy, float fz);
+void fpu_div(float fx, float fy, float fz);
+void fpu_assign_x(float fz);
+void fpu_assign_y(float fz);
+void fpu_ceil(float fz);
+void fpu_floor(float fz);
+void fpu_round(float fz);
+void imprime(FILE *file, List *LISTA);
 uint32_t getInstruction(uint32_t  index, uint32_t *mem, uint32_t length, FILE *file);
 uint32_t getData(uint32_t index, uint32_t *mem, uint32_t length, FILE *file);
 void setData(uint32_t index, uint32_t *mem, uint32_t data, FILE *file);
@@ -144,7 +144,7 @@ int main(int argc, char *argv[])
         i++;
     }
 
-    lines = i - 1;
+    lines = i;
 
     printf("[START OF SIMULATION]\n");
     fprintf(file_out, "[START OF SIMULATION]\n");
@@ -158,177 +158,136 @@ int main(int argc, char *argv[])
 
     while(exit_ == 0)
     {
-       // reg[33] = memory[reg[32]];
-        reg[33] = getInstruction(reg[32], memory, lines, file_out);
+        reg[33] = memory[reg[32]];
+        //reg[33] = getInstruction(reg[32], memory, lines, file_out);
         opcode = (reg[33] & 0xFC000000) >> 26;
 
         switch(opcode)
         {
-            // nop/add
             case 0x00:
                 add(reg, file_out);
                 break;
-            // sub
             case 0x01:
                 sub(reg, file_out);
                 break;
-            // mul
             case 0x02:
                 mul(reg, file_out);
                 break;
-            // div
             case 0x03:
                 _div(reg, file_out);
                 break;
-            // cmp
             case 0x04:
                 cmp(reg, file_out);
                 break;
-            // shl
             case 0x05:
                 shl(reg, file_out);
                 break;
-            // shr
             case 0x06:
                 shr(reg, file_out);
                 break;
-            // and
             case 0x07:
                 and(reg, file_out);
                 break;
-            // not
             case 0x08:
                 not(reg, file_out);
                 break;
-            // or
             case 0x09:
                 or(reg, file_out);
                 break;
-            // xor
             case 0x0A:
                 xor(reg, file_out);
                 break;
-            // push
             case 0x0B:
                 push(memory, reg, file_out);
                 break;
-            // pop
             case 0x0C:
-                pop(memory, reg, file_out);
+                pop(memory, reg, lines, file_out);
                 break;
-            // addi
             case 0x10:
                 addi(reg, file_out);
                 break;
-            // subi
             case 0x11:
                 subi(reg, file_out);
                 break;
-            // muli
             case 0x12:
                 muli(reg, file_out);
                 break;
-            // divi
             case 0x13:
                 divi(reg, file_out);
                 break;
-            // cmpi
             case 0x14:
                 cmpi(reg, file_out);
                 break;
-            // andi
             case 0x15:
                 andi(reg, file_out);
                 break;
-            // noti
             case 0x16:
                 noti(reg, file_out);
                 break;
-            // ori
             case 0x17:
                 ori(reg, file_out);
                 break;
-            // xori
             case 0x18:
                 xori(reg, file_out);
                 break;
-            // ldw
             case 0x19:
                 ldw(memory, lines, reg, file_out);
                 break;
-            // stw
             case 0x1A:
                 stw(memory, reg, file_out);
                 break;
-            // ldb
             case 0x1B:
                 ldb(memory,lines, reg, file_out);
                 break;
-            // stb
             case 0x1C:
-                stb(memory, reg, lines, file_out, terminalOut);
+                stb(memory, lines, reg, file_out, terminalOut);
                 break;
-            // bun
             case 0x20:
                 bun(reg, file_out);
                 break;
-            // beq
             case 0x21:
                 beq(reg, file_out);
                 break;
-            // blt
+
             case 0x22:
                 blt(reg, file_out);
                 break;
-            // bgt
             case 0x23:
                 bgt(reg, file_out);
                 break;
-            // bne
             case 0x24:
                 bne(reg, file_out);
                 break;
-            // ble
             case 0x25:
                 ble(reg, file_out);
                 break;
-            // bge
             case 0x26:
                 bge(reg, file_out);
                 break;
-            // bzd
             case 0x27:
                 bzd(reg, file_out);
                 break;
-            // bnz
             case 0x28:
                 bnz(reg, file_out);
                 break;
-            // biv
             case 0x29:
                 biv(reg, file_out);
                 break;
-            // bni
             case 0x2A:
                 bni(reg, file_out);
                 break;
-            // call
             case 0x30:
                 call(reg, file_out);
                 break;
-            // ret
             case 0x31:
                 ret(reg, file_out);
                 break;
-            // isr
             case 0x32:
                 isr(reg, file_out);
                 break;
-            // reti
             case 0x33:
                 reti(reg, file_out);
                 break;
-            // int
             case 0x3F:
                 _int(reg, file_out);
                 if (reg[32] == 0) exit_ = 1;
@@ -341,19 +300,16 @@ int main(int argc, char *argv[])
         int is_enable = (wdg >> 31);
         if (is_enable == 1)
             watchdog(reg, file_out);
-        
-        fpu(reg, file_out);
-        
+        fpu(reg, file_out); 
     }
     
     imprime(file_out, terminalOut);
     printf("[END OF SIMULATION]\n");
     fprintf(file_out, "[END OF SIMULATION]\n");
-    cacheStats(file_out);
+    //cacheStats(file_out);
     fclose(file_in);
     fclose(file_out);
     free(memory);
-
     return 0;
 }
 
@@ -498,10 +454,9 @@ void fpu(uint32_t *reg, FILE *file)
                 fpu_counter = 1;
                 break;
         }
-
     }
     if (fpu_counter > 0)
-            fpu_counter--;
+        fpu_counter--;
     
 }
 
@@ -509,19 +464,16 @@ void fpu_add(float fx, float fy, float fz)
 {
     uint32_t *pfx = (uint32_t *) &fx;
     uint32_t *pfy = (uint32_t *) &fy;
-
     uint32_t exp_x, exp_y;
 
     exp_x = (*pfx & 0x7F800000) >> 23;
     exp_y = (*pfy & 0x7F800000) >> 23;
-
     fpu_counter = (exp_x - exp_y) + 1;
-    
     fz = fx + fy;
     
     uint32_t *pfz = (uint32_t *) &fz;
-    fpu_z = *pfz;
     
+    fpu_z = *pfz;
     fpuz_is_ieee = 1;
 }
 
@@ -529,20 +481,16 @@ void fpu_sub(float fx, float fy, float fz)
 {
     uint32_t *pfx = (uint32_t *) &fx;
     uint32_t *pfy = (uint32_t *) &fy;
-
     uint32_t exp_x, exp_y;
 
     exp_x = (*pfx & 0x7F800000) >> 23;
     exp_y = (*pfy & 0x7F800000) >> 23;
-
     fpu_counter = (exp_x - exp_y) + 1;
-    
-    
     fz = fx - fy;
     
     uint32_t *pfz = (uint32_t *) &fz;
-    fpu_z = *pfz;
     
+    fpu_z = *pfz;
     fpuz_is_ieee = 1;
 }
 
@@ -550,20 +498,16 @@ void fpu_mul(float fx, float fy, float fz)
 {
     uint32_t *pfx = (uint32_t *) &fx;
     uint32_t *pfy = (uint32_t *) &fy;
-
     uint32_t exp_x, exp_y;
 
     exp_x = (*pfx & 0x7F800000) >> 23;
     exp_y = (*pfy & 0x7F800000) >> 23;
-
     fpu_counter = (exp_x - exp_y) + 1;
-    
     fz = fx * fy;
     
     uint32_t *pfz = (uint32_t *) &fz;
-    fpu_z = *pfz;
     
-
+    fpu_z = *pfz;
     fpuz_is_ieee = 1;
 }
 
@@ -578,19 +522,16 @@ void fpu_div(float fx, float fy, float fz)
     {
         uint32_t *pfx = (uint32_t *) &fx;
         uint32_t *pfy = (uint32_t *) &fy;
-
         uint32_t exp_x, exp_y;
 
         exp_x = (*pfx & 0x7F800000) >> 23;
         exp_y = (*pfy & 0x7F800000) >> 23;
-
         fpu_counter = (exp_x - exp_y) + 1;
-        
         fz = fx / fy;
         
         uint32_t *pfz = (uint32_t *) &fz;
-        fpu_z = *pfz;
         
+        fpu_z = *pfz;
         fpuz_is_ieee = 1;
     }
 }
@@ -655,7 +596,6 @@ void add(uint32_t *reg, FILE *file)
 
     unsigned long long int reg_x_64 =  (unsigned long long int) reg[x];
     unsigned long long int reg_y_64 = (unsigned long long int) reg[y];
-
     unsigned long long int int_64 = reg_x_64 + reg_y_64;
 
     char tmp = (int_64 & 0xFFFFFFFF00000000) >> 32;
@@ -1101,6 +1041,7 @@ void push(uint32_t *mem, uint32_t *reg, FILE *file)
         y |= (ext_y << 5);
 
     mem[reg[x]] = reg[y]; // stw rx, ry
+    //setData(reg[x], mem, reg[y], file);
 
     if (x == 0)
         reg[x] = 0;
@@ -1115,7 +1056,7 @@ void push(uint32_t *mem, uint32_t *reg, FILE *file)
     reg[32]++;
 }
 
-void pop(uint32_t *mem, uint32_t *reg, FILE *file)
+void pop(uint32_t *mem, uint32_t *reg,  uint32_t length, FILE *file)
 {
     uint32_t x, y, ext, ext_x, ext_y;
     char instruction[20];
@@ -1141,6 +1082,7 @@ void pop(uint32_t *mem, uint32_t *reg, FILE *file)
         reg[x] = 0;
     else
         reg[x] = mem[reg[y]];
+        //reg[x] = getData(reg[y], mem, length, file);
 
     sprintf(instruction, "pop %s,%s", indexToName(x, 0), indexToName(y, 0));
     printf("[0x%08X]\t%-20s\t%s=MEM[%s->0x%08X]=0x%08X\n", reg[32] * 4, instruction, indexToName(x, 1), indexToName(y, 1), reg[y] * 4, mem[reg[y]]);
@@ -1290,7 +1232,6 @@ void divi(uint32_t *reg, FILE *file)
     else if (imd != 0 && zd == 1)
         reg[35] &= 0x07;
 
-
     sprintf(instruction, "divi %s,%s,%u", indexToName(x, 0), indexToName(y, 0), imd);
     printf("[0x%08X]\t%-20s\t%s=0x%08X,%s=0x%08X,%s=%s/0x%04X=0x%08X\n", reg[32] * 4, instruction, indexToName(35, 1), reg[35], indexToName(34, 1), reg[34], indexToName(x, 1), indexToName(y, 1), imd, reg[x]);
     fprintf(file, "[0x%08X]\t%-20s\t%s=0x%08X,%s=0x%08X,%s=%s/0x%04X=0x%08X\n", reg[32] * 4, instruction, indexToName(35, 1), reg[35], indexToName(34, 1), reg[34], indexToName(x, 1), indexToName(y, 1), imd, reg[x]);
@@ -1324,7 +1265,7 @@ void cmpi(uint32_t *reg, FILE *file)
         cmp |= 0x00000002;
     else
         cmp |= 0x00000004;
-
+    
     reg[35] = cmp;
 
     sprintf(instruction, "cmpi %s,%u", indexToName(x, 0), imd);
@@ -1453,8 +1394,8 @@ void ldw(uint32_t *mem, uint32_t length, uint32_t *reg, FILE *file)
                 reg[x] = fpu_control;
                 break;
             default:
-                //reg[x] = mem[reg[y]+imd];
-                reg[x] = getData(reg[y]+imd, mem, length, file);
+                reg[x] = mem[reg[y]+imd];
+                //reg[x] = getData(reg[y]+imd, mem, length, file);
                 break;
         }
     }
@@ -1500,8 +1441,8 @@ void stw(uint32_t *mem, uint32_t *reg, FILE *file)
             fpu_control = reg[y];
             break;
         default:
-            //mem[reg[x] + imd] = reg[y];
-            setData(reg[x] + imd, mem, reg[y], file);
+            mem[reg[x] + imd] = reg[y];
+            //setData(reg[x] + imd, mem, reg[y], file);
             break;
     }
 
@@ -1521,8 +1462,35 @@ void ldb(uint32_t *mem, uint32_t length, uint32_t *reg, FILE *file)
     imd = (reg[33] & 0x3FFFC00) >> 10;
 
     index = (reg[y] + imd) / 4;
-    //tmp = mem[index];
-    tmp = getData(index, mem, length, file);
+
+    switch(reg[x] + imd)
+    {
+        case 0x00008080:
+            tmp = wdg;
+            break;
+        case 0x0000888A:
+            tmp = terminal_in;
+        case 0x0000888B:
+            tmp = terminal_out;
+            break;
+        case 0x00008800:
+            tmp = fpu_x;
+            break;
+        case 0x00008804:
+            tmp = fpu_y;
+            break;
+        case 0x00008808:
+            tmp = fpu_z;
+            break;
+        case 0x0000808C:
+            tmp = fpu_control;
+            break;
+        default:
+            tmp = mem[index];
+            //tmp = getData(index, mem, length, file);
+            break;
+    }
+
     byte = (reg[y] + imd) % 4;
     
     if (x == 0)
@@ -1534,7 +1502,7 @@ void ldb(uint32_t *mem, uint32_t length, uint32_t *reg, FILE *file)
             case 0:
                 switch(reg[y] + imd)
                 {
-                    case 0x00002020:
+                    case 0x00008080:
                         reg[x] = (wdg & 0xFF000000) >> 24;
                         break;
                     case 0x0000888A:
@@ -1543,16 +1511,16 @@ void ldb(uint32_t *mem, uint32_t length, uint32_t *reg, FILE *file)
                     case 0x0000888B:
                         reg[x] = (terminal_out & 0xFF000000) >> 24;
                         break;
-                    case 0x00002200:
+                    case 0x00008800:
                         reg[x] = (fpu_x & 0xFF000000) >> 24;
                         break;
-                    case 0x00002201:
+                    case 0x00008804:
                         reg[x] = (fpu_y & 0xFF000000) >> 24;
                         break;
-                    case 0x00002202:
+                    case 0x00008808:
                         reg[x] = (fpu_z & 0xFF000000) >> 24;
                         break;
-                    case 0x00002203:
+                    case 0x0000880C:
                         reg[x] = (fpu_control & 0xFF000000) >> 24;
                         break;
                     default:
@@ -1563,7 +1531,7 @@ void ldb(uint32_t *mem, uint32_t length, uint32_t *reg, FILE *file)
             case 1:
                 switch(reg[y] + imd)
                 {
-                    case 0x00002020:
+                    case 0x00008080:
                         reg[x] = (wdg & 0xFF0000) >> 16;
                         break;
                     case 0x0000888A:
@@ -1572,16 +1540,16 @@ void ldb(uint32_t *mem, uint32_t length, uint32_t *reg, FILE *file)
                     case 0x0000888B:
                         reg[x] = (terminal_out & 0xFF0000) >> 16;
                         break;
-                    case 0x00002200:
+                    case 0x00008800:
                         reg[x] = (fpu_x & 0xFF0000) >> 16;
                         break;
-                    case 0x00002201:
+                    case 0x00008804:
                         reg[x] = (fpu_y & 0xFF0000) >> 16;
                         break;
-                    case 0x00002202:
+                    case 0x00008808:
                         reg[x] = (fpu_z & 0xFF000) >> 16;
                         break;
-                    case 0x00002203:
+                    case 0x0000880C:
                         reg[x] = (fpu_control & 0xFF000) >> 16;
                         break;
                     default:
@@ -1592,7 +1560,7 @@ void ldb(uint32_t *mem, uint32_t length, uint32_t *reg, FILE *file)
             case 2:
                 switch(reg[y] + imd)
                 {
-                    case 0x00002020:
+                    case 0x00008080:
                         reg[x] = (wdg & 0xFF00) >> 8;
                         break;
                     case 0x0000888A:
@@ -1601,16 +1569,16 @@ void ldb(uint32_t *mem, uint32_t length, uint32_t *reg, FILE *file)
                     case 0x0000888B:
                         reg[x] = (terminal_out & 0xFF00) >> 8;
                         break;
-                    case 0x00002200:
+                    case 0x00008800:
                         reg[x] = (fpu_x & 0xFF00) >> 8;
                         break;
-                    case 0x00002201:
+                    case 0x00008801:
                         reg[x] = (fpu_y & 0xFF00) >> 8;
                         break;
-                    case 0x00002202:
+                    case 0x00008804:
                         reg[x] = (fpu_z & 0xFF00) >> 8;
                         break;
-                    case 0x00002203:
+                    case 0x0000880C:
                         reg[x] = (fpu_control & 0xFF00) >> 8;
                         break;
                     default:
@@ -1621,7 +1589,7 @@ void ldb(uint32_t *mem, uint32_t length, uint32_t *reg, FILE *file)
             case 3:
                 switch(reg[y] + imd)
                 {
-                    case 0x00002020:
+                    case 0x00008080:
                         reg[x] = (wdg & 0xFF);
                         break;
                     case 0x0000888A:
@@ -1630,16 +1598,16 @@ void ldb(uint32_t *mem, uint32_t length, uint32_t *reg, FILE *file)
                     case 0x0000888B:
                         reg[x] = (terminal_out & 0xFF);
                         break;
-                    case 0x00002200:
+                    case 0x00008800:
                         reg[x] = (fpu_x & 0xFF);
                         break;
-                    case 0x00002201:
+                    case 0x00008804:
                         reg[x] = (fpu_y & 0xFF);
                         break;
-                    case 0x00002202:
+                    case 0x00008808:
                         reg[x] = (fpu_z & 0xFF);
                         break;
-                    case 0x00002203:
+                    case 0x0000880C:
                         reg[x] = (fpu_control & 0xFF);
                         break;
                     default:
@@ -1658,7 +1626,7 @@ void ldb(uint32_t *mem, uint32_t length, uint32_t *reg, FILE *file)
     reg[32]++;
 }
 
-void stb(uint32_t *mem, uint32_t *reg, uint32_t length, FILE *file, List *terminal)
+void stb(uint32_t *mem, uint32_t length, uint32_t *reg, FILE *file, List *terminal)
 {
     uint32_t index, byte, x, y, imd, tmp;
     char instruction[20];
@@ -1671,7 +1639,7 @@ void stb(uint32_t *mem, uint32_t *reg, uint32_t length, FILE *file, List *termin
 
     switch(reg[x] + imd)
     {
-        case 0x00002020:
+        case 0x00008080:
             tmp = wdg;
             break;
         case 0x0000888A:
@@ -1679,21 +1647,21 @@ void stb(uint32_t *mem, uint32_t *reg, uint32_t length, FILE *file, List *termin
         case 0x0000888B:
             tmp = terminal_out;
             break;
-        case 0x00002200:
+        case 0x00008800:
             tmp = fpu_x;
             break;
-        case 0x00002201:
+        case 0x00008804:
             tmp = fpu_y;
             break;
-        case 0x00002202:
+        case 0x00008808:
             tmp = fpu_z;
             break;
-        case 0x00002203:
+        case 0x0000808C:
             tmp = fpu_control;
             break;
         default:
-            //tmp = mem[index];
-            tmp = getData(index, mem, length, file);
+            tmp = mem[index];
+            //tmp = getData(index, mem, length, file);
             break;
     }
 
@@ -1717,26 +1685,26 @@ void stb(uint32_t *mem, uint32_t *reg, uint32_t length, FILE *file, List *termin
                 out = (reg[y] << 24) >> 24;
                 insert(terminal, (char)terminal_out);
                 break;
-            case 0x00002200:
+            case 0x00008800:
                 fpu_x = (reg[y] << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (((tmp & 0xFF00) >> 8) << 8) | (tmp & 0xFF);
                 out = (reg[y] << 24) >> 24;
                 break;
-            case 0x00002201:
+            case 0x00008804:
                 fpu_y = (reg[y] << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (((tmp & 0xFF00) >> 8) << 8) | (tmp & 0xFF);
                 out = (reg[y] << 24) >> 24;
                 break;
-            case 0x00002202:
+            case 0x00008808:
                 fpu_z = (reg[y] << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (((tmp & 0xFF00) >> 8) << 8) | (tmp & 0xFF);
                 out = (reg[y] << 24) >> 24;
                 break;
-            case 0x00002203:
+            case 0x0000880C:
                 fpu_control = (reg[y] << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (((tmp & 0xFF00) >> 8) << 8) | (tmp & 0xFF);
                 out = (reg[y] << 24) >> 24;
                 break;
             default:
                 data = (reg[y] << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (((tmp & 0xFF00) >> 8) << 8) | (tmp & 0xFF);
-                // mem[index] = data;
-                setData(index, mem, data, file);
+                mem[index] = data;
+                //setData(index, mem, data, file);
                 out = (reg[y] << 24) >> 24;
                 break;
         }
@@ -1745,7 +1713,7 @@ void stb(uint32_t *mem, uint32_t *reg, uint32_t length, FILE *file, List *termin
     {
         switch (reg[x] + imd)
         {
-            case 0x00002020:
+            case 0x00008080:
                 wdg = (((tmp & 0xFF000000) >> 24) << 24) | (reg[y] << 16) | (((tmp & 0xFF00) >> 8) << 8) | (tmp & 0xFF);
                 out = (reg[y] << 24) >> 24;
                 break;
@@ -1758,26 +1726,26 @@ void stb(uint32_t *mem, uint32_t *reg, uint32_t length, FILE *file, List *termin
                 out = (reg[y] << 24) >> 24;
                 insert(terminal, (char)terminal_out);
                 break;
-            case 0x00002200:
+            case 0x00008800:
                 fpu_x = (((tmp & 0xFF000000) >> 24) << 24) | (reg[y] << 16) | (((tmp & 0xFF00) >> 8) << 8) | (tmp & 0xFF);
                 out = (reg[y] << 24) >> 24;
                 break;
-            case 0x00002201:
+            case 0x00008804:
                 fpu_y = (((tmp & 0xFF000000) >> 24) << 24) | (reg[y] << 16) | (((tmp & 0xFF00) >> 8) << 8) | (tmp & 0xFF);
                 out = (reg[y] << 24) >> 24;
                 break;
-            case 0x00002202:
+            case 0x00008808:
                 fpu_z = (((tmp & 0xFF000000) >> 24) << 24) | (reg[y] << 16) | (((tmp & 0xFF00) >> 8) << 8) | (tmp & 0xFF);
                 out = (reg[y] << 24) >> 24;
                 break;
-            case 0x00002203:
+            case 0x0000880C:
                 fpu_control =  (((tmp & 0xFF000000) >> 24) << 24) | (reg[y] << 16) | (((tmp & 0xFF00) >> 8) << 8) | (tmp & 0xFF);
                 out = (reg[y] << 24) >> 24;
                 break;
             default:
                 data = (((tmp & 0xFF000000) >> 24) << 24) | (reg[y] << 16) | (((tmp & 0xFF00) >> 8) << 8) | (tmp & 0xFF);
-                // mem[index] = data
-                setData(index, mem, data, file);
+                mem[index] = data;
+                //setData(index, mem, data, file);
                 out = (reg[y] << 24) >> 24;
                 break;
         }
@@ -1787,7 +1755,7 @@ void stb(uint32_t *mem, uint32_t *reg, uint32_t length, FILE *file, List *termin
     {
         switch (reg[x] + imd)
         {
-            case 0x00002020:
+            case 0x00008080:
                 wdg = (((tmp & 0xFF000000) >> 24) << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (reg[y] << 8) | (tmp & 0xFF);
                 out = (reg[y] << 24) >> 24;
                 break;
@@ -1800,26 +1768,26 @@ void stb(uint32_t *mem, uint32_t *reg, uint32_t length, FILE *file, List *termin
                 out = (reg[y] << 24) >> 24;
                insert(terminal, (char)terminal_out);
                 break;
-            case 0x00002200:
+            case 0x00008800:
                 fpu_x = (((tmp & 0xFF000000) >> 24) << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (reg[y] << 8) | (tmp & 0xFF);
                 out = (reg[y] << 24) >> 24;
                 break;
-            case 0x00002201:
+            case 0x00008804:
                 fpu_y = (((tmp & 0xFF000000) >> 24) << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (reg[y] << 8) | (tmp & 0xFF);
                 out = (reg[y] << 24) >> 24;
                 break;
-            case 0x00002202:
+            case 0x00008808:
                 fpu_z = (((tmp & 0xFF000000) >> 24) << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (reg[y] << 8) | (tmp & 0xFF);
                 out = (reg[y] << 24) >> 24;
                 break;
-            case 0x00002203:
+            case 0x0000880C:
                 fpu_control = (((tmp & 0xFF000000) >> 24) << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (reg[y] << 8) | (tmp & 0xFF);
                 out = (reg[y] << 24) >> 24;
                 break;
             default:
                 data = (((tmp & 0xFF000000) >> 24) << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (reg[y] << 8) | (tmp & 0xFF);
-                // mem[index] = data;
-                setData(index, mem, data, file);
+                mem[index] = data;
+                //setData(index, mem, data, file);
                 out = (reg[y] << 24) >> 24;
                 break;
         }
@@ -1828,7 +1796,7 @@ void stb(uint32_t *mem, uint32_t *reg, uint32_t length, FILE *file, List *termin
     {
         switch (reg[x] + imd)
         {
-            case 0x00002020:
+            case 0x00008080:
                 wdg = (((tmp & 0xFF000000) >> 24) << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (((tmp & 0xFF00) >> 8) << 8) | reg[y];
                 out = (reg[y] << 24) >> 24;
                 break;
@@ -1841,26 +1809,26 @@ void stb(uint32_t *mem, uint32_t *reg, uint32_t length, FILE *file, List *termin
                 out = (reg[y] << 24) >> 24;
                 insert(terminal, (char)terminal_out);
                 break;
-            case 0x00002200:
+            case 0x00008800:
                 fpu_x = (((tmp & 0xFF000000) >> 24) << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (((tmp & 0xFF00) >> 8) << 8) | reg[y];
                 out = (reg[y] << 24) >> 24;
                 break;
-            case 0x00002201:
+            case 0x00008804:
                 fpu_y = (((tmp & 0xFF000000) >> 24) << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (((tmp & 0xFF00) >> 8) << 8) | reg[y];
                 out = (reg[y] << 24) >> 24;
                 break;
-            case 0x00002202:
+            case 0x00008808:
                 fpu_z = (((tmp & 0xFF000000) >> 24) << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (((tmp & 0xFF00) >> 8) << 8) | reg[y];
                 out = (reg[y] << 24) >> 24;
                 break;
-            case 0x00002203:
+            case 0x0000880C:
                 fpu_control = (((tmp & 0xFF000000) >> 24) << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (((tmp & 0xFF00) >> 8) << 8) | reg[y];
                 out = (reg[y] << 24) >> 24;
                 break;
             default:
                 data = (((tmp & 0xFF000000) >> 24) << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (((tmp & 0xFF00) >> 8) << 8) | reg[y];
-                // mem[index] = data;
-                setData(index, mem, data, file);
+                mem[index] = data;
+                //setData(index, mem, data, file);
                 out = (reg[y] << 24) >> 24;
                 break;
         }
@@ -2236,58 +2204,11 @@ uint32_t getInstruction(uint32_t index, uint32_t *mem, uint32_t length, FILE *fi
                     {
                         int k = index >> 4;
                         k *= 4;
-                        if (length % 4 != 0)
+                        for (int j = 0; j < 4; j++)
                         {
-                            int diff = length - (index / 4);
-                            if (diff < 4)
-                            {
-                                switch(diff)
-                                {
-                                    case 3:
-                                        for (int j = 0; j < 3; j++)
-                                        {
-                                            cache_i[line].set[0].block[j] = mem[k];
-                                            k++;
-                                        }
-                                        cache_i[line].set[0].block[3] = 0;
-                                        break;
-                                    case 2:
-                                        for (int j = 0; j < 2; j++)
-                                        {
-                                            cache_i[line].set[0].block[j] = mem[k];
-                                            k++;
-                                        }
-                                        cache_i[line].set[0].block[2] = 0;
-                                        cache_i[line].set[0].block[3] = 0;
-                                        break;
-                                    case 1:
-                                        for (int j = 0; j < 1; j++)
-                                        {
-                                            cache_i[line].set[0].block[j] = mem[k];
-                                            k++;
-                                        }
-                                        cache_i[line].set[0].block[1] = 0;
-                                        cache_i[line].set[0].block[2] = 0;
-                                        cache_i[line].set[0].block[3] = 0;
-                                        break;
-                                }
-                            }
-                            else
-                            {
-                                for (int j = 0; j < 4; j++)
-                                {
-                                    cache_i[line].set[0].block[j] = mem[k];
-                                    k++;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            for (int j = 0; j < 4; j++)
-                            {
-                                cache_i[line].set[0].block[j] = mem[k];
-                                k++;
-                            }
+                            uint32_t resto = k % length;
+                            cache_i[line].set[0].block[j] = mem[resto];
+                            k++;
                         }
                         cache_i[line].set[0].age = 0;
                         cache_i[line].set[0].id = id;
@@ -2298,58 +2219,11 @@ uint32_t getInstruction(uint32_t index, uint32_t *mem, uint32_t length, FILE *fi
                     {
                         int k = index >> 4;
                         k *= 4;
-                        if (length % 4 != 0)
+                        for (int j = 0; j < 4; j++)
                         {
-                            int diff = length - (index / 4);
-                            if (diff < 4)
-                            {
-                                switch(diff)
-                                {
-                                    case 3:
-                                        for (int j = 0; j < 3; j++)
-                                        {
-                                            cache_i[line].set[1].block[j] = mem[k];
-                                            k++;
-                                        }
-                                        cache_i[line].set[1].block[3] = 0;
-                                        break;
-                                    case 2:
-                                        for (int j = 0; j < 2; j++)
-                                        {
-                                            cache_i[line].set[1].block[j] = mem[k];
-                                            k++;
-                                        }
-                                        cache_i[line].set[1].block[2] = 0;
-                                        cache_i[line].set[1].block[3] = 0;
-                                        break;
-                                    case 1:
-                                        for (int j = 0; j < 1; j++)
-                                        {
-                                            cache_i[line].set[1].block[j] = mem[k];
-                                            k++;
-                                        }
-                                        cache_i[line].set[1].block[1] = 0;
-                                        cache_i[line].set[1].block[2] = 0;
-                                        cache_i[line].set[1].block[3] = 0;
-                                        break;
-                                }
-                            }
-                            else
-                            {
-                                for (int j = 0; j < 4; j++)
-                                {
-                                    cache_i[line].set[1].block[j] = mem[k];
-                                    k++;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            for (int j = 0; j < 4; j++)
-                            {
-                                cache_i[line].set[1].block[j] = mem[k];
-                                k++;
-                            }
+                            uint32_t resto = k % length;
+                            cache_i[line].set[1].block[j] = mem[resto];
+                            k++;
                         }
                         cache_i[line].set[1].age = 0;
                         cache_i[line].set[1].id = id;
@@ -2368,58 +2242,11 @@ uint32_t getInstruction(uint32_t index, uint32_t *mem, uint32_t length, FILE *fi
             fprintf(file, "[0x%08X]\t%-20s\t%s\n\t\t\t\t\t\t\t\t\t\t%s\n", index, instruction, str_set0, str_set1);
             int k = index >> 4;
             k *= 4;
-            if (length % 4 != 0)
+            for (int j = 0; j < 4; j++)
             {
-                int diff = length - (index / 4);
-                if (diff < 4)
-                {
-                    switch(diff)
-                    {
-                        case 3:
-                            for (int j = 0; j < 3; j++)
-                            {
-                                cache_i[line].set[i].block[j] = mem[k];
-                                k++;
-                            }
-                            cache_i[line].set[i].block[3] = 0;
-                            break;
-                        case 2:
-                            for (int j = 0; j < 2; j++)
-                            {
-                                cache_i[line].set[i].block[j] = mem[k];
-                                k++;
-                            }
-                            cache_i[line].set[i].block[2] = 0;
-                            cache_i[line].set[i].block[3] = 0;
-                            break;
-                        case 1:
-                            for (int j = 0; j < 1; j++)
-                            {
-                                cache_i[line].set[i].block[j] = mem[k];
-                                k++;
-                            }
-                            cache_i[line].set[i].block[1] = 0;
-                            cache_i[line].set[i].block[2] = 0;
-                            cache_i[line].set[i].block[3] = 0;
-                            break;
-                    }
-                }
-                else
-                {
-                    for (int j = 0; j < 4; j++)
-                    {
-                        cache_i[line].set[i].block[j] = mem[k];
-                        k++;
-                    }
-                }
-            }
-            else
-            {
-                for (int j = 0; j < 4; j++)
-                {
-                    cache_i[line].set[i].block[j] = mem[k];
-                    k++;
-                }
+                uint32_t resto = k % length;
+                cache_i[line].set[i].block[j] = mem[resto];
+                k++;
             }
             cache_i[line].set[i].valid = 1;
             cache_i[line].set[i].id = id;
@@ -2480,58 +2307,11 @@ uint32_t getData(uint32_t index, uint32_t *mem, uint32_t length, FILE *file)
                     {
                         int k = index >> 4;
                         k *=4;
-                        if (length % 4 != 0)
+                        for (int j = 0; j < 4; j++)
                         {
-                            int diff = length - (index / 4);
-                            if (diff < 4)
-                            {
-                                switch(diff)
-                                {
-                                    case 3:
-                                        for (int j = 0; j < 3; j++)
-                                        {
-                                            cache_d[line].set[0].block[j] = mem[k];
-                                            k++;
-                                        }
-                                        cache_d[line].set[0].block[3] = 0;
-                                        break;
-                                    case 2:
-                                        for (int j = 0; j < 2; j++)
-                                        {
-                                            cache_d[line].set[0].block[j] = mem[k];
-                                            k++;
-                                        }
-                                        cache_d[line].set[0].block[2] = 0;
-                                        cache_d[line].set[0].block[3] = 0;
-                                        break;
-                                    case 1:
-                                        for (int j = 0; j < 1; j++)
-                                        {
-                                            cache_d[line].set[0].block[j] = mem[k];
-                                            k++;
-                                        }
-                                        cache_d[line].set[0].block[1] = 0;
-                                        cache_d[line].set[0].block[2] = 0;
-                                        cache_d[line].set[0].block[3] = 0;
-                                        break;
-                                }
-                            }
-                            else
-                            {
-                                for (int j = 0; j < 4; j++)
-                                {
-                                    cache_d[line].set[0].block[j] = mem[k];
-                                    k++;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            for (int j = 0; j < 4; j++)
-                            {
-                                cache_d[line].set[0].block[j] = mem[k];
-                                k++;
-                            }
+                            uint32_t resto = k % length;
+                            cache_d[line].set[0].block[j] = mem[resto];
+                            k++;
                         }
                         cache_d[line].set[0].age = 0;
                         cache_d[line].set[0].id = id;
@@ -2542,58 +2322,11 @@ uint32_t getData(uint32_t index, uint32_t *mem, uint32_t length, FILE *file)
                     {
                         int k = index >> 4;
                         k *=4;
-                        if (length % 4 != 0)
+                        for (int j = 0; j < 4; j++)
                         {
-                            int diff = length - (index / 4);
-                            if (diff < 4)
-                            {
-                                switch(diff)
-                                {
-                                    case 3:
-                                        for (int j = 0; j < 3; j++)
-                                        {
-                                            cache_d[line].set[1].block[j] = mem[k];
-                                            k++;
-                                        }
-                                        cache_d[line].set[1].block[3] = 0;
-                                        break;
-                                    case 2:
-                                        for (int j = 0; j < 2; j++)
-                                        {
-                                            cache_d[line].set[1].block[j] = mem[k];
-                                            k++;
-                                        }
-                                        cache_d[line].set[1].block[2] = 0;
-                                        cache_d[line].set[1].block[3] = 0;
-                                        break;
-                                    case 1:
-                                        for (int j = 0; j < 1; j++)
-                                        {
-                                            cache_d[line].set[1].block[j] = mem[k];
-                                            k++;
-                                        }
-                                        cache_d[line].set[1].block[1] = 0;
-                                        cache_d[line].set[1].block[2] = 0;
-                                        cache_d[line].set[1].block[3] = 0;
-                                        break;
-                                }
-                            }
-                            else
-                            {
-                                for (int j = 0; j < 4; j++)
-                                {
-                                    cache_d[line].set[1].block[j] = mem[k];
-                                    k++;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            for (int j = 0; j < 4; j++)
-                            {
-                                cache_d[line].set[1].block[j] = mem[k];
-                                k++;
-                            }
+                            uint32_t resto = k % length;
+                            cache_d[line].set[1].block[j] = mem[resto];
+                            k++;
                         }
                         cache_d[line].set[1].age = 0;
                         cache_d[line].set[1].id = id;
@@ -2612,58 +2345,11 @@ uint32_t getData(uint32_t index, uint32_t *mem, uint32_t length, FILE *file)
             fprintf(file, "[0x%08X]\t%-20s\t%s\n\t\t\t\t\t\t\t\t\t\t%s\n", index, instruction, str_set0, str_set1);
             int k = index >> 4;
             k *=4;
-            if (length % 4 != 0)
+            for (int j = 0; j < 4; j++)
             {
-                int diff = length - (index / 4);
-                if (diff < 4)
-                {
-                    switch(diff)
-                    {
-                        case 3:
-                            for (int j = 0; j < 3; j++)
-                            {
-                                cache_d[line].set[i].block[j] = mem[k];
-                                k++;
-                            }
-                            cache_d[line].set[i].block[3] = 0;
-                            break;
-                        case 2:
-                            for (int j = 0; j < 2; j++)
-                            {
-                                cache_d[line].set[i].block[j] = mem[k];
-                                k++;
-                            }
-                            cache_d[line].set[i].block[2] = 0;
-                            cache_d[line].set[i].block[3] = 0;
-                            break;
-                        case 1:
-                            for (int j = 0; j < 1; j++)
-                            {
-                                cache_d[line].set[i].block[j] = mem[k];
-                                k++;
-                            }
-                            cache_d[line].set[i].block[1] = 0;
-                            cache_d[line].set[i].block[2] = 0;
-                            cache_d[line].set[i].block[3] = 0;
-                            break;
-                    }
-                }
-                else
-                {
-                    for (int j = 0; j < 4; j++)
-                    {
-                        cache_d[line].set[i].block[j] = mem[k];
-                        k++;
-                    }
-                }
-            }
-            else
-            {
-                for (int j = 0; j < 4; j++)
-                {
-                    cache_d[line].set[i].block[j] = mem[k];
-                    k++;
-                }
+                uint32_t resto = k % length;
+                cache_d[line].set[i].block[j] = mem[resto];
+                k++;
             }
             cache_d[line].set[i].valid = 1;
             cache_d[line].set[i].id = id;
@@ -2690,9 +2376,7 @@ void setData(uint32_t index, uint32_t *mem, uint32_t data, FILE *file)
                 cache_d[i].set[j].age ++;
         }
     }
-    
-    int not_found = 0;
-        
+            
     for (int i = 0; i < 2; i++)
     {
         if (cache_d[line].set[i].valid == 1 )
@@ -2709,45 +2393,28 @@ void setData(uint32_t index, uint32_t *mem, uint32_t data, FILE *file)
                 mem[index / 4] = cache_d[line].set[i].block[word] = data;
                 return;
             }
-            else
-            {
-                not_found = 1;
-            }
-        }
-        else
-        {
-            not_found = 1;
         }
     }
     
-    if (not_found == 1)
-    {
-        sprintf(instruction, "write_miss D->%u", line);
-        sprintf(str_set0, "SET=0:STATUS=%s,AGE=%u,DATA=%s", validToString(cache_d[line].set[0].valid), cache_d[line].set[0].age, blockToString(cache_d[line].set[0].block));
-        sprintf(str_set1, "SET=1:STATUS=%s,AGE=%u,DATA=%s", validToString(cache_d[line].set[1].valid), cache_d[line].set[1].age, blockToString(cache_d[line].set[1].block));
-        printf("[0x%08X]\t%-20s\t%s\n\t\t\t\t\t%s\n", index, instruction, str_set0, str_set1);
-        fprintf(file, "[0x%08X]\t%-20s\t%s\n\t\t\t\t\t\t\t\t\t\t%s\n", index, instruction, str_set0, str_set1);
-        mem[index / 4] = data;
-        cache_d_miss_counter++;
-    }
+    sprintf(instruction, "write_miss D->%u", line);
+    sprintf(str_set0, "SET=0:STATUS=%s,AGE=%u,DATA=%s", validToString(cache_d[line].set[0].valid), cache_d[line].set[0].age, blockToString(cache_d[line].set[0].block));
+    sprintf(str_set1, "SET=1:STATUS=%s,AGE=%u,DATA=%s", validToString(cache_d[line].set[1].valid), cache_d[line].set[1].age, blockToString(cache_d[line].set[1].block));
+    printf("[0x%08X]\t%-20s\t%s\n\t\t\t\t\t%s\n", index, instruction, str_set0, str_set1);
+    fprintf(file, "[0x%08X]\t%-20s\t%s\n\t\t\t\t\t\t\t\t\t\t%s\n", index, instruction, str_set0, str_set1);
+    mem[index / 4] = data;
+    cache_d_miss_counter++;
+
 }
 
 void cacheStats(FILE *file)
 {
     float total_i = (float)(cache_i_hit_counter + cache_i_miss_counter);
-    float ta_i_f = (float)(cache_i_hit_counter / total_i) * 100;
-    float tf_i_f = (float)(cache_i_miss_counter / total_i) * 100;
-    uint32_t ta_i =  (uint32_t) roundf(ta_i_f);
-    uint32_t tf_i = (uint32_t) roundf(tf_i_f);
+    float ta_i = (float)(cache_i_hit_counter / total_i) * 100;
     float total_d = (float)(cache_d_hit_counter + cache_d_miss_counter);
-    float ta_d_f = (float)(cache_d_hit_counter / total_d) * 100;
-    float tf_d_f = (float)(cache_d_miss_counter / total_d) * 100;
-    uint32_t ta_d =  (uint32_t) roundf(ta_d_f);
-    uint32_t tf_d = (uint32_t) roundf(tf_d_f);
-    printf("[CACHE D STATISTICS] #Hit = %u (%u%%), #Miss = %u (%u%%)\n", cache_d_hit_counter, ta_d, cache_d_miss_counter, tf_d);
-    fprintf(file, "[CACHE D STATISTICS] #Hit = %u (%u%%), #Miss = %u (%u%%)\n", cache_d_hit_counter, ta_d, cache_d_miss_counter, tf_d);
-    printf("[CACHE I STATISTICS] #Hit = %u (%u%%), #Miss = %u (%u%%)\n", cache_i_hit_counter, ta_i, cache_i_miss_counter, tf_i);
-    fprintf(file, "[CACHE I STATISTICS] #Hit = %u (%u%%), #Miss = %u (%u%%)\n", cache_i_hit_counter, ta_i, cache_i_miss_counter, tf_i);
+    float ta_d = (float)(cache_d_hit_counter / total_d) * 100;
+
+    printf("[CACHE]\nD_hit_rate: %.2f%%\nI_hit_rate: %.2f%%\n", ta_d, ta_i);
+    fprintf(file, "[CACHE]\nD_hit_rate: %.2f%%\nI_hit_rate: %.2f%%\n", ta_d, ta_i);
 }
 
 int getNumberLines(FILE *file)
