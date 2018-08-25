@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    uint32_t lines = getNumberLines(file_in) + 1;
+    uint32_t lines = getNumberLines(file_in);
     uint32_t *memory = (uint32_t *) malloc(sizeof(uint32_t) * lines);
     uint32_t line;
     int i = 0;
@@ -139,12 +139,10 @@ int main(int argc, char *argv[])
 
     while (!feof(file_in))
     {
-        fscanf(file_in, "%X", &line);
+        fscanf(file_in, "%X\n", &line);
         memory[i] = line;
         i++;
     }
-
-    lines = i;
 
     printf("[START OF SIMULATION]\n");
     fprintf(file_out, "[START OF SIMULATION]\n");
@@ -158,8 +156,8 @@ int main(int argc, char *argv[])
 
     while(exit_ == 0)
     {
-        reg[33] = memory[reg[32]];
-        //reg[33] = getInstruction(reg[32], memory, lines, file_out);
+        //reg[33] = memory[reg[32]];
+        reg[33] = getInstruction(reg[32], memory, lines, file_out);
         opcode = (reg[33] & 0xFC000000) >> 26;
 
         switch(opcode)
@@ -306,7 +304,7 @@ int main(int argc, char *argv[])
     imprime(file_out, terminalOut);
     printf("[END OF SIMULATION]\n");
     fprintf(file_out, "[END OF SIMULATION]\n");
-    //cacheStats(file_out);
+    cacheStats(file_out);
     fclose(file_in);
     fclose(file_out);
     free(memory);
@@ -321,7 +319,7 @@ void imprime(FILE *file, List *list)
         fprintf(file, "[TERMINAL]\n");
         
         Node* aux = list->head;
-        while(aux->next != NULL)
+        while(aux != NULL)
         {
             printf("%c", aux->character);
             fprintf(file, "%c", aux->character);
@@ -1040,8 +1038,8 @@ void push(uint32_t *mem, uint32_t *reg, FILE *file)
     if (ext_y == 1)
         y |= (ext_y << 5);
 
-    mem[reg[x]] = reg[y]; // stw rx, ry
-    //setData(reg[x], mem, reg[y], file);
+    //mem[reg[x]] = reg[y];
+    setData(reg[x], mem, reg[y], file);
 
     if (x == 0)
         reg[x] = 0;
@@ -1081,8 +1079,8 @@ void pop(uint32_t *mem, uint32_t *reg,  uint32_t length, FILE *file)
     if(x == 0)
         reg[x] = 0;
     else
-        reg[x] = mem[reg[y]];
-        //reg[x] = getData(reg[y], mem, length, file);
+        //reg[x] = mem[reg[y]];
+        reg[x] = getData(reg[y], mem, length, file);
 
     sprintf(instruction, "pop %s,%s", indexToName(x, 0), indexToName(y, 0));
     printf("[0x%08X]\t%-20s\t%s=MEM[%s->0x%08X]=0x%08X\n", reg[32] * 4, instruction, indexToName(x, 1), indexToName(y, 1), reg[y] * 4, mem[reg[y]]);
@@ -1394,8 +1392,8 @@ void ldw(uint32_t *mem, uint32_t length, uint32_t *reg, FILE *file)
                 reg[x] = fpu_control;
                 break;
             default:
-                reg[x] = mem[reg[y]+imd];
-                //reg[x] = getData(reg[y]+imd, mem, length, file);
+                //reg[x] = mem[reg[y]+imd];
+                reg[x] = getData(reg[y]+imd, mem, length, file);
                 break;
         }
     }
@@ -1441,8 +1439,8 @@ void stw(uint32_t *mem, uint32_t *reg, FILE *file)
             fpu_control = reg[y];
             break;
         default:
-            mem[reg[x] + imd] = reg[y];
-            //setData(reg[x] + imd, mem, reg[y], file);
+            //mem[reg[x] + imd] = reg[y];
+            setData(reg[x] + imd, mem, reg[y], file);
             break;
     }
 
@@ -1463,7 +1461,7 @@ void ldb(uint32_t *mem, uint32_t length, uint32_t *reg, FILE *file)
 
     index = (reg[y] + imd) / 4;
 
-    switch(reg[x] + imd)
+    switch(reg[y] + imd)
     {
         case 0x00008080:
             tmp = wdg;
@@ -1486,8 +1484,8 @@ void ldb(uint32_t *mem, uint32_t length, uint32_t *reg, FILE *file)
             tmp = fpu_control;
             break;
         default:
-            tmp = mem[index];
-            //tmp = getData(index, mem, length, file);
+            //tmp = mem[index];
+            tmp = getData(index, mem, length, file);
             break;
     }
 
@@ -1672,7 +1670,7 @@ void stb(uint32_t *mem, uint32_t length, uint32_t *reg, FILE *file, List *termin
     {
         switch (reg[x] + imd)
         {
-            case 0x00002020:
+            case 0x00008080:
                 wdg = (reg[y] << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (((tmp & 0xFF00) >> 8) << 8) | (tmp & 0xFF);
                 out = (reg[y] << 24) >> 24;
                 break;
@@ -1703,8 +1701,8 @@ void stb(uint32_t *mem, uint32_t length, uint32_t *reg, FILE *file, List *termin
                 break;
             default:
                 data = (reg[y] << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (((tmp & 0xFF00) >> 8) << 8) | (tmp & 0xFF);
-                mem[index] = data;
-                //setData(index, mem, data, file);
+                //mem[index] = data;
+                setData(index, mem, data, file);
                 out = (reg[y] << 24) >> 24;
                 break;
         }
@@ -1744,8 +1742,8 @@ void stb(uint32_t *mem, uint32_t length, uint32_t *reg, FILE *file, List *termin
                 break;
             default:
                 data = (((tmp & 0xFF000000) >> 24) << 24) | (reg[y] << 16) | (((tmp & 0xFF00) >> 8) << 8) | (tmp & 0xFF);
-                mem[index] = data;
-                //setData(index, mem, data, file);
+                //mem[index] = data;
+                setData(index, mem, data, file);
                 out = (reg[y] << 24) >> 24;
                 break;
         }
@@ -1766,7 +1764,7 @@ void stb(uint32_t *mem, uint32_t length, uint32_t *reg, FILE *file, List *termin
             case 0x0000888B:
                 terminal_out = (((tmp & 0xFF000000) >> 24) << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (reg[y] << 8) | (tmp & 0xFF);
                 out = (reg[y] << 24) >> 24;
-               insert(terminal, (char)terminal_out);
+                insert(terminal, (char)terminal_out);
                 break;
             case 0x00008800:
                 fpu_x = (((tmp & 0xFF000000) >> 24) << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (reg[y] << 8) | (tmp & 0xFF);
@@ -1786,8 +1784,8 @@ void stb(uint32_t *mem, uint32_t length, uint32_t *reg, FILE *file, List *termin
                 break;
             default:
                 data = (((tmp & 0xFF000000) >> 24) << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (reg[y] << 8) | (tmp & 0xFF);
-                mem[index] = data;
-                //setData(index, mem, data, file);
+                //mem[index] = data;
+                setData(index, mem, data, file);
                 out = (reg[y] << 24) >> 24;
                 break;
         }
@@ -1827,8 +1825,8 @@ void stb(uint32_t *mem, uint32_t length, uint32_t *reg, FILE *file, List *termin
                 break;
             default:
                 data = (((tmp & 0xFF000000) >> 24) << 24) | (((tmp & 0xFF0000) >> 16) << 16) | (((tmp & 0xFF00) >> 8) << 8) | reg[y];
-                mem[index] = data;
-                //setData(index, mem, data, file);
+                //mem[index] = data;
+                setData(index, mem, data, file);
                 out = (reg[y] << 24) >> 24;
                 break;
         }
@@ -2303,7 +2301,7 @@ uint32_t getData(uint32_t index, uint32_t *mem, uint32_t length, FILE *file)
                     sprintf(str_set1, "SET=1:STATUS=%s,AGE=%u,DATA=%s", validToString(cache_d[line].set[1].valid), cache_d[line].set[1].age, blockToString(cache_d[line].set[1].block));
                     printf("[0x%08X]\t%-20s\t%s\n\t\t\t\t\t%s\n", index, instruction, str_set0, str_set1);
                     fprintf(file, "[0x%08X]\t%-20s\t%s\n\t\t\t\t\t\t\t\t\t\t%s\n", index, instruction, str_set0, str_set1);
-                    if (old == cache_i[line].set[0].age)
+                    if (old == cache_d[line].set[0].age)
                     {
                         int k = index >> 4;
                         k *=4;
@@ -2419,15 +2417,17 @@ void cacheStats(FILE *file)
 
 int getNumberLines(FILE *file)
 {
-    int lines = 0;
-    char ch;
-    while (!feof(file))
+    int count = 0;
+    char line[12];
+    char temp[12];
+
+    while (fgets(temp, sizeof(temp), file) != NULL)
     {
-        ch = fgetc(file);
-        if (ch == '\n')
-            lines++;
+        fscanf(file, "%s", &line);
+        if (line != "\n")
+            count++;
     }
-    return lines;
+    return count;
 }
 
 char * indexToName(uint32_t index, int upperCase)

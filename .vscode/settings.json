@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "*.tcc": "c",
+        "unordered_map": "c",
+        "vector": "c"
+    }
+}
